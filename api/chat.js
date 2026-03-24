@@ -22,7 +22,7 @@ export default async function handler(req, res) {
 
   temperature: 0.7,   // 🔥 creativity + variation
   max_tokens: 200     // 🔥 short answer control
-})
+)}
             role: "system",
             content: `
 You are a deep life guide inspired by Bhagavad Gita.
