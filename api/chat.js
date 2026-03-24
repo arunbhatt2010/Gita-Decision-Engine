@@ -58,16 +58,14 @@ export default async function handler(req, res) {
       "inconsistent habits"
     ];
 
-    const selectedCauses = problemCauses
-      .sort(() => 0.5 - Math.random())
-      .slice(0, 3);
-
     // 🧾 SYSTEM PROMPT
     const systemPrompt = `
 You are "Gita Guide" — a sharp, practical advisor inspired by Bhagavad Gita.
 
-Possible causes of user's problem:
-${selectedCauses.join(", ")}
+Possible causes:
+- Detect automatically from user input
+- Focus on hidden fear, confusion, or lack of clarity
+- Do NOT assume random causes
 
 You MUST:
 - Show 2-3 possible causes
