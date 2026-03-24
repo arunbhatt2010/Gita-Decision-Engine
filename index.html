@@ -19,59 +19,73 @@ body {
 
 .chat-box {
   background:#000;
-  padding:10px;
+  padding:12px;
   height:300px;
   overflow-y:auto;
-  border-radius:8px;
+  border-radius:10px;
   margin-bottom:10px;
 }
 
-input {
+/* 🔤 Language */
+select {
   width:100%;
   padding:10px;
-  margin-top:5px;
-  border-radius:5px;
+  margin-bottom:8px;
+  border-radius:6px;
   border:none;
-}
-
-button {
-  width:100%;
-  padding:12px;
-  margin-top:8px;
-  background:orange;
-  border:none;
-  border-radius:5px;
-  cursor:pointer;
-}
-
-.options {
-  margin-top:10px;
-}
-
-.option-btn {
-  display:inline-block;
-  padding:8px 12px;
-  margin:5px;
   background:#222;
-  border-radius:20px;
-  cursor:pointer;
-  border:1px solid #444;
+  color:#fff;
 }
 
-.option-btn.active {
-  background:orange;
-  color:#000;
+/* ✍️ Input + mic */
+.input-row {
+  display:flex;
+  gap:8px;
 }
-  .options {
+
+input {
+  flex:1;
+  padding:12px;
+  border-radius:6px;
+  border:none;
+}
+
+.mic-btn {
+  padding:12px;
+  border:none;
+  border-radius:6px;
+  background:#222;
+  color:#fff;
+  cursor:pointer;
+}
+
+/* 🔥 Premium Button */
+.primary-btn {
+  width:100%;
+  padding:14px;
+  margin-top:10px;
+  border:none;
+  border-radius:10px;
+  font-weight:bold;
+  cursor:pointer;
+  background:linear-gradient(135deg, orange, #ff7b00);
+  transition:0.2s;
+}
+
+.primary-btn:hover {
+  transform:scale(1.02);
+}
+
+/* 🎯 Options */
+.options {
   margin-top:15px;
-  animation: fadeIn 0.4s ease;
 }
 
 .option-card {
   background:#1a1a1a;
-  padding:12px;
+  padding:14px;
   margin-bottom:10px;
-  border-radius:10px;
+  border-radius:12px;
   border:1px solid #333;
   cursor:pointer;
   transition:0.2s;
@@ -79,13 +93,11 @@ button {
 
 .option-card:hover {
   border-color:orange;
-  transform:scale(1.02);
 }
 
 .option-card.active {
   background:orange;
   color:#000;
-  border-color:orange;
 }
 
 .step-title {
@@ -93,53 +105,69 @@ button {
   opacity:0.7;
   margin-bottom:8px;
 }
-
-@keyframes fadeIn {
-  from {opacity:0; transform:translateY(10px);}
-  to {opacity:1; transform:translateY(0);}
-  }
 </style>
 </head>
 
 <body>
 
 <div class="container">
-  <h2>Gita Guidance</h2>
 
-  <div id="chat" class="chat-box"></div>
+<h2>Gita Guidance</h2>
 
-  <input id="input" placeholder="Ask your problem..." />
+<div id="chat" class="chat-box"></div>
 
-  <button onclick="showOptions()">Next</button>
+<!-- 🔤 Language -->
+<select id="lang">
+  <option value="english">English</option>
+  <option value="hindi">Hindi</option>
+  <option value="both">Hindi + English</option>
+</select>
+
+<!-- ✍️ Input + mic -->
+<div class="input-row">
+  <input id="input" placeholder="What’s really bothering you..." />
+  <button class="mic-btn" onclick="startVoice()">🎤</button>
+</div>
+
+<button class="primary-btn" onclick="showOptions()">
+  Understand my problem
+</button>
+
 <div id="options" class="options" style="display:none;"></div>
-  <div id="options" class="options" style="display:none;"></div>
 
-  <button id="sendBtn" onclick="sendMessage()" style="display:none;">Get Guidance</button>
+<button id="sendBtn" class="primary-btn" onclick="sendMessage()" style="display:none;">
+  Get Guidance
+</button>
+
 </div>
 
 <script>
 
+// 🔥 INIT MESSAGE
+const chat = document.getElementById("chat");
+chat.innerHTML = `
+<div style="opacity:0.7;">
+You don’t need more advice.<br>
+You need clarity.
+</div>
+`;
+
 let selectedCauses = [];
 
 const causes = [
-  "Lack of discipline",
-  "Overthinking",
-  "Distraction",
-  "No clear goal",
-  "Fear / doubt",
-  "Procrastination",
-  "Low confidence",
-  "No routine",
-  "Mental fatigue",
-  "Too many goals"
-  chat.innerHTML = `
-<div style="opacity:0.7;">
-You don’t need more advice.  
-You need clarity.
-</div>
-
+"Lack of discipline",
+"Overthinking",
+"Distraction",
+"No clear goal",
+"Fear / doubt",
+"Procrastination",
+"Low confidence",
+"No routine",
+"Mental fatigue",
+"Too many goals"
 ];
 
+// 🎯 Show options
 function showOptions() {
   const input = document.getElementById("input").value.trim();
   if (!input) return;
@@ -170,34 +198,25 @@ function showOptions() {
 
   optionsDiv.style.display = "block";
   document.getElementById("sendBtn").style.display = "block";
-  }
-
-    optionsDiv.appendChild(btn);
-  });
-
-  optionsDiv.style.display = "block";
-  document.getElementById("sendBtn").style.display = "block";
 }
 
+// 🚀 Send
 async function sendMessage() {
   const input = document.getElementById("input").value.trim();
-  const chat = document.getElementById("chat");
+  const lang = document.getElementById("lang").value;
 
   if (!input) return;
 
   chat.innerHTML += `<div><b>You:</b> ${input}</div>`;
-
-  chat.innerHTML += `<div style="opacity:0.7;">Analyzing...</div>`;
+  chat.innerHTML += `<div style="opacity:0.7;">Thinking deeper...</div>`;
 
   const response = await fetch("/api/chat", {
     method: "POST",
-    headers: {
-      "Content-Type": "application/json"
-    },
+    headers: { "Content-Type": "application/json" },
     body: JSON.stringify({
       messages: [
         { role: "user", content: input },
-        { role: "system", content: "CAUSES: " + selectedCauses.join(", ") }
+        { role: "system", content: "LANG: " + lang + " | CAUSES: " + selectedCauses.join(", ") }
       ]
     })
   });
@@ -214,7 +233,19 @@ async function sendMessage() {
   chat.scrollTop = chat.scrollHeight;
 }
 
+// 🎤 Voice typing
+function startVoice() {
+  const recognition = new (window.SpeechRecognition || window.webkitSpeechRecognition)();
+  recognition.lang = "en-IN";
+
+  recognition.onresult = function(event) {
+    document.getElementById("input").value = event.results[0][0].transcript;
+  };
+
+  recognition.start();
+}
+
 </script>
 
 </body>
-</html>
+  </html>
