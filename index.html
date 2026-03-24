@@ -166,7 +166,13 @@ async function sendMessage(deep=false){
   const input = document.getElementById("input").value.trim();
   const lang = document.getElementById("lang").value;
   const chat = document.getElementById("chat");
+loopStep++;
 
+let mode = "INITIAL";
+
+if(loopStep === 1) mode = "INITIAL";
+else if(loopStep === 2) mode = "DEEPER";
+else mode = "CORE";
   chat.innerHTML += `<div><b>You:</b> ${input}</div>`;
   chat.innerHTML += `<div style="opacity:0.6">Thinking...</div>`;
 
