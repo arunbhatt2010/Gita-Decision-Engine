@@ -13,10 +13,16 @@ export default async function handler(req, res) {
         "Authorization": `Bearer ${process.env.GROQ_API_KEY}`,
         "Content-Type": "application/json"
       },
-      body: JSON.stringify({
-        model: "llama-3.3-70b-versatile",
-        messages: [
-          {
+    body: JSON.stringify({
+  model: "llama-3.1-8b-instant",
+  messages: [
+    { role: "system", content: systemPrompt },
+    { role: "user", content: userMessage }
+  ],
+
+  temperature: 0.7,   // 🔥 creativity + variation
+  max_tokens: 200     // 🔥 short answer control
+})
             role: "system",
             content: `
 You are a deep life guide inspired by Bhagavad Gita.
