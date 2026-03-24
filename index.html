@@ -79,7 +79,10 @@ async function sendMessage() {
   chat.innerHTML += `<div><b>You:</b> ${text}</div>`;
   inputBox.value = "";
 
-  chat.innerHTML += `<div id="loading"><b>Guide:</b> Thinking...</div>`;
+  // 🧠 user message add
+  messages.push({ role: "user", content: text });
+
+  chat.innerHTML += `<div><b>Guide:</b> Thinking...</div>`;
 
   try {
     const res = await fetch("/api/chat", {
@@ -87,25 +90,31 @@ async function sendMessage() {
       headers: {
         "Content-Type": "application/json"
       },
-      body: JSON.stringify({ message: text })
+      body: JSON.stringify({
+        messages: messages
+      })
     });
 
     const data = await res.json();
 
-    document.getElementById("loading").innerHTML =
-      `<b>Guide:</b><br>${data.reply}`;
+    const reply = data.reply || "No response";
+
+    // 🧠 assistant message add (VERY IMPORTANT)
+    messages.push({ role: "assistant", content: reply });
+
+    // replace Thinking...
+    chat.innerHTML = chat.innerHTML.replace(
+      "Thinking...",
+      reply
+    );
 
   } catch (err) {
-    document.getElementById("loading").innerHTML =
-      "Error: Failed to fetch";
+    chat.innerHTML = chat.innerHTML.replace(
+      "Thinking...",
+      "Error"
+    );
   }
-}
-
-// Enter support
-document.getElementById("input").addEventListener("keypress", function(e) {
-  if (e.key === "Enter") {
-    e.preventDefault();
-    sendMessage();
+  }
   }
 });
 </script>
