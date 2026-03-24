@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<title>Gita Guidance</title>
+<title>Gita Decision Engine</title>
 
 <style>
 body {
@@ -59,78 +59,81 @@ button {
   <select id="lang">
     <option value="english">English</option>
     <option value="hindi">Hindi</option>
+    <option value="both">Hindi + English</option>
   </select>
 
   <input id="input" placeholder="Ask your problem..." />
-
   <button onclick="sendMessage()">Send</button>
 </div>
 
 <script>
+let messages = [];
 
-let messages = []; // 🔥 IMPORTANT (memory)
+// 🔒 MONETIZATION LOCK
+let questionCount = localStorage.getItem("count") || 0;
+questionCount = parseInt(questionCount);
+const LIMIT = 3;
 
 async function sendMessage() {
-
   const inputBox = document.getElementById("input");
   const chat = document.getElementById("chat");
-  const lang = document.getElementById("lang").value;
-
   const text = inputBox.value.trim();
+
   if (!text) return;
 
-  // show user message
+  // 🔒 LIMIT CHECK
+  if (questionCount >= LIMIT) {
+    chat.innerHTML += `
+      <div style="color: orange;">
+      🔒 Truth stops here.<br><br>
+      You don’t need more answers.<br>
+      You need commitment.<br><br>
+      Unlock deeper guidance →
+      </div>
+    `;
+    return;
+  }
+
+  // user message
   chat.innerHTML += `<div><b>You:</b> ${text}</div>`;
   inputBox.value = "";
 
-  // store user message
   messages.push({ role: "user", content: text });
 
-  // unique thinking id
-  const thinkingId = "msg-" + Date.now();
+  // 🔥 MEMORY CONTROL (important)
+  messages = messages.slice(-6);
 
-  chat.innerHTML += `<div id="${thinkingId}"><b>Guide:</b> Thinking...</div>`;
+  chat.innerHTML += `<div><b>Guide:</b> Thinking...</div>`;
 
   try {
-
     const res = await fetch("/api/chat", {
       method: "POST",
       headers: {
-        "Content-Type": "application/json"
+        "Content-Type": "application/json",
       },
       body: JSON.stringify({
         messages: messages,
-        lang: lang
-      })
+        lang: document.getElementById("lang").value
+      }),
     });
 
     const data = await res.json();
-
     const reply = data.reply || "No response";
 
-    // store AI reply
+    // add AI response to memory
     messages.push({ role: "assistant", content: reply });
 
-    // replace thinking
-    document.getElementById(thinkingId).innerHTML =
-      `<b>Guide:</b> ${reply}`;
+    // replace thinking text
+    chat.innerHTML = chat.innerHTML.replace("Thinking...", reply);
+
+    // 🔒 UPDATE COUNT
+    questionCount++;
+    localStorage.setItem("count", questionCount);
 
   } catch (err) {
-
-    document.getElementById(thinkingId).innerHTML =
-      `<b>Guide:</b> Error`;
-
+    chat.innerHTML = chat.innerHTML.replace("Thinking...", "Error connecting to AI");
   }
 }
-
-// ENTER key support
-document.getElementById("input").addEventListener("keypress", function(e) {
-  if (e.key === "Enter") {
-    e.preventDefault();
-    sendMessage();
-  }
-});
-
 </script>
 
 </body>
