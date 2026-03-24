@@ -92,15 +92,9 @@ You need clarity.
 <input id="input" placeholder="What's really bothering you..." />
 <span class="voice-btn" onclick="startVoice()">🎤</span>
 </div>
-
-<button class="primary-btn" onclick="showOptions()">Understand my problem</button>
-
-<div id="options" style="display:none;"></div>
-
-<button id="sendBtn" class="primary-btn" onclick="sendMessage()" style="display:none;">
-Get Guidance
+<button class="primary-btn" onclick="sendMessage()">
+Understand my problem
 </button>
-
 </div>
 
 <script>
@@ -119,33 +113,7 @@ const causes = [
 "Mental fatigue"
 ];
 
-function showOptions(){
-const box = document.getElementById("options");
-box.innerHTML = "<div style='opacity:0.7'>What feels true?</div>";
 
-selectedCauses = [];
-
-causes.forEach(c=>{
-let div=document.createElement("div");
-div.className="option-card";
-div.innerText=c;
-
-div.onclick=()=>{
-div.classList.toggle("active");
-
-if(selectedCauses.includes(c)){
-selectedCauses=selectedCauses.filter(x=>x!==c);
-}else{
-if(selectedCauses.length>=2){alert("Select max 2");return;}
-selectedCauses.push(c);
-}
-};
-
-box.appendChild(div);
-});
-
-box.style.display="block";
-document.getElementById("sendBtn").style.display="block";
 }
 
 async function sendMessage(deep=false){
@@ -180,7 +148,7 @@ role:"system",
 content:`
 User problem: ${input}
 Language: ${lang}
-Selected causes: ${selectedCauses.join(", ")}
+Selected causes: auto-detect from problem
 Conversation step: ${mode}
 
 Rules:
