@@ -5,7 +5,19 @@ export default async function handler(req, res) {
   }
 
   try {
-    const { message } = req.body;
+
+    const { messages } = req.body;
+
+    const systemPrompt = `
+You are a sharp life guide inspired by Bhagavad Gita.
+
+Rules:
+- Keep answers short (max 120 words)
+- Be direct and slightly uncomfortable
+- No generic advice
+- Structure:
+  Truth → Pattern → Action → Question
+`;
 
     const response = await fetch("https://api.groq.com/openai/v1/chat/completions", {
       method: "POST",
@@ -16,14 +28,8 @@ export default async function handler(req, res) {
       body: JSON.stringify({
         model: "llama-3.1-8b-instant",
         messages: [
-          {
-            role: "system",
-            content: "You are a sharp life guide. Keep answers short, direct, and uncomfortable."
-          },
-          {
-            role: "user",
-            content: message
-          }
+          { role: "system", content: systemPrompt },
+          ...messages
         ],
         temperature: 0.6,
         max_tokens: 150
@@ -32,13 +38,21 @@ export default async function handler(req, res) {
 
     const data = await response.json();
 
-    return res.status(200).json({
-      reply: data.choices?.[0]?.message?.content || "No response"
-    });
+    console.log("GROQ RAW:", JSON.stringify(data)); // 🔥 DEBUG
+
+    const reply =
+      data?.choices?.[0]?.message?.content ||
+      data?.choices?.[0]?.text ||
+      "⚠️ AI returned empty response";
+
+    return res.status(200).json({ reply });
 
   } catch (error) {
+
+    console.error("ERROR:", error);
+
     return res.status(500).json({
-      error: error.message
+      reply: "⚠️ Server error"
     });
   }
-      }
+}
