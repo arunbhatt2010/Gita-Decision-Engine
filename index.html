@@ -1,8 +1,9 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<title>Gita Decision Engine</title>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Gita Guidance</title>
 
 <style>
 body {
@@ -24,10 +25,11 @@ body {
 .chat-box {
   background: #000;
   padding: 10px;
-  height: 300px;
+  height: 320px;
   overflow-y: auto;
   margin-bottom: 10px;
   border-radius: 5px;
+  font-size: 14px;
 }
 
 input, select {
@@ -45,6 +47,9 @@ button {
   border: none;
   border-radius: 5px;
   cursor: pointer;
+}
+h3 {
+  margin: 8px 0 4px;
 }
 </style>
 </head>
@@ -69,130 +74,112 @@ button {
 <script>
 let messages = [];
 
-const DEV_MODE = true; // true = unlimited testing
+// 🔥 DEV MODE (TRUE = UNLIMITED)
+const DEV_MODE = true;
 const LIMIT = 3;
 
-// 🔒 Monetization counter
-let questionCount = localStorage.getItem("count") || 0;
+// 🔁 RESET SUPPORT
+if (window.location.search.includes("reset=true")) {
+  localStorage.removeItem("count");
+}
+
+// 🔒 COUNTER
+let questionCount = DEV_MODE ? 0 : (localStorage.getItem("count") || 0);
 questionCount = parseInt(questionCount);
 
-// 🔁 Send message function
+// 🧠 SYSTEM PROMPT
+const systemPrompt = `
+You are a sharp, no-BS life advisor inspired by Bhagavad Gita.
+
+Respond in CLEAN HTML format.
+
+Structure:
+
+<h3>🧠 Truth (Gita Insight)</h3>
+<p>2 lines max. Occasionally reference Krishna or detachment.</p>
+
+<h3>🔍 Pattern</h3>
+<p>2 lines max about behavior</p>
+
+<h3>⚡ Action (Karma Step)</h3>
+<ul>
+<li>Step 1</li>
+<li>Step 2</li>
+</ul>
+
+<h3>❓ Question</h3>
+<p>1 deep question</p>
+
+Rules:
+- Mobile friendly
+- No long paragraphs
+- No generic advice
+- No spiritual nonsense words
+- Be direct, real, sharp
+`;
+
 async function sendMessage() {
 
   const inputBox = document.getElementById("input");
   const chat = document.getElementById("chat");
-  const text = inputBox.value.trim();
-
-  if (!text) return;
-
-  // 🔒 LIMIT CHECK (fixed)
-  if (!DEV_MODE && questionCount >= LIMIT) {
-    chat.innerHTML += `
-      <div style="color: orange;">
-      🔒 You've reached your limit.<br><br>
-      You don’t lack answers.<br>
-      You lack execution.<br><br>
-      Unlock deeper guidance →
-      </div>
-    `;
-    return;
-  }
-
-  // 👤 User message
-  chat.innerHTML += `<div><b>You:</b> ${text}</div>`;
-  inputBox.value = "";
-
-  // 🧠 Save message
-  messages.push({ role: "user", content: text });
-
-  // ⏳ Thinking UI
-  chat.innerHTML += `<div><b>Guide:</b> Thinking...</div>`;
-
-  try {
-    const res = await fetch("/api/chat", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json"
-      },
-      body: JSON.stringify({ messages: messages })
-    });
-
-    const data = await res.json();
-    const reply = data.reply || "No response";
-
-    // 🧠 Save AI reply
-    messages.push({ role: "assistant", content: reply });
-
-    // ✅ Replace Thinking
-    chat.innerHTML = chat.innerHTML.replace("Thinking...", reply);
-
-    // 🔢 Increase count
-    questionCount++;
-    localStorage.setItem("count", questionCount);
-
-  } catch (err) {
-    chat.innerHTML = chat.innerHTML.replace("Thinking...", "Error");
-  }
-  }
-
-async function sendMessage() {
-  const inputBox = document.getElementById("input");
-  const chat = document.getElementById("chat");
+  const lang = document.getElementById("lang").value;
   const text = inputBox.value.trim();
 
   if (!text) return;
 
   // 🔒 LIMIT CHECK
-  if (questionCount >= LIMIT) {
+  if (!DEV_MODE && questionCount >= LIMIT) {
     chat.innerHTML += `
-      <div style="color: orange;">
+    <div style="color: orange;">
       🔒 Truth stops here.<br><br>
       You don’t need more answers.<br>
       You need commitment.<br><br>
       Unlock deeper guidance →
-      </div>
-    `;
+    </div>`;
     return;
   }
 
-  // user message
+  // 👤 USER MESSAGE
   chat.innerHTML += `<div><b>You:</b> ${text}</div>`;
   inputBox.value = "";
 
   messages.push({ role: "user", content: text });
 
-  // 🔥 MEMORY CONTROL (important)
-  messages = messages.slice(-6);
-
-  chat.innerHTML += `<div><b>Guide:</b> Thinking...</div>`;
+  // 🤖 THINKING
+  chat.innerHTML += `<div id="loading"><b>Guide:</b> Thinking...</div>`;
 
   try {
+
     const res = await fetch("/api/chat", {
       method: "POST",
       headers: {
-        "Content-Type": "application/json",
+        "Content-Type": "application/json"
       },
       body: JSON.stringify({
-        messages: messages,
-        lang: document.getElementById("lang").value
-      }),
+        messages: [
+          { role: "system", content: systemPrompt },
+          ...messages
+        ],
+        lang: lang
+      })
     });
 
     const data = await res.json();
+
     const reply = data.reply || "No response";
 
-    // add AI response to memory
     messages.push({ role: "assistant", content: reply });
 
-    // replace thinking text
-    chat.innerHTML = chat.innerHTML.replace("Thinking...", reply);
+    document.getElementById("loading").remove();
 
-    // 🔒 UPDATE COUNT
+    chat.innerHTML += `<div><b>Guide:</b> ${reply}</div>`;
+
+    // 🔢 COUNT UPDATE
     questionCount++;
     localStorage.setItem("count", questionCount);
 
   } catch (err) {
-    chat.innerHTML = chat.innerHTML.replace("Thinking...", "Error connecting to AI");
+    document.getElementById("loading").innerText = "Error";
   }
 }
 </script>
