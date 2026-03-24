@@ -1,54 +1,54 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <title>Gita Decisions Engine</title>
-<link rel="stylesheet" href="style.css">
-  <style>
-    body {
-      font-family: Arial;
-      background: #111;
-      color: #fff;
-      display: flex;
-      justify-content: center;
-      padding-top: 40px;
-    }
+<meta charset="UTF-8">
+<title>Gita Guidance</title>
 
-    .container {
-      width: 350px;
-      background: #1c1c1c;
-      padding: 20px;
-      border-radius: 10px;
-    }
+<style>
+body {
+  font-family: Arial;
+  background: #111;
+  color: #fff;
+  display: flex;
+  justify-content: center;
+  padding-top: 40px;
+}
 
-    .chat-box {
-      background: #000;
-      padding: 10px;
-      height: 300px;
-      overflow-y: auto;
-      margin-bottom: 10px;
-      border-radius: 5px;
-    }
+.container {
+  width: 350px;
+  background: #1c1c1c;
+  padding: 20px;
+  border-radius: 10px;
+}
 
-    input, select {
-      width: 100%;
-      padding: 8px;
-      margin-bottom: 5px;
-      border-radius: 5px;
-      border: none;
-    }
+.chat-box {
+  background: #000;
+  padding: 10px;
+  height: 300px;
+  overflow-y: auto;
+  margin-bottom: 10px;
+  border-radius: 5px;
+}
 
-    button {
-      width: 100%;
-      padding: 10px;
-      background: orange;
-      border: none;
-      border-radius: 5px;
-      cursor: pointer;
-    }
-  </style>
+input, select {
+  width: 100%;
+  padding: 8px;
+  margin-bottom: 5px;
+  border-radius: 5px;
+  border: none;
+}
 
+button {
+  width: 100%;
+  padding: 10px;
+  background: orange;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+}
+</style>
 </head>
+
 <body>
 
 <div class="container">
@@ -59,7 +59,6 @@
   <select id="lang">
     <option value="english">English</option>
     <option value="hindi">Hindi</option>
-    <option value="both">Hindi + English</option>
   </select>
 
   <input id="input" placeholder="Ask your problem..." />
@@ -68,30 +67,40 @@
 </div>
 
 <script>
+
+let messages = []; // 🔥 IMPORTANT (memory)
+
 async function sendMessage() {
 
   const inputBox = document.getElementById("input");
   const chat = document.getElementById("chat");
+  const lang = document.getElementById("lang").value;
 
   const text = inputBox.value.trim();
   if (!text) return;
 
+  // show user message
   chat.innerHTML += `<div><b>You:</b> ${text}</div>`;
   inputBox.value = "";
 
-  // 🧠 user message add
+  // store user message
   messages.push({ role: "user", content: text });
 
-  chat.innerHTML += `<div><b>Guide:</b> Thinking...</div>`;
+  // unique thinking id
+  const thinkingId = "msg-" + Date.now();
+
+  chat.innerHTML += `<div id="${thinkingId}"><b>Guide:</b> Thinking...</div>`;
 
   try {
+
     const res = await fetch("/api/chat", {
       method: "POST",
       headers: {
         "Content-Type": "application/json"
       },
       body: JSON.stringify({
-        messages: messages
+        messages: messages,
+        lang: lang
       })
     });
 
@@ -99,24 +108,29 @@ async function sendMessage() {
 
     const reply = data.reply || "No response";
 
-    // 🧠 assistant message add (VERY IMPORTANT)
+    // store AI reply
     messages.push({ role: "assistant", content: reply });
 
-    // replace Thinking...
-    chat.innerHTML = chat.innerHTML.replace(
-      "Thinking...",
-      reply
-    );
+    // replace thinking
+    document.getElementById(thinkingId).innerHTML =
+      `<b>Guide:</b> ${reply}`;
 
   } catch (err) {
-    chat.innerHTML = chat.innerHTML.replace(
-      "Thinking...",
-      "Error"
-    );
+
+    document.getElementById(thinkingId).innerHTML =
+      `<b>Guide:</b> Error`;
+
   }
-  }
+}
+
+// ENTER key support
+document.getElementById("input").addEventListener("keypress", function(e) {
+  if (e.key === "Enter") {
+    e.preventDefault();
+    sendMessage();
   }
 });
+
 </script>
 
 </body>
