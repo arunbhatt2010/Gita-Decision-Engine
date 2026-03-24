@@ -68,11 +68,11 @@ button {
 
 <script>
 let messages = [];
-
+const DEV_MODE = true; // true = unlimited access
 // 🔒 MONETIZATION LOCK
 let questionCount = localStorage.getItem("count") || 0;
 questionCount = parseInt(questionCount);
-const LIMIT = 3;
+if (!DEV_MODE && questionCount >= 3) {
 
 async function sendMessage() {
   const inputBox = document.getElementById("input");
