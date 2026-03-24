@@ -12,7 +12,7 @@ body {
   margin:0;
 }
 
-.container{
+.container {
   max-width:500px;
   margin:auto;
   padding:15px;
@@ -20,7 +20,7 @@ body {
 
 h2{text-align:center;}
 
-.chat-box{
+.chat-box {
   height:45vh;
   overflow-y:auto;
   background:#000;
@@ -29,7 +29,7 @@ h2{text-align:center;}
   margin-bottom:10px;
 }
 
-select,input{
+select, input {
   width:100%;
   padding:12px;
   margin-top:8px;
@@ -37,7 +37,7 @@ select,input{
   border:none;
 }
 
-.primary-btn{
+.primary-btn {
   width:100%;
   padding:14px;
   margin-top:10px;
@@ -45,27 +45,6 @@ select,input{
   border:none;
   border-radius:10px;
   font-weight:bold;
-  cursor:pointer;
-}
-
-.option-card{
-  background:#1a1a1a;
-  padding:12px;
-  margin:6px 0;
-  border-radius:10px;
-  border:1px solid #333;
-  cursor:pointer;
-}
-
-.option-card.active{
-  background:orange;
-  color:#000;
-}
-
-.voice-btn{
-  position:absolute;
-  right:10px;
-  top:10px;
   cursor:pointer;
 }
 </style>
@@ -88,116 +67,78 @@ You need clarity.
 <option value="hi">Hindi</option>
 </select>
 
-<div style="position:relative;">
 <input id="input" placeholder="What's really bothering you..." />
-<span class="voice-btn" onclick="startVoice()">🎤</span>
-</div>
-<button class="primary-btn" onclick="sendMessage()">
-Understand my problem
-</button>
+
+<button id="sendBtn" class="primary-btn">Get Guidance</button>
+
 </div>
 
 <script>
-let selectedCauses = [];
-let responseCount = 0;
+
 let loopStep = 0;
 
-const causes = [
-"Procrastination",
-"Overthinking",
-"Distraction",
-"No clear goal",
-"Fear / doubt",
-"Low confidence",
-"No routine",
-"Mental fatigue"
-];
-
-
-}
+document.getElementById("sendBtn").addEventListener("click", () => {
+  sendMessage();
+});
 
 async function sendMessage(deep=false){
 
-if(responseCount>=2 && !deep){
-alert("Unlock premium for deeper guidance 🔒");
-return;
-}
+  const input = document.getElementById("input").value.trim();
+  const lang = document.getElementById("lang").value;
+  const chat = document.getElementById("chat");
 
-const input=document.getElementById("input").value.trim();
-const lang=document.getElementById("lang").value;
-const chat=document.getElementById("chat");
+  if(!input) return;
 
-if(!input)return;
+  loopStep++;
 
-loopStep++;
+  let mode = "INITIAL";
+  if(loopStep === 2) mode = "DEEPER";
+  if(loopStep >= 3) mode = "CORE";
 
-let mode="INITIAL";
-if(loopStep===2) mode="DEEPER";
-if(loopStep>=3) mode="CORE";
+  chat.innerHTML += `<div><b>You:</b> ${input}</div>`;
+  chat.innerHTML += `<div style="opacity:0.6;">Thinking...</div>`;
 
-chat.innerHTML+=`<div><b>You:</b> ${input}</div>`;
-chat.innerHTML+=`<div style="opacity:0.6;">Thinking...</div>`;
+  try {
 
-const response=await fetch("/api/chat",{
-method:"POST",
-headers:{"Content-Type":"application/json"},
-body:JSON.stringify({
-messages:[
-{
-role:"system",
-content:`
-User problem: ${input}
+    const response = await fetch("/api/chat", {
+      method:"POST",
+      headers:{ "Content-Type":"application/json" },
+      body: JSON.stringify({
+        messages: [
+          {
+            role:"system",
+            content: `User problem: ${input}
 Language: ${lang}
-Selected causes: auto-detect from problem
 Conversation step: ${mode}
 
 Rules:
-- Answer in selected language
 - Keep response short
-- Max 4–5 lines per section
+- Max 4-5 lines per section
 - No long paragraphs
-- Must ask 1 deep question
-- Never skip question
-- Hide reasoning (deep insight internal only)
-`
-}
-]
-})
-});
+- Must ask 1 deep question`
+          }
+        ]
+      })
+    });
 
-const data=await response.json();
+    const data = await response.json();
 
-chat.innerHTML+=`<div><b>Guide:</b><br>${data.reply}</div>
+    const reply =
+      data?.reply || "❌ API not responding";
 
-<div onclick="sendMessage(true)" style="opacity:0.6;cursor:pointer;">
-Unlock deeper insight →
-</div>
-`;
+    chat.innerHTML += `<div><b>Guide:</b><br>${reply}</div>`;
 
-if(loopStep>=3) loopStep=0;
+  } catch(err){
+    chat.innerHTML += `<div>❌ Error: API failed</div>`;
+  }
 
-responseCount++;
+  if(loopStep >= 3) loopStep = 0;
 
-document.getElementById("input").value="";
-document.getElementById("options").style.display="none";
-document.getElementById("sendBtn").style.display="none";
-
-chat.scrollTop=chat.scrollHeight;
+  document.getElementById("input").value = "";
+  chat.scrollTop = chat.scrollHeight;
 }
 
-function startVoice(){
-const recognition=new(window.SpeechRecognition||window.webkitSpeechRecognition)();
-const lang=document.getElementById("lang").value;
-
-recognition.lang=lang==="hi"?"hi-IN":"en-US";
-
-recognition.start();
-
-recognition.onresult=(e)=>{
-document.getElementById("input").value=e.results[0][0].transcript;
-};
-}
 </script>
 
 </body>
-  </html>
+</html>
