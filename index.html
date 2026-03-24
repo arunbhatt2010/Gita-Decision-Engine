@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
 <head>
-<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
 <title>Gita Guidance</title>
 
 <style>
@@ -12,30 +12,24 @@ body {
   margin:0;
 }
 
-.container {
+.container{
   max-width:500px;
   margin:auto;
-  height:50vh;
-  display:flex;
-  flex-direction:column;
   padding:15px;
-  gap:8px; /* spacing */
 }
 
-h2 {
-  text-align:center;
-}
+h2{text-align:center;}
 
-.chat-box {
-  height: 55vh;   /* 👈 fixed height */
-  max-height: 60vh;
+.chat-box{
+  height:45vh;
+  overflow-y:auto;
   background:#000;
   padding:15px;
   border-radius:12px;
-  overflow-y:auto;
   margin-bottom:10px;
 }
-select, input {
+
+select,input{
   width:100%;
   padding:12px;
   margin-top:8px;
@@ -43,7 +37,7 @@ select, input {
   border:none;
 }
 
-.primary-btn {
+.primary-btn{
   width:100%;
   padding:14px;
   margin-top:10px;
@@ -54,7 +48,7 @@ select, input {
   cursor:pointer;
 }
 
-.option-card {
+.option-card{
   background:#1a1a1a;
   padding:12px;
   margin:6px 0;
@@ -63,12 +57,12 @@ select, input {
   cursor:pointer;
 }
 
-.option-card.active {
+.option-card.active{
   background:orange;
   color:#000;
 }
 
-.voice-btn {
+.voice-btn{
   position:absolute;
   right:10px;
   top:10px;
@@ -80,38 +74,39 @@ select, input {
 <body>
 
 <div class="container">
-  <h2>Gita Guidance</h2>
+<h2>Gita Guidance</h2>
 
-  <div id="chat" class="chat-box">
-    <div style="opacity:0.7;">
-      You don’t need more advice.<br>
-      You need clarity.
-    </div>
-  </div>
+<div id="chat" class="chat-box">
+<div style="opacity:0.7;">
+You don’t need more advice.<br>
+You need clarity.
+</div>
+</div>
 
-  <select id="lang">
-    <option value="en">English</option>
-    <option value="hi">Hindi</option>
-  </select>
+<select id="lang">
+<option value="en">English</option>
+<option value="hi">Hindi</option>
+</select>
 
-  <div style="position:relative;">
-    <input id="input" placeholder="What's really bothering you..." />
-    <span class="voice-btn" onclick="startVoice()">🎤</span>
-  </div>
+<div style="position:relative;">
+<input id="input" placeholder="What's really bothering you..." />
+<span class="voice-btn" onclick="startVoice()">🎤</span>
+</div>
 
-  <button class="primary-btn" onclick="showOptions()">Understand my problem</button>
+<button class="primary-btn" onclick="showOptions()">Understand my problem</button>
 
-  <div id="options" style="display:none;"></div>
+<div id="options" style="display:none;"></div>
 
-  <button id="sendBtn" class="primary-btn" onclick="sendMessage()" style="display:none;">
-    Get Guidance
-  </button>
+<button id="sendBtn" class="primary-btn" onclick="sendMessage()" style="display:none;">
+Get Guidance
+</button>
+
 </div>
 
 <script>
-
 let selectedCauses = [];
 let responseCount = 0;
+let loopStep = 0;
 
 const causes = [
 "Procrastination",
@@ -124,121 +119,116 @@ const causes = [
 "Mental fatigue"
 ];
 
-function showOptions() {
-  const box = document.getElementById("options");
-  box.innerHTML = "<div style='opacity:0.7'>What feels true?</div>";
+function showOptions(){
+const box = document.getElementById("options");
+box.innerHTML = "<div style='opacity:0.7'>What feels true?</div>";
 
-  selectedCauses = [];
+selectedCauses = [];
 
-  causes.forEach(c => {
-    const div = document.createElement("div");
-    div.className = "option-card";
-    div.innerText = c;
+causes.forEach(c=>{
+let div=document.createElement("div");
+div.className="option-card";
+div.innerText=c;
 
-    div.onclick = () => {
-      if(div.classList.contains("active")){
-        div.classList.remove("active");
-        selectedCauses = selectedCauses.filter(x => x!==c);
-      } else {
-        if(selectedCauses.length >=2){
-          alert("Select max 2");
-          return;
-        }
-        div.classList.add("active");
-        selectedCauses.push(c);
-      }
-    };
+div.onclick=()=>{
+div.classList.toggle("active");
 
-    box.appendChild(div);
-  });
+if(selectedCauses.includes(c)){
+selectedCauses=selectedCauses.filter(x=>x!==c);
+}else{
+if(selectedCauses.length>=2){alert("Select max 2");return;}
+selectedCauses.push(c);
+}
+};
 
-  box.style.display = "block";
-  document.getElementById("sendBtn").style.display = "block";
+box.appendChild(div);
+});
+
+box.style.display="block";
+document.getElementById("sendBtn").style.display="block";
 }
 
 async function sendMessage(deep=false){
 
-  if(responseCount >=2){
-    alert("Unlock premium for deeper guidance 🔒");
-    return;
-  }
+if(responseCount>=2 && !deep){
+alert("Unlock premium for deeper guidance 🔒");
+return;
+}
 
-  const input = document.getElementById("input").value.trim();
-  const lang = document.getElementById("lang").value;
-  const chat = document.getElementById("chat");
+const input=document.getElementById("input").value.trim();
+const lang=document.getElementById("lang").value;
+const chat=document.getElementById("chat");
+
+if(!input)return;
+
 loopStep++;
 
-let mode = "INITIAL";
+let mode="INITIAL";
+if(loopStep===2) mode="DEEPER";
+if(loopStep>=3) mode="CORE";
 
-if(loopStep === 1) mode = "INITIAL";
-else if(loopStep === 2) mode = "DEEPER";
-else mode = "CORE";
-  chat.innerHTML += `<div><b>You:</b> ${input}</div>`;
-  chat.innerHTML += `<div style="opacity:0.6">Thinking...</div>`;
+chat.innerHTML+=`<div><b>You:</b> ${input}</div>`;
+chat.innerHTML+=`<div style="opacity:0.6;">Thinking...</div>`;
 
-  const response = await fetch("/api/chat",{
-    method:"POST",
-    headers:{"Content-Type":"application/json"},
-    body: JSON.stringify({
-      messages:[
-        {
-          role:"system",
-          content:`
+const response=await fetch("/api/chat",{
+method:"POST",
+headers:{"Content-Type":"application/json"},
+body:JSON.stringify({
+messages:[
+{
+role:"system",
+content:`
 User problem: ${input}
 Language: ${lang}
 Selected causes: ${selectedCauses.join(", ")}
 Conversation step: ${mode}
-Mode: "NORMAL"
-IMPORTANT:
-- Keep response short and sharp
-- No long paragraphs
-- Break into clear sections
-- Never explain too much
+
 Rules:
 - Answer in selected language
-- Give clear truth
-- Explain pattern
-- Give 2 actions
-- MUST ask 1 deep question
+- Keep response short
+- Max 4–5 lines per section
+- No long paragraphs
+- Must ask 1 deep question
 - Never skip question
+- Hide reasoning (deep insight internal only)
 `
-        }
-      ]
-    })
-  });
+}
+]
+})
+});
 
-  const data = await response.json();
+const data=await response.json();
 
-  chat.innerHTML += `<div><b>Guide:</b> ${data.reply}</div>
- if(loopStep >= 3){
-  loopStep = 0;
-  }
-  <div onclick="sendMessage(true)" style="opacity:0.7;cursor:pointer;">
-  Unlock deeper insight →
-  </div>`;
+chat.innerHTML+=`<div><b>Guide:</b><br>${data.reply}</div>
 
-  responseCount++;
+<div onclick="sendMessage(true)" style="opacity:0.6;cursor:pointer;">
+Unlock deeper insight →
+</div>
+`;
 
-  document.getElementById("input").value="";
-  document.getElementById("options").style.display="none";
-  document.getElementById("sendBtn").style.display="none";
+if(loopStep>=3) loopStep=0;
 
-  chat.scrollTop = chat.scrollHeight;
+responseCount++;
+
+document.getElementById("input").value="";
+document.getElementById("options").style.display="none";
+document.getElementById("sendBtn").style.display="none";
+
+chat.scrollTop=chat.scrollHeight;
 }
 
 function startVoice(){
-  const recognition = new (window.SpeechRecognition || window.webkitSpeechRecognition)();
-  const lang = document.getElementById("lang").value;
+const recognition=new(window.SpeechRecognition||window.webkitSpeechRecognition)();
+const lang=document.getElementById("lang").value;
 
-  recognition.lang = lang === "hi" ? "hi-IN" : "en-US";
+recognition.lang=lang==="hi"?"hi-IN":"en-US";
 
-  recognition.start();
+recognition.start();
 
-  recognition.onresult = function(event){
-    document.getElementById("input").value = event.results[0][0].transcript;
-  };
+recognition.onresult=(e)=>{
+document.getElementById("input").value=e.results[0][0].transcript;
+};
 }
-
 </script>
 
 </body>
