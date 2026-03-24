@@ -27,7 +27,11 @@ module.exports = async function handler(req, res) {
 
     const data = await response.json();
 
-    return res.status(200).json({ reply: "ok" });
+const reply =
+  data?.choices?.[0]?.message?.content ||
+  "⚠️ AI not responding";
+
+return res.status(200).json({ reply });
 
   } catch (err) {
     console.log("🔥 ERROR:", err);
