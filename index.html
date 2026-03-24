@@ -62,6 +62,42 @@ button {
   background:orange;
   color:#000;
 }
+  .options {
+  margin-top:15px;
+  animation: fadeIn 0.4s ease;
+}
+
+.option-card {
+  background:#1a1a1a;
+  padding:12px;
+  margin-bottom:10px;
+  border-radius:10px;
+  border:1px solid #333;
+  cursor:pointer;
+  transition:0.2s;
+}
+
+.option-card:hover {
+  border-color:orange;
+  transform:scale(1.02);
+}
+
+.option-card.active {
+  background:orange;
+  color:#000;
+  border-color:orange;
+}
+
+.step-title {
+  font-size:14px;
+  opacity:0.7;
+  margin-bottom:8px;
+}
+
+@keyframes fadeIn {
+  from {opacity:0; transform:translateY(10px);}
+  to {opacity:1; transform:translateY(0);}
+  }
 </style>
 </head>
 
