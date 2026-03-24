@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Gita AI</title>
+
+  <style>
+    body {
+      font-family: Arial;
+      background: #111;
+      color: #fff;
+      display: flex;
+      justify-content: center;
+      padding-top: 40px;
+    }
+
+    .container {
+      width: 350px;
+      background: #1c1c1c;
+      padding: 20px;
+      border-radius: 10px;
+    }
+
+    .chat-box {
+      background: #000;
+      padding: 10px;
+      height: 300px;
+      overflow-y: auto;
+      margin-bottom: 10px;
+      border-radius: 5px;
+    }
+
+    input, select {
+      width: 100%;
+      padding: 8px;
+      margin-bottom: 5px;
+      border-radius: 5px;
+      border: none;
+    }
+
+    button {
+      width: 100%;
+      padding: 10px;
+      background: orange;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+    }
+  </style>
+
+</head>
+<body>
+
+<div class="container">
+  <h2>Gita Guidance</h2>
+
+  <div id="chat" class="chat-box"></div>
+
+  <select id="lang">
+    <option value="english">English</option>
+    <option value="hindi">Hindi</option>
+    <option value="both">Hindi + English</option>
+  </select>
+
+  <input id="input" placeholder="Ask your problem..." />
+
+  <button onclick="sendMessage()">Send</button>
+</div>
+
+<script>
+async function sendMessage() {
+
+  const inputBox = document.getElementById("input");
+  const chat = document.getElementById("chat");
+
+  const text = inputBox.value.trim();
+  if (!text) return;
+
+  chat.innerHTML += `<div><b>You:</b> ${text}</div>`;
+  inputBox.value = "";
+
+  chat.innerHTML += `<div id="loading"><b>Guide:</b> Thinking...</div>`;
+
+  try {
+    const res = await fetch("/api/chat", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify({ message: text })
+    });
+
+    const data = await res.json();
+
+    document.getElementById("loading").innerHTML =
+      `<b>Guide:</b><br>${data.reply}`;
+
+  } catch (err) {
+    document.getElementById("loading").innerHTML =
+      "Error: Failed to fetch";
+  }
+}
+
+// Enter support
+document.getElementById("input").addEventListener("keypress", function(e) {
+  if (e.key === "Enter") {
+    e.preventDefault();
+    sendMessage();
+  }
+});
+</script>
+
+</body>
+</html>
