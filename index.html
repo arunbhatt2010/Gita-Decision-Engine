@@ -1,22 +1,22 @@
-<!DOCTYPE html><html>
+<!DOCTYPE html>
+<html>
 <head>
 <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-<title>Gita Guidance</title><style>
+<title>Gita Guidance</title>
+
+<style>
 body {
   background:#0f0f0f;
   color:#fff;
   font-family:Arial;
   margin:0;
 }
-
 .container {
   max-width:500px;
   margin:auto;
   padding:15px;
 }
-
 h2{text-align:center;}
-
 .chat-box {
   height:45vh;
   overflow-y:auto;
@@ -25,7 +25,6 @@ h2{text-align:center;}
   border-radius:12px;
   margin-bottom:10px;
 }
-
 select, input {
   width:100%;
   padding:12px;
@@ -33,7 +32,6 @@ select, input {
   border-radius:8px;
   border:none;
 }
-
 .primary-btn {
   width:100%;
   padding:14px;
@@ -42,26 +40,34 @@ select, input {
   border:none;
   border-radius:10px;
   font-weight:bold;
-  cursor:pointer;
 }
-</style></head><body><div class="container">
-<h2>Gita Guidance</h2><div id="chat" class="chat-box">
+</style>
+</head>
+
+<body>
+
+<div class="container">
+<h2>Gita Guidance</h2>
+
+<div id="chat" class="chat-box">
 <div style="opacity:0.7;">
 You don’t need more advice.<br>
 You need clarity.
 </div>
-</div><select id="lang">
+</div>
+
+<select id="lang">
 <option value="en">English</option>
 <option value="hi">Hindi</option>
-</select><input id="input" placeholder="What's really bothering you..." /><button id="sendBtn" class="primary-btn">Get Guidance</button>
+</select>
 
-</div><script>
+<input id="input" placeholder="What's really bothering you..." />
 
-let loopStep = 0;
+<button onclick="sendMessage()" class="primary-btn">Get Guidance</button>
 
-document.getElementById("sendBtn").addEventListener("click", () => {
-  sendMessage();
-});
+</div>
+
+<script>
 
 async function sendMessage(){
 
@@ -70,12 +76,6 @@ async function sendMessage(){
   const chat = document.getElementById("chat");
 
   if(!input) return;
-
-  loopStep++;
-
-  let mode = "INITIAL";
-  if(loopStep === 2) mode = "DEEPER";
-  if(loopStep >= 3) mode = "CORE";
 
   chat.innerHTML += `<div><b>You:</b> ${input}</div>`;
   chat.innerHTML += `<div style="opacity:0.6;">Thinking...</div>`;
@@ -88,16 +88,8 @@ async function sendMessage(){
       body: JSON.stringify({
         messages: [
           {
-            role:"system",
-            content: `User problem: ${input}
-Language: ${lang}
-Conversation step: ${mode}
-
-Rules:
-- Keep response short
-- Max 4-5 lines per section
-- No long paragraphs
-- Must ask 1 deep question`
+            role:"user",
+            content: `User problem: ${input}\nLanguage: ${lang}`
           }
         ]
       })
@@ -108,27 +100,19 @@ Rules:
       return;
     }
 
-    let data;
-    try {
-      data = await response.json();
-    } catch {
-      chat.innerHTML += `<div>❌ Invalid JSON response</div>`;
-      return;
-    }
+    const data = await response.json();
 
-    const reply = data?.reply || "❌ API not responding";
-
-    chat.innerHTML += `<div><b>Guide:</b><br>${reply}</div>`;
+    chat.innerHTML += `<div><b>Guide:</b><br>${data.reply}</div>`;
 
   } catch(err){
-    chat.innerHTML += `<div>❌ Error: API failed</div>`;
+    chat.innerHTML += `<div>❌ Fetch failed</div>`;
   }
-
-  if(loopStep >= 3) loopStep = 0;
 
   document.getElementById("input").value = "";
   chat.scrollTop = chat.scrollHeight;
 }
 
-</script></body>
+</script>
+
+</body>
 </html>
