@@ -1,55 +1,66 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
-<meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
 <title>Gita Guidance</title>
 
 <style>
 body {
+  background:#111;
+  color:#fff;
   font-family: Arial;
-  background: #111;
-  color: #fff;
-  display: flex;
-  justify-content: center;
-  padding-top: 40px;
+  padding:15px;
 }
 
 .container {
-  width: 350px;
-  background: #1c1c1c;
-  padding: 20px;
-  border-radius: 10px;
+  max-width:500px;
+  margin:auto;
 }
 
 .chat-box {
-  background: #000;
-  padding: 10px;
-  height: 320px;
-  overflow-y: auto;
-  margin-bottom: 10px;
-  border-radius: 5px;
-  font-size: 14px;
+  background:#000;
+  padding:10px;
+  height:300px;
+  overflow-y:auto;
+  border-radius:8px;
+  margin-bottom:10px;
 }
 
-input, select {
-  width: 100%;
-  padding: 8px;
-  margin-bottom: 5px;
-  border-radius: 5px;
-  border: none;
+input {
+  width:100%;
+  padding:10px;
+  margin-top:5px;
+  border-radius:5px;
+  border:none;
 }
 
 button {
-  width: 100%;
-  padding: 10px;
-  background: orange;
-  border: none;
-  border-radius: 5px;
-  cursor: pointer;
+  width:100%;
+  padding:12px;
+  margin-top:8px;
+  background:orange;
+  border:none;
+  border-radius:5px;
+  cursor:pointer;
 }
-h3 {
-  margin: 8px 0 4px;
+
+.options {
+  margin-top:10px;
+}
+
+.option-btn {
+  display:inline-block;
+  padding:8px 12px;
+  margin:5px;
+  background:#222;
+  border-radius:20px;
+  cursor:pointer;
+  border:1px solid #444;
+}
+
+.option-btn.active {
+  background:orange;
+  color:#000;
 }
 </style>
 </head>
@@ -61,127 +72,96 @@ h3 {
 
   <div id="chat" class="chat-box"></div>
 
-  <select id="lang">
-    <option value="english">English</option>
-    <option value="hindi">Hindi</option>
-    <option value="both">Hindi + English</option>
-  </select>
-
   <input id="input" placeholder="Ask your problem..." />
-  <button onclick="sendMessage()">Send</button>
+
+  <button onclick="showOptions()">Next</button>
+
+  <div id="options" class="options" style="display:none;"></div>
+
+  <button id="sendBtn" onclick="sendMessage()" style="display:none;">Get Guidance</button>
 </div>
 
 <script>
-let messages = [];
 
-// 🔥 DEV MODE (TRUE = UNLIMITED)
-const DEV_MODE = true;
-const LIMIT = 3;
+let selectedCauses = [];
 
-// 🔁 RESET SUPPORT
-if (window.location.search.includes("reset=true")) {
-  localStorage.removeItem("count");
+const causes = [
+  "Lack of discipline",
+  "Overthinking",
+  "Distraction",
+  "No clear goal",
+  "Fear / doubt",
+  "Procrastination",
+  "Low confidence",
+  "No routine",
+  "Mental fatigue",
+  "Too many goals"
+];
+
+function showOptions() {
+  const input = document.getElementById("input").value.trim();
+  if (!input) return;
+
+  const optionsDiv = document.getElementById("options");
+  optionsDiv.innerHTML = "<p>What could be the real reason?</p>";
+
+  causes.forEach(cause => {
+    const btn = document.createElement("div");
+    btn.innerText = cause;
+    btn.className = "option-btn";
+
+    btn.onclick = () => {
+      btn.classList.toggle("active");
+
+      if (selectedCauses.includes(cause)) {
+        selectedCauses = selectedCauses.filter(c => c !== cause);
+      } else {
+        selectedCauses.push(cause);
+      }
+    };
+
+    optionsDiv.appendChild(btn);
+  });
+
+  optionsDiv.style.display = "block";
+  document.getElementById("sendBtn").style.display = "block";
 }
-
-// 🔒 COUNTER
-let questionCount = DEV_MODE ? 0 : (localStorage.getItem("count") || 0);
-questionCount = parseInt(questionCount);
-
-// 🧠 SYSTEM PROMPT
-const systemPrompt = `
-You are a sharp, no-BS life advisor inspired by Bhagavad Gita.
-
-Respond in CLEAN HTML format.
-
-Structure:
-
-<h3>🧠 Truth (Gita Insight)</h3>
-<p>2 lines max. Occasionally reference Krishna or detachment.</p>
-
-<h3>🔍 Pattern</h3>
-<p>2 lines max about behavior</p>
-
-<h3>⚡ Action (Karma Step)</h3>
-<ul>
-<li>Step 1</li>
-<li>Step 2</li>
-</ul>
-
-<h3>❓ Question</h3>
-<p>1 deep question</p>
-
-Rules:
-- Mobile friendly
-- No long paragraphs
-- No generic advice
-- No spiritual nonsense words
-- Be direct, real, sharp
-`;
 
 async function sendMessage() {
-
-  const inputBox = document.getElementById("input");
+  const input = document.getElementById("input").value.trim();
   const chat = document.getElementById("chat");
-  const lang = document.getElementById("lang").value;
-  const text = inputBox.value.trim();
 
-  if (!text) return;
+  if (!input) return;
 
-  // 🔒 LIMIT CHECK
-  if (!DEV_MODE && questionCount >= LIMIT) {
-    chat.innerHTML += `
-    <div style="color: orange;">
-      🔒 Truth stops here.<br><br>
-      You don’t need more answers.<br>
-      You need commitment.<br><br>
-      Unlock deeper guidance →
-    </div>`;
-    return;
-  }
+  chat.innerHTML += `<div><b>You:</b> ${input}</div>`;
 
-  // 👤 USER MESSAGE
-  chat.innerHTML += `<div><b>You:</b> ${text}</div>`;
-  inputBox.value = "";
+  chat.innerHTML += `<div style="opacity:0.7;">Analyzing...</div>`;
 
-  messages.push({ role: "user", content: text });
+  const response = await fetch("/api/chat", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json"
+    },
+    body: JSON.stringify({
+      messages: [
+        { role: "user", content: input },
+        { role: "system", content: "CAUSES: " + selectedCauses.join(", ") }
+      ]
+    })
+  });
 
-  // 🤖 THINKING
-  chat.innerHTML += `<div id="loading"><b>Guide:</b> Thinking...</div>`;
+  const data = await response.json();
 
-  try {
+  chat.innerHTML += `<div><b>Guide:</b> ${data.reply}</div>`;
 
-    const res = await fetch("/api/chat", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json"
-      },
-      body: JSON.stringify({
-        messages: [
-          { role: "system", content: systemPrompt },
-          ...messages
-        ],
-        lang: lang
-      })
-    });
+  document.getElementById("input").value = "";
+  document.getElementById("options").style.display = "none";
+  document.getElementById("sendBtn").style.display = "none";
+  selectedCauses = [];
 
-    const data = await res.json();
-
-    const reply = data.reply || "No response";
-
-    messages.push({ role: "assistant", content: reply });
-
-    document.getElementById("loading").remove();
-
-    chat.innerHTML += `<div><b>Guide:</b> ${reply}</div>`;
-
-    // 🔢 COUNT UPDATE
-    questionCount++;
-    localStorage.setItem("count", questionCount);
-
-  } catch (err) {
-    document.getElementById("loading").innerText = "Error";
-  }
+  chat.scrollTop = chat.scrollHeight;
 }
+
 </script>
 
 </body>
