@@ -26,64 +26,67 @@ export default async function handler(req, res) {
       "Avoiding truth creates suffering",
       "Awareness breaks negative patterns",
       "Your habits shape your destiny",
-      "You can’t control results, only effort",
+      "You can't control results, only effort",
       "Inner stability > external success"
     ];
 
-    // 🎯 pick random principle (anti-repeat feel)
+    // 🎲 Random principle
     const randomPrinciple =
       gitaPrinciples[Math.floor(Math.random() * gitaPrinciples.length)];
 
-    // 🧠 SYSTEM PROMPT (final version)
+    // 🎯 PROBLEM CAUSES ENGINE (ANTI-GENERIC)
+    const problemCauses = [
+      "no clear routine",
+      "lack of discipline",
+      "overthinking",
+      "phone distraction",
+      "late sleeping habit",
+      "no clear priorities",
+      "fear of failure",
+      "comfort zone",
+      "lack of consistency",
+      "no accountability",
+      "mental fatigue",
+      "too many goals",
+      "no time planning",
+      "procrastination",
+      "low motivation",
+      "emotional instability",
+      "lack of clarity",
+      "external distractions",
+      "no self-control",
+      "inconsistent habits"
+    ];
+
+    const selectedCauses = problemCauses
+      .sort(() => 0.5 - Math.random())
+      .slice(0, 3);
+
+    // 🧾 SYSTEM PROMPT
     const systemPrompt = `
 You are "Gita Guide" — a sharp, practical advisor inspired by Bhagavad Gita.
 
-Your thinking process MUST follow this exact flow:
+Possible causes of user's problem:
+${selectedCauses.join(", ")}
 
-1. USER INPUT
-- Understand what user is saying (surface problem)
+You MUST:
+- Show 2-3 possible causes
+- Not assume one single reason
+- Explain simply which fits user
 
-2. HIDDEN PROBLEM
-- Detect real issue behind it
-- Example:
-  "late ho raha hun" → poor discipline / no system / distraction
-
-3. PATTERN IDENTIFICATION
-- Show what user is repeatedly doing wrong
-- Must be specific (habits, money, delay, fear, comfort zone)
-
-4. GITA INSIGHT (CONNECTED, NOT RANDOM)
-- Use 1 relevant principle only
-- Explain WHY it applies to THIS situation
-- No generic Krishna lines
-
-5. PRACTICAL DIRECTION
-- Give 2 clear, real-world actions
-- Immediate use (no theory)
-
-6. DEEP QUESTION
-- Ask 1 uncomfortable question
-- Should force self-reflection
-
-7. NEXT LEVEL HOOK (VERY IMPORTANT)
-- Create curiosity
-- Hint that deeper truth exists
-
-----------------------------------
+Thinking flow:
+1. Understand user problem
+2. Detect hidden issue
+3. Identify pattern
+4. Use ONE relevant Gita principle: "${randomPrinciple}"
+5. Give 2 practical actions
+6. Ask 1 deep question
 
 STRICT RULES:
-
-- Speak like a sharp friend, not guru
-- Use simple Hindi / Hinglish / English (match user language)
-- No vague or philosophical sentences
-- No nonsense lines
-- Every line must feel real and relatable
-
-REALITY CHECK:
-- Only real-life causes allowed
-- (sleep, money, habits, phone, fear, discipline, etc.)
-
-----------------------------------
+- Speak like a smart friend (not guru)
+- Use simple Hindi / Hinglish / English (match user)
+- No vague lines
+- Every line must feel real
 
 OUTPUT FORMAT (HTML ONLY):
 
@@ -103,36 +106,31 @@ OUTPUT FORMAT (HTML ONLY):
 <p></p>
 
 <p style="opacity:0.7;">Unlock deeper guidance →</p>
-
-----------------------------------
-
-If answer feels generic → it's WRONG.
 `;
 
-    // 🚀 API CALL (Groq)
+    // 🤖 API CALL
     const response = await fetch(
       "https://api.groq.com/openai/v1/chat/completions",
       {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          Authorization: `Bearer ${process.env.GROQ_API_KEY}`,
+          Authorization: `Bearer ${process.env.GROQ_API_KEY}`
         },
         body: JSON.stringify({
           model: "llama-3.1-8b-instant",
           messages: [
             { role: "system", content: systemPrompt },
-            ...messages,
+            ...messages
           ],
           temperature: 0.7,
-          max_tokens: 300,
-        }),
+          max_tokens: 300
+        })
       }
     );
 
     const data = await response.json();
 
-    // 🛑 SAFE PARSE (no crash)
     const reply =
       data?.choices?.[0]?.message?.content ||
       "⚠️ No response from AI";
@@ -142,7 +140,7 @@ If answer feels generic → it's WRONG.
   } catch (error) {
     console.error("ERROR:", error);
     return res.status(500).json({
-      reply: "⚠️ Server error",
+      reply: "⚠️ Server error"
     });
   }
-}
+          }
