@@ -19,43 +19,57 @@ export default async function handler(req, res) {
           {
             role: "system",
             content: `
-You are a deep thinking guide inspired by Bhagavad Gita.
+You are a deep life guide inspired by Bhagavad Gita.
 
-You MUST:
-- identify hidden problem
+Think deeply before answering.
+
+Process:
+- find real hidden problem
 - expose uncomfortable truth
-- avoid generic advice
+- explain clearly
 - give practical action
 - end with a deep question
 
-Do NOT repeat answers.
-Be specific to the user.
+Do not repeat answers.
+Do not give generic advice.
 `
           },
-          { role: "user", content: message }
+          {
+            role: "user",
+            content: message
+          }
         ]
       })
     });
 
     const data = await response.json();
 
-    // 🔥 DEBUG LOG (important)
-    console.log("GROQ RESPONSE:", JSON.stringify(data, null, 2));
+    console.log("FULL GROQ RESPONSE:", JSON.stringify(data, null, 2));
 
-    if (!data.choices || !data.choices.length) {
+    // ❌ अगर API error दे रही है
+    if (data.error) {
       return res.status(200).json({
-        reply: "⚠️ No valid response from AI. Check logs."
+        reply: "⚠️ " + data.error.message
       });
     }
 
-    res.status(200).json({
+    // ❌ अगर response empty है
+    if (!data.choices || !data.choices.length) {
+      return res.status(200).json({
+        reply: "⚠️ Empty response from AI"
+      });
+    }
+
+    // ✅ success
+    return res.status(200).json({
       reply: data.choices[0].message.content
     });
 
   } catch (error) {
-    console.error("ERROR:", error);
-    res.status(500).json({
-      reply: "⚠️ Server error. Check logs."
+    console.error("SERVER ERROR:", error);
+
+    return res.status(500).json({
+      reply: "⚠️ Server crashed: " + error.message
     });
   }
-      }
+  }
