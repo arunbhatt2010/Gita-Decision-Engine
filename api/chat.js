@@ -1,47 +1,58 @@
-export default async function handler(req, res) {
+let step = 0;
 
-  if (req.method !== "POST") {
-    return res.status(405).json({ error: "Method not allowed" });
+async function sendMessage() {
+
+  const inputBox = document.getElementById("input");
+  const chat = document.getElementById("chat");
+
+  const text = inputBox.value.trim();
+  if (!text) return;
+
+  // Show user message
+  chat.innerHTML += `<div><b>You:</b> ${text}</div>`;
+  inputBox.value = "";
+
+  let reply;
+
+  // 🔒 Paywall logic
+  if (step >= 3) {
+    reply = `
+    <div style="color:orange;">
+    🔒 You’re very close to real clarity<br><br>
+    Most people stop here… and repeat the same pattern<br><br>
+    Unlock full clarity for ₹49
+    </div>`;
+  } else {
+
+    try {
+      // 🔥 API CALL
+      const response = await fetch("/api/chat", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({ message: text })
+      });
+
+      const data = await response.json();
+
+      reply = data.reply;
+
+    } catch (err) {
+      reply = "Something went wrong...";
+    }
   }
 
-  const { message } = req.body;
+  // Show AI reply
+  chat.innerHTML += `<div><b>Guide:</b><br>${reply}</div>`;
 
-  const systemPrompt = `
-You are a sharp life guide inspired by Bhagavad Gita.
-
-Your job is NOT to comfort the user.
-Expose truth clearly.
-
-Format:
-Truth:
-Why this happens:
-What to do:
-Think:
-`;
-
-  try {
-    const response = await fetch("https://api.openai.com/v1/chat/completions", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        "Authorization": `Bearer ${process.env.OPENAI_API_KEY}`
-      },
-      body: JSON.stringify({
-        model: "gpt-4o-mini",
-        messages: [
-          { role: "system", content: systemPrompt },
-          { role: "user", content: message }
-        ]
-      })
-    });
-
-    const data = await response.json();
-
-    res.status(200).json({
-      reply: data.choices[0].message.content
-    });
-
-  } catch (err) {
-    res.status(500).json({ error: "Something went wrong" });
-  }
+  step++;
 }
+
+// ENTER SUPPORT
+document.getElementById("input").addEventListener("keypress", function(e) {
+  if (e.key === "Enter") {
+    e.preventDefault();
+    sendMessage();
+  }
+});
