@@ -102,8 +102,7 @@ async function sendMessage(){
 
     const data = await response.json();
 
-    chat.innerHTML += `<div><b>Guide:</b><br>${data.reply}</div>`;
-
+    chat.innerHTML += data.reply;
   } catch(err){
     chat.innerHTML += `<div>❌ Fetch failed</div>`;
   }
