@@ -5,7 +5,7 @@ export default async function handler(req, res) {
   }
 
   try {
-    const { message } = req.body; // ⚠️ JSON.parse हटाओ
+    const { message } = req.body;
 
     const response = await fetch("https://api.groq.com/openai/v1/chat/completions", {
       method: "POST",
@@ -16,7 +16,22 @@ export default async function handler(req, res) {
       body: JSON.stringify({
         model: "llama3-70b-8192",
         messages: [
-          { role: "system", content: "You are a deep thinking guide." },
+          {
+            role: "system",
+            content: `
+You are a deep thinking guide inspired by Bhagavad Gita.
+
+You MUST:
+- identify hidden problem
+- expose uncomfortable truth
+- avoid generic advice
+- give practical action
+- end with a deep question
+
+Do NOT repeat answers.
+Be specific to the user.
+`
+          },
           { role: "user", content: message }
         ]
       })
@@ -24,11 +39,23 @@ export default async function handler(req, res) {
 
     const data = await response.json();
 
+    // 🔥 DEBUG LOG (important)
+    console.log("GROQ RESPONSE:", JSON.stringify(data, null, 2));
+
+    if (!data.choices || !data.choices.length) {
+      return res.status(200).json({
+        reply: "⚠️ No valid response from AI. Check logs."
+      });
+    }
+
     res.status(200).json({
-      reply: data.choices?.[0]?.message?.content || "No response"
+      reply: data.choices[0].message.content
     });
 
-  } catch (err) {
-    res.status(500).json({ error: "Server error" });
+  } catch (error) {
+    console.error("ERROR:", error);
+    res.status(500).json({
+      reply: "⚠️ Server error. Check logs."
+    });
   }
-}
+      }
