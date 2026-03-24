@@ -10,72 +10,35 @@ export default async function handler(req, res) {
     const response = await fetch("https://api.groq.com/openai/v1/chat/completions", {
       method: "POST",
       headers: {
-        "Authorization": `Bearer ${process.env.GROQ_API_KEY}`,
-        "Content-Type": "application/json"
+        "Content-Type": "application/json",
+        "Authorization": `Bearer ${process.env.GROQ_API_KEY}`
       },
-    body: JSON.stringify({
-  model: "llama-3.1-8b-instant",
-  messages: [
-    { role: "system", content: systemPrompt },
-    { role: "user", content: userMessage }
-  ],
-
-  temperature: 0.7,   // 🔥 creativity + variation
-  max_tokens: 200     // 🔥 short answer control
-)}
+      body: JSON.stringify({
+        model: "llama-3.1-8b-instant",
+        messages: [
+          {
             role: "system",
-            content: `
-You are a deep life guide inspired by Bhagavad Gita.
-
-Think deeply before answering.
-
-Process:
-- find real hidden problem
-- expose uncomfortable truth
-- explain clearly
-- give practical action
-- end with a deep question
-
-Do not repeat answers.
-Do not give generic advice.
-`
+            content: "You are a sharp life guide. Keep answers short, direct, and uncomfortable."
           },
           {
             role: "user",
             content: message
           }
-        ]
+        ],
+        temperature: 0.6,
+        max_tokens: 150
       })
     });
 
     const data = await response.json();
 
-    console.log("FULL GROQ RESPONSE:", JSON.stringify(data, null, 2));
-
-    // ❌ अगर API error दे रही है
-    if (data.error) {
-      return res.status(200).json({
-        reply: "⚠️ " + data.error.message
-      });
-    }
-
-    // ❌ अगर response empty है
-    if (!data.choices || !data.choices.length) {
-      return res.status(200).json({
-        reply: "⚠️ Empty response from AI"
-      });
-    }
-
-    // ✅ success
     return res.status(200).json({
-      reply: data.choices[0].message.content
+      reply: data.choices?.[0]?.message?.content || "No response"
     });
 
   } catch (error) {
-    console.error("SERVER ERROR:", error);
-
     return res.status(500).json({
-      reply: "⚠️ Server crashed: " + error.message
+      error: error.message
     });
   }
-  }
+      }
