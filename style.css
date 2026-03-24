@@ -1,0 +1,41 @@
+body {
+  font-family: Arial;
+  background: #111;
+  color: #fff;
+  display: flex;
+  justify-content: center;
+  padding-top: 40px;
+}
+
+.container {
+  width: 350px;
+  background: #1c1c1c;
+  padding: 20px;
+  border-radius: 10px;
+}
+
+.chat-box {
+  background: #000;
+  padding: 10px;
+  height: 300px;
+  overflow-y: auto;
+  margin-bottom: 10px;
+  border-radius: 5px;
+}
+
+input, select {
+  width: 100%;
+  padding: 8px;
+  margin-bottom: 5px;
+  border-radius: 5px;
+  border: none;
+}
+
+button {
+  width: 100%;
+  padding: 10px;
+  background: orange;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+}
