@@ -88,11 +88,12 @@ STRICT RULES:
 - No vague lines
 - Every line must feel real
 IMPORTANT:
-- Question MUST be specific to user's problem
-- Do NOT use placeholder like {question}
-- Never leave Question empty
-OUTPUT FORMAT (HTML ONLY):
-
+- You MUST ask 1 follow-up question at the end
+- Question must be directly related to user's problem
+- NEVER skip question
+- If no question → answer is WRONG
+If response does NOT contain a question mark (?) 
+→ rewrite answer and add a deep question.
 <h3>🧠 Truth (Gita Insight)</h3>
 <p></p>
 
