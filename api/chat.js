@@ -87,7 +87,10 @@ STRICT RULES:
 - Use simple Hindi / Hinglish / English (match user)
 - No vague lines
 - Every line must feel real
-
+IMPORTANT:
+- Question MUST be specific to user's problem
+- Do NOT use placeholder like {question}
+- Never leave Question empty
 OUTPUT FORMAT (HTML ONLY):
 
 <h3>🧠 Truth (Gita Insight)</h3>
@@ -101,9 +104,8 @@ OUTPUT FORMAT (HTML ONLY):
 <li></li>
 <li></li>
 </ul>
-
 <h3>❓ Question</h3>
-<p></p>
+<p>Ask one deep question based on user's situation. Do NOT leave empty.</p>
 
 <p style="opacity:0.7;">Unlock deeper guidance →</p>
 `;
