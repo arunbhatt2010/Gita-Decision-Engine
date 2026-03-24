@@ -187,7 +187,7 @@ else mode = "CORE";
 User problem: ${input}
 Language: ${lang}
 Selected causes: ${selectedCauses.join(", ")}
-
+Conversation step: ${mode}
 Mode: "NORMAL"
 IMPORTANT:
 - Keep response short and sharp
@@ -210,6 +210,9 @@ Rules:
   const data = await response.json();
 
   chat.innerHTML += `<div><b>Guide:</b> ${data.reply}</div>
+ if(loopStep >= 3){
+  loopStep = 0;
+  }
   <div onclick="sendMessage(true)" style="opacity:0.7;cursor:pointer;">
   Unlock deeper insight →
   </div>`;
