@@ -1,10 +1,7 @@
-<!DOCTYPE html>
-<html>
+<!DOCTYPE html><html>
 <head>
 <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-<title>Gita Guidance</title>
-
-<style>
+<title>Gita Guidance</title><style>
 body {
   background:#0f0f0f;
   color:#fff;
@@ -47,33 +44,18 @@ select, input {
   font-weight:bold;
   cursor:pointer;
 }
-</style>
-</head>
-
-<body>
-
-<div class="container">
-<h2>Gita Guidance</h2>
-
-<div id="chat" class="chat-box">
+</style></head><body><div class="container">
+<h2>Gita Guidance</h2><div id="chat" class="chat-box">
 <div style="opacity:0.7;">
 You don’t need more advice.<br>
 You need clarity.
 </div>
-</div>
-
-<select id="lang">
+</div><select id="lang">
 <option value="en">English</option>
 <option value="hi">Hindi</option>
-</select>
+</select><input id="input" placeholder="What's really bothering you..." /><button id="sendBtn" class="primary-btn">Get Guidance</button>
 
-<input id="input" placeholder="What's really bothering you..." />
-
-<button id="sendBtn" class="primary-btn">Get Guidance</button>
-
-</div>
-
-<script>
+</div><script>
 
 let loopStep = 0;
 
@@ -81,7 +63,7 @@ document.getElementById("sendBtn").addEventListener("click", () => {
   sendMessage();
 });
 
-async function sendMessage(deep=false){
+async function sendMessage(){
 
   const input = document.getElementById("input").value.trim();
   const lang = document.getElementById("lang").value;
@@ -100,11 +82,7 @@ async function sendMessage(deep=false){
 
   try {
 
-    if(!response.ok){
-  chat.innerHTML += `<div>❌ API Error (${response.status})</div>`;
-  return;
-  },
-    {
+    const response = await fetch("https://gita-decision-engine.vercel.app/api/chat", {
       method:"POST",
       headers:{ "Content-Type":"application/json" },
       body: JSON.stringify({
@@ -125,16 +103,20 @@ Rules:
       })
     });
 
-    let data;
-try {
-  data = await response.json();
-} catch {
-  chat.innerHTML += `<div>❌ Invalid JSON response</div>`;
-  return;
-  }
+    if(!response.ok){
+      chat.innerHTML += `<div>❌ API Error (${response.status})</div>`;
+      return;
+    }
 
-    const reply =
-      data?.reply || "❌ API not responding";
+    let data;
+    try {
+      data = await response.json();
+    } catch {
+      chat.innerHTML += `<div>❌ Invalid JSON response</div>`;
+      return;
+    }
+
+    const reply = data?.reply || "❌ API not responding";
 
     chat.innerHTML += `<div><b>Guide:</b><br>${reply}</div>`;
 
@@ -148,7 +130,5 @@ try {
   chat.scrollTop = chat.scrollHeight;
 }
 
-</script>
-
-</body>
+</script></body>
 </html>
