@@ -100,7 +100,11 @@ async function sendMessage(deep=false){
 
   try {
 
-    const response = await fetch("/api/chat", {
+    if(!response.ok){
+  chat.innerHTML += `<div>❌ API Error (${response.status})</div>`;
+  return;
+  },
+    {
       method:"POST",
       headers:{ "Content-Type":"application/json" },
       body: JSON.stringify({
@@ -121,7 +125,13 @@ Rules:
       })
     });
 
-    const data = await response.json();
+    let data;
+try {
+  data = await response.json();
+} catch {
+  chat.innerHTML += `<div>❌ Invalid JSON response</div>`;
+  return;
+  }
 
     const reply =
       data?.reply || "❌ API not responding";
