@@ -154,7 +154,7 @@ If response does NOT contain a question mark (?)
             ...messages
           ],
           temperature: 0.7,
-          max_tokens: 300
+          max_tokens: 800
         })
       }
     );
