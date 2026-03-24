@@ -132,6 +132,12 @@ const causes = [
   "No routine",
   "Mental fatigue",
   "Too many goals"
+  chat.innerHTML = `
+<div style="opacity:0.7;">
+You don’t need more advice.  
+You need clarity.
+</div>
+
 ];
 
 function showOptions() {
@@ -139,15 +145,18 @@ function showOptions() {
   if (!input) return;
 
   const optionsDiv = document.getElementById("options");
-  optionsDiv.innerHTML = "<p>What could be the real reason?</p>";
+
+  optionsDiv.innerHTML = `
+    <div class="step-title">Step 2: What could be the real reason?</div>
+  `;
 
   causes.forEach(cause => {
-    const btn = document.createElement("div");
-    btn.innerText = cause;
-    btn.className = "option-btn";
+    const card = document.createElement("div");
+    card.className = "option-card";
+    card.innerText = cause;
 
-    btn.onclick = () => {
-      btn.classList.toggle("active");
+    card.onclick = () => {
+      card.classList.toggle("active");
 
       if (selectedCauses.includes(cause)) {
         selectedCauses = selectedCauses.filter(c => c !== cause);
@@ -155,6 +164,13 @@ function showOptions() {
         selectedCauses.push(cause);
       }
     };
+
+    optionsDiv.appendChild(card);
+  });
+
+  optionsDiv.style.display = "block";
+  document.getElementById("sendBtn").style.display = "block";
+  }
 
     optionsDiv.appendChild(btn);
   });
