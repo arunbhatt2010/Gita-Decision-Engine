@@ -68,11 +68,72 @@ button {
 
 <script>
 let messages = [];
-const DEV_MODE = true; // true = unlimited access
-// 🔒 MONETIZATION LOCK
+
+const DEV_MODE = true; // true = unlimited testing
+const LIMIT = 3;
+
+// 🔒 Monetization counter
 let questionCount = localStorage.getItem("count") || 0;
 questionCount = parseInt(questionCount);
-if (!DEV_MODE && questionCount >= 3) {
+
+// 🔁 Send message function
+async function sendMessage() {
+
+  const inputBox = document.getElementById("input");
+  const chat = document.getElementById("chat");
+  const text = inputBox.value.trim();
+
+  if (!text) return;
+
+  // 🔒 LIMIT CHECK (fixed)
+  if (!DEV_MODE && questionCount >= LIMIT) {
+    chat.innerHTML += `
+      <div style="color: orange;">
+      🔒 You've reached your limit.<br><br>
+      You don’t lack answers.<br>
+      You lack execution.<br><br>
+      Unlock deeper guidance →
+      </div>
+    `;
+    return;
+  }
+
+  // 👤 User message
+  chat.innerHTML += `<div><b>You:</b> ${text}</div>`;
+  inputBox.value = "";
+
+  // 🧠 Save message
+  messages.push({ role: "user", content: text });
+
+  // ⏳ Thinking UI
+  chat.innerHTML += `<div><b>Guide:</b> Thinking...</div>`;
+
+  try {
+    const res = await fetch("/api/chat", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify({ messages: messages })
+    });
+
+    const data = await res.json();
+    const reply = data.reply || "No response";
+
+    // 🧠 Save AI reply
+    messages.push({ role: "assistant", content: reply });
+
+    // ✅ Replace Thinking
+    chat.innerHTML = chat.innerHTML.replace("Thinking...", reply);
+
+    // 🔢 Increase count
+    questionCount++;
+    localStorage.setItem("count", questionCount);
+
+  } catch (err) {
+    chat.innerHTML = chat.innerHTML.replace("Thinking...", "Error");
+  }
+  }
 
 async function sendMessage() {
   const inputBox = document.getElementById("input");
