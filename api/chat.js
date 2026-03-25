@@ -100,28 +100,37 @@ QUESTION INTENT FIX:
   planning questions
   vague thinking questions
   FOLLOW-UP STRUCTURE FIX:
+- After Action, ALWAYS give a short Hint
 
-- Before asking the question, give a SMALL hint or example
-- The hint must suggest a possible action (not full answer)
+- Hint must be a SIMPLE, REAL example
+- 1 line only
+- No explanation
 
-- Then ask the question based on that hint
+- Then ask Question based on that hint
 
-- Format:
+- Structure must be:
+
+Action:
+- Step 1
+- Step 2
+
 Hint:
-(One simple example action)
+(1 real example)
 
 Question:
-(Force user to commit to their own version)
+(force commitment with number + time + platform)
 
 - Example:
+
 Hint:
-You could message 3 potential clients with a simple offer.
+You could message 3 potential clients on WhatsApp with a simple offer.
 
 Question:
-By tomorrow 10am, how many people will you contact and through which platform?
+By tomorrow 10am, how many people will you message and on which platform?
 
-- Keep hint short (1–2 lines only)
-- Do NOT over-explain
+- Question must NOT be about thinking
+- Question must force DOING
+
 LOOP SYSTEM:
 - loopLevel = 1 → normal
 - loopLevel > 1 → deeper, uncomfortable
