@@ -60,8 +60,7 @@ button {
 <button id="getBtn">Get Clarity</button>
 
 <input id="reflectionInput" placeholder="Answer honestly..." />
-
-<button onclick="startPayment()">🔒 Go Deeper (₹19)</button>
+<button id="payBtn">🔒 Go Deeper (₹19)</button>
 
 </div>
 
@@ -208,6 +207,7 @@ getBtn.addEventListener("click", async () => {
     ${reply}
   `;
 });
+  document.getElementById("payBtn").addEventListener("click", startPayment);
 
 </script>
 
