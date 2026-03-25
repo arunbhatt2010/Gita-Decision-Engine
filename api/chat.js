@@ -1,8 +1,6 @@
-module.exports = async function handler(req, res) {
-  res.status(200).json({ reply: "AI working ✅" });
-};
+export default async function handler(req, res) {
   try {
-    // ✅ SAFE BODY PARSE (FIX)
+    // ✅ SAFE BODY PARSE
     const body = typeof req.body === "string"
       ? JSON.parse(req.body)
       : req.body;
@@ -64,94 +62,20 @@ CORE RULES:
 - No "maybe", "could be", "might be"
 - No generic advice
 - Use simple, direct human language
+
 QUESTION RULES:
-
-- The question must force a commitment
-- Must include:
-  1. Time constraint (today / tomorrow / within 24 hours)
-  2. Clear action
-  3. Measurable output
-
-- Do NOT ask open-ended or philosophical questions
-
-- Example:
-"By tomorrow 10am, how many people will you contact and through which platform?"
-
-TONE:
-- Sharp
-- Direct
-- Slightly uncomfortable
-- No over-explaining
-
-DELIVERY STYLE:
-- Start with a bold, uncomfortable truth
-- First sentence must challenge the user
-- Maintain intensity throughout
-- Convert the pattern into real-life behavior
-- Do NOT drift away from the pattern
-- If the answer feels safe, make it more uncomfortable
+- Must include time + action + measurable output
+- No philosophical questions
 
 LOOP SYSTEM:
-- loopLevel = 1 → initial clarity
-- loopLevel > 1 → deeper, more uncomfortable truth
-- Each loop must go deeper than previous
-- Do NOT repeat the same explanation
-
-COMMITMENT RULES:
-- If user gives a vague answer:
-
-  First show a strong example, then ask user to rewrite.
-
-  Example:
-  "Too vague. Here's what a strong answer looks like:
-  Tomorrow 10am–12pm, I will send 10 emails offering 3 ideas.
-
-  Now rewrite your answer clearly."
-
-- If user gives a clear answer:
-
-  Respond ONLY:
-  "Accepted. I'll hold you accountable."
-ANSWER RULES:
-
-- The answer must be specific and actionable
-- Must include:
-  1. Exact time (e.g. 10am, tomorrow, within 24 hours)
-  2. Exact action (what exactly to do)
-  3. Measurable output (number, count, result)
-
-- Do NOT accept vague answers like:
-  "I will try", "I will improve", "I will start"
-
-- If vague → respond ONLY:
-"Too vague. Be specific with time + action."
-
-- If strong → convert into a concrete commitment example
+- loopLevel = 1 → normal
+- loopLevel > 1 → deeper, uncomfortable
 
 FORMAT:
-
-<div><b>Guide:</b><br>
-Guide:
-(Write 20–25 words. Describe what is happening in reality that others can see. Avoid words like "mindset", "fear", "clarity", "motivation".)
-</div>
-
-<div><b>Pattern:</b><br>
-(${selectedPattern})
-</div>
-
-<div><b>Action:</b>
-<ul>
-<li>Step 1</li>
-<li>Step 2</li>
-</ul>
-</div>
-
-<div><b>Question:</b><br>
-(One uncomfortable question)
-</div>
+Guide + Pattern + Action + Question
 `;
 
-    // 🚀 API CALL (FIXED SAFE VERSION)
+    // 🚀 API CALL
     const response = await fetch(
       "https://api.groq.com/openai/v1/chat/completions",
       {
@@ -172,7 +96,6 @@ Guide:
       }
     );
 
-    // ✅ SAFE ERROR HANDLING
     const text = await response.text();
 
     if (!response.ok) {
@@ -205,4 +128,4 @@ Guide:
       reply: "⚠️ Server error"
     });
   }
-};
+}
