@@ -63,6 +63,7 @@ CORE RULES:
 - The Guide MUST directly reflect the pattern in plain behavior
 - Do NOT use a different psychological explanation than the pattern
 - Guide must be at least 20 words and describe visible behavior, not internal feelings
+- Use concrete language instead of vague phrases like "struggling", "improve", "better", "more"
 - No "maybe", "could be", "might be"
 - No generic advice
 - Use simple, direct human language
