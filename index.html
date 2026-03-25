@@ -2,7 +2,7 @@
 <html>
 <head>
 <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-<title>Gita Guidance</title>
+<title>TruthLoop</title>
 
 <style>
 body {
@@ -16,23 +16,22 @@ body {
   margin:auto;
   padding:15px;
 }
-h2{text-align:center;}
 .chat-box {
-  height:45vh;
+  height:50vh;
   overflow-y:auto;
   background:#000;
   padding:15px;
   border-radius:12px;
   margin-bottom:10px;
 }
-select, input {
+input, textarea {
   width:100%;
   padding:12px;
   margin-top:8px;
   border-radius:8px;
   border:none;
 }
-.primary-btn {
+button {
   width:100%;
   padding:14px;
   margin-top:10px;
@@ -41,74 +40,91 @@ select, input {
   border-radius:10px;
   font-weight:bold;
 }
+.hidden { display:none; }
 </style>
 </head>
 
 <body>
 
 <div class="container">
-<h2>Gita Guidance</h2>
 
-<div id="chat" class="chat-box">
-<div style="opacity:0.7;">
-You don’t need more advice.<br>
-You need clarity.
-</div>
-</div>
+<h2>TruthLoop</h2>
 
-<select id="lang">
-<option value="en">English</option>
-<option value="hi">Hindi</option>
-</select>
+<div id="chat" class="chat-box"></div>
 
 <input id="input" placeholder="What's really bothering you..." />
 
-<button onclick="sendMessage()" class="primary-btn">Get Guidance</button>
+<button onclick="send()">Get Clarity</button>
+
+<textarea id="reflection" class="hidden" placeholder="Answer honestly..."></textarea>
+<button id="reflectBtn" class="hidden" onclick="nextStep()">Continue</button>
+
+<textarea id="action" class="hidden" placeholder="What will you do in next 24 hours?"></textarea>
+<button id="actionBtn" class="hidden" onclick="saveAction()">Commit Action</button>
 
 </div>
 
 <script>
 
-async function sendMessage(){
+let lastPattern = "";
+let repeatCount = 0;
 
-  const input = document.getElementById("input").value.trim();
-  const lang = document.getElementById("lang").value;
+async function send(){
+
+  const input = document.getElementById("input").value;
   const chat = document.getElementById("chat");
 
   if(!input) return;
 
   chat.innerHTML += `<div><b>You:</b> ${input}</div>`;
-  chat.innerHTML += `<div style="opacity:0.6;">Thinking...</div>`;
+  chat.innerHTML += `<div>Thinking...</div>`;
 
-  try {
+  const res = await fetch("/api/chat", {
+    method:"POST",
+    headers:{ "Content-Type":"application/json" },
+    body: JSON.stringify({
+      messages:[{ role:"user", content:input }]
+    })
+  });
 
-    const response = await fetch("/api/chat", {
-      method:"POST",
-      headers:{ "Content-Type":"application/json" },
-      body: JSON.stringify({
-        messages: [
-          {
-            role:"user",
-            content: `User problem: ${input}\nLanguage: ${lang}`
-          }
-        ]
-      })
-    });
+  const data = await res.json();
 
-    if(!response.ok){
-      chat.innerHTML += `<div>❌ API Error (${response.status})</div>`;
-      return;
-    }
+  chat.innerHTML += `<div>${data.reply}</div>`;
 
-    const data = await response.json();
+  // Show reflection lock
+  document.getElementById("reflection").classList.remove("hidden");
+  document.getElementById("reflectBtn").classList.remove("hidden");
+}
 
-    chat.innerHTML += data.reply;
-  } catch(err){
-    chat.innerHTML += `<div>❌ Fetch failed</div>`;
+function nextStep(){
+
+  const reflection = document.getElementById("reflection").value;
+  const chat = document.getElementById("chat");
+
+  if(!reflection){
+    alert("You skipped the hard part.");
+    return;
   }
 
-  document.getElementById("input").value = "";
-  chat.scrollTop = chat.scrollHeight;
+  chat.innerHTML += `<div><b>You (Reflection):</b> ${reflection}</div>`;
+
+  document.getElementById("action").classList.remove("hidden");
+  document.getElementById("actionBtn").classList.remove("hidden");
+}
+
+function saveAction(){
+
+  const action = document.getElementById("action").value;
+  const chat = document.getElementById("chat");
+
+  if(!action){
+    alert("No action = no change.");
+    return;
+  }
+
+  chat.innerHTML += `<div><b>Committed Action:</b> ${action}</div>`;
+  chat.innerHTML += `<div>Clarity done. Execution pending.</div>`;
+
 }
 
 </script>
