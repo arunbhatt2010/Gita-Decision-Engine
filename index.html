@@ -58,14 +58,11 @@ button {
 
 <h2>TruthLoop</h2>
 
-<!-- OUTPUT -->
 <div id="outputBox" class="output"></div>
 
-<!-- USER INPUT -->
 <input id="mainInput" placeholder="What's really bothering you..." />
 <button id="getBtn">Get Clarity</button>
 
-<!-- REFLECTION -->
 <input id="reflectionInput" placeholder="Answer honestly..." />
 <button id="continueBtn">Continue</button>
 
@@ -73,7 +70,7 @@ button {
 
 <script>
 
-// 🔹 ELEMENTS
+// ELEMENTS
 const input = document.getElementById("mainInput");
 const reflectionInput = document.getElementById("reflectionInput");
 const outputBox = document.getElementById("outputBox");
@@ -83,7 +80,7 @@ const continueBtn = document.getElementById("continueBtn");
 let messages = [];
 let loopLevel = 1;
 
-// 🔥 VALIDATION
+// VALIDATION
 function isValidCommitment(text) {
   return (
     text.length > 20 &&
@@ -97,7 +94,36 @@ function isValidCommitment(text) {
   );
 }
 
-// 🚀 FIRST CALL
+// COMMON API CALL (🔥 FIX)
+async function callAPI() {
+  try {
+    const res = await fetch("/api/chat", {
+      method:"POST",
+      headers:{ "Content-Type":"application/json" },
+      body: JSON.stringify({ messages, loopLevel })
+    });
+
+    if (!res.ok) {
+      throw new Error("API failed");
+    }
+
+    const data = await res.json();
+
+    if (!data.reply) {
+      throw new Error("Empty response");
+    }
+
+    messages.push({ role: "assistant", content: data.reply });
+
+    return data.reply;
+
+  } catch (err) {
+    console.error(err);
+    return "⚠️ AI unstable. Try again.";
+  }
+}
+
+// FIRST CALL
 getBtn.addEventListener("click", async () => {
 
   const userText = input.value.trim();
@@ -108,23 +134,15 @@ getBtn.addEventListener("click", async () => {
 
   outputBox.innerHTML = "Thinking...";
 
-  const res = await fetch("/api/chat", {
-    method:"POST",
-    headers:{ "Content-Type":"application/json" },
-    body: JSON.stringify({ messages, loopLevel })
-  });
-
-  const data = await res.json();
-
-  messages.push({ role: "assistant", content: data.reply });
+  const reply = await callAPI();
 
   outputBox.innerHTML = `
     <b>You:</b> ${userText}<br><br>
-    ${data.reply}
+    ${reply}
   `;
 });
 
-// 🔁 CONTINUE LOOP
+// CONTINUE LOOP
 continueBtn.addEventListener("click", async () => {
 
   const userText = reflectionInput.value.trim();
@@ -143,19 +161,11 @@ continueBtn.addEventListener("click", async () => {
 
   outputBox.innerHTML += `<br><br><i>Going deeper...</i>`;
 
-  const res = await fetch("/api/chat", {
-    method:"POST",
-    headers:{ "Content-Type":"application/json" },
-    body: JSON.stringify({ messages, loopLevel })
-  });
-
-  const data = await res.json();
-
-  messages.push({ role: "assistant", content: data.reply });
+  const reply = await callAPI();
 
   outputBox.innerHTML += `
     <br><br><b>You (Reflection):</b> ${userText}<br><br>
-    ${data.reply}
+    ${reply}
   `;
 });
 
