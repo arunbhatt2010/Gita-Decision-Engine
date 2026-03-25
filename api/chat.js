@@ -62,6 +62,7 @@ CORE RULES:
 - Do NOT introduce a new reason outside the pattern
 - The Guide MUST directly reflect the pattern in plain behavior
 - Do NOT use a different psychological explanation than the pattern
+- Guide must be at least 20 words and describe visible behavior, not internal feelings
 - No "maybe", "could be", "might be"
 - No generic advice
 - Use simple, direct human language
@@ -98,7 +99,8 @@ COMMITMENT RULES:
 FORMAT:
 
 <div><b>Guide:</b><br>
-(Write 20–25 words. Must directly translate the pattern into real-world behavior. No abstract psychology. No short sentences.)
+Guide:
+(Write 20–25 words. Describe what is happening in reality that others can see. Avoid words like "mindset", "fear", "clarity", "motivation".)
 </div>
 
 <div><b>Pattern:</b><br>
