@@ -75,7 +75,7 @@ DELIVERY STYLE:
 - Avoid obvious or common explanations
 - Sound like exposing reality, not suggesting ideas
 - If the answer feels safe, rewrite it to make it more uncomfortable
-
+- Replace vague phrases with concrete reality (no abstract wording)
 FORMAT (STRICT):
 
 <div><b>Guide:</b><br>
