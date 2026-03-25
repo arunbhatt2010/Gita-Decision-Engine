@@ -204,14 +204,15 @@ getBtn.addEventListener("click", async () => {
   const userText = input.value.trim();
   if (!userText) return;
 
+  // 🚫 LIMIT CHECK (BEFORE API CALL)
   if (freeCount >= 2 && !isPaid) {
-  outputBox.innerHTML += `
-  <br><br>
-  ⚠️ You’ve only scratched the surface.<br>
-  The real problem is deeper.<br><br>
-  🔒 Unlock deeper clarity to continue.
-  `;
-  return;
+    outputBox.innerHTML += `
+    <br><br>
+    ⚠️ You’ve only scratched the surface.<br>
+    The real problem is deeper.<br><br>
+    🔒 Unlock deeper clarity to continue.
+    `;
+    return;
   }
 
   loopLevel = 1;
@@ -221,8 +222,9 @@ getBtn.addEventListener("click", async () => {
 
   const reply = await callAPI();
 
+  // ✅ COUNT AFTER SUCCESS
   freeCount++;
-localStorage.setItem("freeCount_" + deviceId, freeCount);
+  localStorage.setItem("freeCount_" + deviceId, freeCount);
 
   let warning = "";
 
@@ -231,12 +233,9 @@ localStorage.setItem("freeCount_" + deviceId, freeCount);
     warning = "<br><br>⚠️ You are still not seeing the real problem...";
   }
 
-  // ✅ FORMAT FIX
-  const formattedReply = reply.replace(/\n/g, "<br>");
-
   outputBox.innerHTML = `
     <b>You:</b> ${userText}<br><br>
-    ${formattedReply}
+    ${reply}
     ${warning}
   `;
 });
