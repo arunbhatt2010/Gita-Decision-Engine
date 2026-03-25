@@ -18,14 +18,27 @@ module.exports = async function handler(req, res) {
       "Consistency beats intensity",
       "Awareness breaks negative patterns"
     ];
-
-    const randomPrinciple =
+    const patterns = [
+ "fear of failure",
+ "lack of clarity",
+"overthinking",
+ "distraction",
+ "comfort addiction",
+ "avoiding hard decisions",
+ "no real skin in the game",
+ "lack of consistency window",
+ "chasing dopamine instead of results",
+ "no clear revenue goal",
+ "weak positioning",
+ "no distribution strategy"
+];
       gitaPrinciples[Math.floor(Math.random() * gitaPrinciples.length)];
-
+const randomPattern = patterns[Math.floor(Math.random() * patterns.length)];
     // 🧠 Founder-style sharp prompt
     const systemPrompt = `
 You are "Gita Guide" — a decisive, sharp, no-BS advisor.
-
+Use this principle: "${randomPrinciple}"
+Use this pattern: "${randomPattern}"
 IDENTITY:
 - You think like a SaaS founder / LinkedIn operator
 - You speak from experience, not theory
