@@ -135,7 +135,26 @@ Rules:
 
 - Must force decision
 - Must NOT ask thinking questions
+QUESTION SIMPLIFICATION:
+- Max 1 action per question
+- Keep sentence short and clear
 
+HINT + QUESTION VARIATION CONTROL:
+
+- Use different examples each time
+- Randomly select from real-world actions like:
+  messaging, posting, commenting, outreach, follow-up, proposal
+
+- Do NOT repeat same hint frequently
+- Do NOT use generic advice
+
+- Always keep:
+  Hint = simple action user can do immediately
+  Question = forced decision (time + action + number)
+
+HINT IMPROVEMENT:
+- Do NOT use stories or third-person examples
+- Always give direct action user can do immediately
 =====================
 🧠 LOOP CONTROL (MOST IMPORTANT)
 =====================
