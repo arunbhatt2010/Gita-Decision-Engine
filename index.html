@@ -6,45 +6,12 @@
 <title>TruthLoop</title>
 
 <style>
-body {
-  background:#0f0f0f;
-  color:#fff;
-  font-family:Arial;
-  margin:0;
-}
-.container {
-  max-width:500px;
-  margin:auto;
-  padding:15px;
-}
-h2 {
-  text-align:center;
-}
-.output {
-  height:45vh;
-  overflow-y:auto;
-  background:#000;
-  padding:15px;
-  border-radius:12px;
-  margin-bottom:10px;
-}
-input {
-  width:100%;
-  padding:12px;
-  margin-top:8px;
-  border-radius:8px;
-  border:none;
-}
-button {
-  width:100%;
-  padding:14px;
-  margin-top:10px;
-  background:linear-gradient(45deg, orange, #ff5e00);
-  border:none;
-  border-radius:10px;
-  font-weight:bold;
-  cursor:pointer;
-}
+body { background:#0f0f0f; color:#fff; font-family:Arial; margin:0; }
+.container { max-width:500px; margin:auto; padding:15px; }
+h2 { text-align:center; }
+.output { height:45vh; overflow-y:auto; background:#000; padding:15px; border-radius:12px; margin-bottom:10px; }
+input { width:100%; padding:12px; margin-top:8px; border-radius:8px; border:none; }
+button { width:100%; padding:14px; margin-top:10px; background:linear-gradient(45deg, orange, #ff5e00); border:none; border-radius:10px; font-weight:bold; cursor:pointer; }
 </style>
 </head>
 
@@ -61,41 +28,40 @@ button {
 
 <input id="reflectionInput" placeholder="Answer honestly..." />
 
-<button id="payBtn" style="display:none;">🔒 Go Deeper (₹19)</button>
+<button id="payBtn" style="display:none;">🔒 Unlock Deep Truth (₹19)</button>
+
 </div>
 
 <script>
-console.log("Razorpay check:", typeof Razorpay);
+
 // ELEMENTS
 const input = document.getElementById("mainInput");
 const reflectionInput = document.getElementById("reflectionInput");
 const outputBox = document.getElementById("outputBox");
 const getBtn = document.getElementById("getBtn");
+const payBtn = document.getElementById("payBtn");
 
+// STATE (PERSISTENT)
 let messages = [];
 let loopLevel = 1;
-let isPaid = false;
-  let freeCount = 0;
-// 🔥 PAYMENT (FINAL FIXED)
+
+let freeCount = localStorage.getItem("freeCount")
+  ? parseInt(localStorage.getItem("freeCount"))
+  : 0;
+
+let isPaid = localStorage.getItem("isPaid") === "true";
+
+// 🔥 PAYMENT
 async function startPayment() {
   try {
-  if (isPaid) {
-  await unlockDeepLoop();
-  return;
-  }
-    if (typeof Razorpay === "undefined") {
-  alert("Razorpay not loaded ❌");
-  return;
+
+    if (isPaid) {
+      await unlockDeepLoop();
+      return;
     }
+
     const res = await fetch("/api/create-order", { method: "POST" });
-
-    if (!res.ok) throw new Error("Order API failed");
-
     const data = await res.json();
-
-    if (!data.id || !data.key) {
-      throw new Error("Invalid order data");
-    }
 
     const options = {
       key: data.key,
@@ -105,40 +71,28 @@ async function startPayment() {
       description: "Unlock Deep Clarity",
       order_id: data.id,
 
+      handler: async function () {
+        alert("Payment success ✅");
 
-        try {
-          await unlockDeepLoop();
-        } catch (e) {
-          console.error("Unlock error:", e);
-          alert("Payment done but unlock failed");
-        }
+        isPaid = true;
+        localStorage.setItem("isPaid", "true");
+
+        await unlockDeepLoop();
       },
 
-      modal: {
-        ondismiss: function () {
-          console.log("❌ Payment popup closed");
-        }
-      },
-
-      theme: {
-        color: "#ff5e00"
-      }
+      theme: { color: "#ff5e00" }
     };
 
     const rzp = new Razorpay(options);
     rzp.open();
 
-  } catch (err) {handler: async function () {
-  alert("Payment success ✅");
-  isPaid = true;
-  await unlockDeepLoop();
-  }
+  } catch (err) {
     console.error(err);
-    alert("Payment failed: " + err.message);
+    alert("Payment failed");
   }
 }
 
-// ✅ API CALL (STABLE)
+// ✅ API CALL
 async function callAPI() {
   try {
     const res = await fetch("/api/chat", {
@@ -147,31 +101,22 @@ async function callAPI() {
       body: JSON.stringify({ messages, loopLevel })
     });
 
-    if (!res.ok) throw new Error("API failed");
-
     const data = await res.json();
-
-    if (!data.reply) throw new Error("Empty response");
 
     messages.push({ role: "assistant", content: data.reply });
 
     return data.reply;
 
   } catch (err) {
-    console.error(err);
-    return "⚠️ AI unstable. Try again.";
+    return "⚠️ AI unstable";
   }
 }
 
-// 🔓 DEEP LOOP (FINAL SAFE)
+// 🔓 DEEP LOOP
 async function unlockDeepLoop() {
   try {
     const userText = reflectionInput.value.trim();
-
-    if (!userText) {
-      outputBox.innerHTML += "<br><br>⚠️ Enter reflection first";
-      return;
-    }
+    if (!userText) return;
 
     messages.push({ role: "user", content: userText });
 
@@ -183,29 +128,22 @@ async function unlockDeepLoop() {
       body: JSON.stringify({ messages, loopLevel: 2 })
     });
 
-    if (!res.ok) throw new Error("Deep API failed");
-
     const data = await res.json();
-
-    if (!data.reply) {
-      outputBox.innerHTML += "<br><br>⚠️ No response";
-      return;
-    }
 
     outputBox.innerHTML += `<br><br>${data.reply}`;
 
   } catch (err) {
-    console.error(err);
     outputBox.innerHTML += "<br><br>⚠️ Error loading deep response";
   }
 }
 
-// FIRST CALL
+// 🎯 MAIN FLOW
 getBtn.addEventListener("click", async () => {
+
   const userText = input.value.trim();
   if (!userText) return;
 
-  // 🚫 LIMIT FREE USAGE
+  // 🚫 LIMIT FREE
   if (freeCount >= 2 && !isPaid) {
     outputBox.innerHTML += "<br><br>🔒 Unlock deeper clarity to continue.";
     return;
@@ -218,12 +156,14 @@ getBtn.addEventListener("click", async () => {
 
   const reply = await callAPI();
 
+  // ✅ SAVE COUNT
   freeCount++;
+  localStorage.setItem("freeCount", freeCount);
 
   let warning = "";
 
-  if (freeCount === 2) {
-    document.getElementById("payBtn").style.display = "block";
+  if (freeCount === 2 && !isPaid) {
+    payBtn.style.display = "block";
     warning = "<br><br>⚠️ You are still not seeing the real problem...";
   }
 
@@ -233,7 +173,9 @@ getBtn.addEventListener("click", async () => {
     ${warning}
   `;
 });
-  document.getElementById("payBtn").addEventListener("click", startPayment);
+
+// BUTTON
+payBtn.addEventListener("click", startPayment);
 
 </script>
 
