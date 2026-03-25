@@ -64,12 +64,39 @@ button {
 <button id="getBtn">Get Clarity</button>
 
 <input id="reflectionInput" placeholder="Answer honestly..." />
-<button id="continueBtn">Continue</button>
 
+<button onclick="startPayment()">🔒 Go Deeper (₹19)</button>
 </div>
 
 <script>
+async function startPayment() {
+  const res = await fetch("/api/create-order", {
+    method: "POST"
+  });
 
+  const data = await res.json();
+
+  const options = {
+    key: "YOUR_RAZORPAY_KEY_ID", // 👈 यहाँ अपना key डालो
+    amount: data.amount,
+    currency: "INR",
+    name: "TruthLoop",
+    description: "Unlock Deep Clarity",
+    order_id: data.id,
+
+    handler: async function (response) {
+      // ✅ Payment success → unlock loop
+      await unlockDeepLoop();
+    },
+
+    theme: {
+      color: "#ff5e00"
+    }
+  };
+
+  const rzp = new Razorpay(options);
+  rzp.open();
+  }
 // ELEMENTS
 const input = document.getElementById("mainInput");
 const reflectionInput = document.getElementById("reflectionInput");
@@ -102,7 +129,27 @@ async function callAPI() {
       headers:{ "Content-Type":"application/json" },
       body: JSON.stringify({ messages, loopLevel })
     });
+// 🔓 UNLOCK DEEP LOOP (PAID)
+async function unlockDeepLoop() {
+  const userText = reflectionInput.value.trim();
+  if (!userText) return;
 
+  messages.push({ role: "user", content: userText });
+
+  outputBox.innerHTML += `<br><br><i>Going deeper...</i>`;
+
+  const res = await fetch("/api/chat", {
+    method:"POST",
+    headers:{ "Content-Type":"application/json" },
+    body: JSON.stringify({ messages, loopLevel: 2 })
+  });
+
+  const data = await res.json();
+
+  outputBox.innerHTML += `
+    <br><br>${data.reply}
+  `;
+  }
     if (!res.ok) {
       throw new Error("API failed");
     }
@@ -170,6 +217,6 @@ continueBtn.addEventListener("click", async () => {
 });
 
 </script>
-
+<script src="https://checkout.razorpay.com/v1/checkout.js"></script>
 </body>
 </html>
