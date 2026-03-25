@@ -74,10 +74,14 @@ const getBtn = document.getElementById("getBtn");
 
 let messages = [];
 let loopLevel = 1;
-
+let isPaid = false;
 // 🔥 PAYMENT (FINAL FIXED)
 async function startPayment() {
   try {
+  if (isPaid) {
+  await unlockDeepLoop();
+  return;
+  }
     if (typeof Razorpay === "undefined") {
   alert("Razorpay not loaded ❌");
   return;
@@ -100,8 +104,6 @@ async function startPayment() {
       description: "Unlock Deep Clarity",
       order_id: data.id,
 
-      handler: async function (response) {
-        console.log("✅ Payment success", response);
 
         try {
           await unlockDeepLoop();
@@ -125,7 +127,11 @@ async function startPayment() {
     const rzp = new Razorpay(options);
     rzp.open();
 
-  } catch (err) {
+  } catch (err) {handler: async function () {
+  alert("Payment success ✅");
+  isPaid = true;
+  await unlockDeepLoop();
+  }
     console.error(err);
     alert("Payment failed: " + err.message);
   }
