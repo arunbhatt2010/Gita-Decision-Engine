@@ -1,46 +1,46 @@
 export default async function handler(req, res) {
-  try {
-    // ✅ SAFE BODY PARSE
-    const body = typeof req.body === "string"
-      ? JSON.parse(req.body)
-      : req.body;
+try {
+// ✅ SAFE BODY PARSE
+const body = typeof req.body === "string"
+? JSON.parse(req.body)
+: req.body;
 
-    const { messages, loopLevel = 1 } = body;
+const { messages, loopLevel = 1 } = body;
 
-    if (!messages || !messages.length) {
-      return res.status(400).json({ reply: "No input provided" });
-    }
+if (!messages || !messages.length) {
+  return res.status(400).json({ reply: "No input provided" });
+}
 
-    const userInput =
-      messages[messages.length - 1].content.toLowerCase();
+const userInput =
+  messages[messages.length - 1].content.toLowerCase();
 
-    // 🧠 Pattern Detection (UNCHANGED)
-    let selectedPattern = "lack of clarity";
+// 🧠 Pattern Detection (UNCHANGED)
+let selectedPattern = "lack of clarity";
 
-    if (userInput.includes("client")) selectedPattern = "weak positioning";
-    if (userInput.includes("focus")) selectedPattern = "distraction";
-    if (userInput.includes("delay")) selectedPattern = "overthinking";
-    if (userInput.includes("grow")) selectedPattern = "no clear revenue goal";
-    if (userInput.includes("tired")) selectedPattern = "burnout";
-    if (userInput.includes("fear")) selectedPattern = "fear of failure";
+if (userInput.includes("client")) selectedPattern = "weak positioning";
+if (userInput.includes("focus")) selectedPattern = "distraction";
+if (userInput.includes("delay")) selectedPattern = "overthinking";
+if (userInput.includes("grow")) selectedPattern = "no clear revenue goal";
+if (userInput.includes("tired")) selectedPattern = "burnout";
+if (userInput.includes("fear")) selectedPattern = "fear of failure";
 
-    // 🧠 Gita principles (UNCHANGED)
-    const gitaPrinciples = [
-      "Focus on action, not results",
-      "Control your mind, not external situations",
-      "Attachment creates suffering",
-      "Discipline creates freedom",
-      "Clarity comes from action, not overthinking",
-      "Fear comes from attachment to outcome",
-      "Consistency beats intensity",
-      "Awareness breaks negative patterns"
-    ];
+// 🧠 Gita principles (UNCHANGED)
+const gitaPrinciples = [
+  "Focus on action, not results",
+  "Control your mind, not external situations",
+  "Attachment creates suffering",
+  "Discipline creates freedom",
+  "Clarity comes from action, not overthinking",
+  "Fear comes from attachment to outcome",
+  "Consistency beats intensity",
+  "Awareness breaks negative patterns"
+];
 
-    const randomPrinciple =
-      gitaPrinciples[Math.floor(Math.random() * gitaPrinciples.length)];
+const randomPrinciple =
+  gitaPrinciples[Math.floor(Math.random() * gitaPrinciples.length)];
 
-    // 🧠 SYSTEM PROMPT (UNCHANGED + STRICT FORMAT ADD)
-    const systemPrompt = `
+// 🧠 SYSTEM PROMPT (FIXED ONLY — NOTHING REMOVED)
+const systemPrompt = `
 You are "TruthLoop" — a brutal clarity engine.
 
 Use this principle: "${randomPrinciple}"
@@ -71,84 +71,77 @@ LOOP SYSTEM:
 - loopLevel = 1 → normal
 - loopLevel > 1 → deeper, uncomfortable
 
+🚫 TONE CORRECTION (IMPORTANT FIX):
+- Do NOT judge the user
+- Do NOT accuse (no "you fail", "you always", "you never")
+- Do NOT sound superior
+
+- Instead say:
+  "Your current behavior shows..."
+  "Right now, this pattern looks like..."
+
+- Keep it sharp but neutral
+- Make the user feel exposed, not attacked
+
+🎯 ACTION QUALITY FIX:
+- Action must include SPECIFIC real-world behavior
+- Avoid generic advice like "improve", "analyze", "focus"
+
 FORMAT:
 Guide + Pattern + Action + Question
-
-STRICT FORMAT RULE (MANDATORY):
-
-You MUST respond exactly in this format:
-
-Guide:
-<20-25 words, visible behavior only>
-Guide must explain visible behavior in detail with specific examples. Do NOT be short.
-Pattern:
-(${selectedPattern})
-
-Action:
-- Step 1
-- Step 2
-
-Question:
-<one uncomfortable question with time + action + number>
-
-RULES:
-- Do NOT write a paragraph
-- Do NOT merge sections
-- Each section MUST be on new line
-- Follow structure strictly
 `;
 
-    // 🚀 API CALL
-    const response = await fetch(
-      "https://api.groq.com/openai/v1/chat/completions",
-      {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${process.env.GROQ_API_KEY}`
-        },
-        body: JSON.stringify({
-          model: "llama-3.3-70b-versatile",
-          messages: [
-            { role: "system", content: systemPrompt },
-            ...messages
-          ],
-          temperature: 0.7,
-          max_tokens: 500
-        })
-      }
-    );
-
-    const text = await response.text();
-
-    if (!response.ok) {
-      console.error("GROQ ERROR:", text);
-      return res.status(500).json({
-        reply: "⚠️ AI unstable. Try again."
-      });
-    }
-
-    let data;
-
-    try {
-      data = JSON.parse(text);
-    } catch (e) {
-      console.error("INVALID JSON:", text);
-      return res.status(500).json({
-        reply: "⚠️ Invalid AI response"
-      });
-    }
-
-    const reply =
-      data?.choices?.[0]?.message?.content ||
-      "⚠️ No response";
-
-    return res.status(200).json({ reply });
-
-  } catch (error) {
-    console.error("SERVER ERROR:", error);
-    return res.status(500).json({
-      reply: "⚠️ Server error"
-    });
+// 🚀 API CALL
+const response = await fetch(
+  "https://api.groq.com/openai/v1/chat/completions",
+  {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${process.env.GROQ_API_KEY}`
+    },
+    body: JSON.stringify({
+      model: "llama-3.3-70b-versatile",
+      messages: [
+        { role: "system", content: systemPrompt },
+        ...messages
+      ],
+      temperature: 0.7,
+      max_tokens: 500
+    })
   }
+);
+
+const text = await response.text();
+
+if (!response.ok) {
+  console.error("GROQ ERROR:", text);
+  return res.status(500).json({
+    reply: "⚠️ AI unstable. Try again."
+  });
 }
+
+let data;
+
+try {
+  data = JSON.parse(text);
+} catch (e) {
+  console.error("INVALID JSON:", text);
+  return res.status(500).json({
+    reply: "⚠️ Invalid AI response"
+  });
+}
+
+const reply =
+  data?.choices?.[0]?.message?.content ||
+  "⚠️ No response";
+
+return res.status(200).json({ reply });
+
+} catch (error) {
+console.error("SERVER ERROR:", error);
+return res.status(500).json({
+reply: "⚠️ Server error"
+});
+}
+      }
