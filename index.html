@@ -2,7 +2,7 @@
 <html>
 <head>
 <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-<script src="https://checkout.razorpay.com/v1/checkout.js"></script>
+<script src="https://checkout.razorpay.com/v1/checkout.js" defer></script>
 <title>TruthLoop</title>
 
 <style>
@@ -60,8 +60,8 @@ button {
 <button id="getBtn">Get Clarity</button>
 
 <input id="reflectionInput" placeholder="Answer honestly..." />
-<button id="payBtn">🔒 Go Deeper (₹19)</button>
 
+<button id="payBtn" type="button">🔒 Go Deeper (₹19)</button>
 </div>
 
 <script>
@@ -78,6 +78,10 @@ let loopLevel = 1;
 // 🔥 PAYMENT (FINAL FIXED)
 async function startPayment() {
   try {
+    if (typeof Razorpay === "undefined") {
+  alert("Razorpay not loaded ❌");
+  return;
+    }
     const res = await fetch("/api/create-order", { method: "POST" });
 
     if (!res.ok) throw new Error("Order API failed");
