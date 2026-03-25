@@ -60,6 +60,8 @@ CORE RULES:
 - Identify ONE core problem only
 - The explanation MUST reflect the given pattern
 - Do NOT introduce a new reason outside the pattern
+- The Guide MUST directly reflect the pattern in plain behavior
+- Do NOT use a different psychological explanation than the pattern
 - No "maybe", "could be", "might be"
 - No generic advice
 - Use simple, direct human language
