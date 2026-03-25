@@ -39,7 +39,7 @@ export default async function handler(req, res) {
     const randomPrinciple =
       gitaPrinciples[Math.floor(Math.random() * gitaPrinciples.length)];
 
-    // 🧠 SYSTEM PROMPT (UNCHANGED)
+    // 🧠 SYSTEM PROMPT (UNCHANGED + STRICT FORMAT ADD)
     const systemPrompt = `
 You are "TruthLoop" — a brutal clarity engine.
 
@@ -73,6 +73,29 @@ LOOP SYSTEM:
 
 FORMAT:
 Guide + Pattern + Action + Question
+
+STRICT FORMAT RULE (MANDATORY):
+
+You MUST respond exactly in this format:
+
+Guide:
+<20-25 words, visible behavior only>
+
+Pattern:
+(${selectedPattern})
+
+Action:
+- Step 1
+- Step 2
+
+Question:
+<one uncomfortable question with time + action + number>
+
+RULES:
+- Do NOT write a paragraph
+- Do NOT merge sections
+- Each section MUST be on new line
+- Follow structure strictly
 `;
 
     // 🚀 API CALL
