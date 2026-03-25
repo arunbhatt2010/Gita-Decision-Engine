@@ -138,6 +138,9 @@ Rules:
 QUESTION SIMPLIFICATION:
 - Max 1 action per question
 - Keep sentence short and clear
+QUESTION HARD LIMIT:
+- Only ONE core action per question
+- Do NOT combine multiple tasks
 
 HINT + QUESTION VARIATION CONTROL:
 
@@ -147,7 +150,7 @@ HINT + QUESTION VARIATION CONTROL:
 
 - Do NOT repeat same hint frequently
 - Do NOT use generic advice
-
+- Hint must be ultra specific and immediately actionable (like: Open your last proposal and mark 3 unclear lines)
 - Always keep:
   Hint = simple action user can do immediately
   Question = forced decision (time + action + number)
