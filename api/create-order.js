@@ -14,11 +14,10 @@ module.exports = async function handler(req, res) {
 
     // 🔥 IMPORTANT FIX
     res.status(200).json({
-      id: order.id,
-      amount: order.amount,
-      currency: order.currency,
-      key: process.env.RAZORPAY_KEY_ID
-    });
+  id: order.id,
+  amount: order.amount,
+  key: process.env.RAZORPAY_KEY_ID
+});
 
   } catch (err) {
     console.error(err);
