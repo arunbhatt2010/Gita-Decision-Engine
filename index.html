@@ -205,8 +205,13 @@ getBtn.addEventListener("click", async () => {
   if (!userText) return;
 
   if (freeCount >= 2 && !isPaid) {
-    outputBox.innerHTML += "<br><br>🔒 Unlock deeper clarity to continue.";
-    return;
+  outputBox.innerHTML += `
+  <br><br>
+  ⚠️ You’ve only scratched the surface.<br>
+  The real problem is deeper.<br><br>
+  🔒 Unlock deeper clarity to continue.
+  `;
+  return;
   }
 
   loopLevel = 1;
