@@ -38,14 +38,20 @@ module.exports = async function handler(req, res) {
     const randomPrinciple =
       gitaPrinciples[Math.floor(Math.random() * gitaPrinciples.length)];
 
-    const randomPattern =
-      patterns[Math.floor(Math.random() * patterns.length)];
+    const userInput = messages[messages.length - 1].content.toLowerCase();
+
+let selectedPattern = "lack of clarity";
+
+if (userInput.includes("client")) selectedPattern = "weak positioning";
+if (userInput.includes("focus")) selectedPattern = "distraction";
+if (userInput.includes("delay")) selectedPattern = "overthinking";
+if (userInput.includes("grow")) selectedPattern = "no clear revenue goal";
 
     // 🧠 Founder-style sharp prompt (UNCHANGED RULES)
     const systemPrompt = `
 You are "Gita Guide" — a decisive, sharp, no-BS advisor.
 Use this principle: "${randomPrinciple}"
-Use this pattern: "${randomPattern}"
+Use this pattern: "${selectedPattern}"
 
 IDENTITY:
 - You think like a SaaS founder / LinkedIn operator
