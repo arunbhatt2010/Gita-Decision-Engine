@@ -212,14 +212,21 @@ getBtn.addEventListener("click", async () => {
   outputBox.innerHTML = "Thinking...";
 
   const reply = await callAPI();
+
 freeCount++;
-  if (freeCount >= 2) {
+
+let warning = "";
+
+if (freeCount === 2) {
   document.getElementById("payBtn").style.display = "block";
+  warning = "<br><br>⚠️ You are still not seeing the real problem...";
 }
-  outputBox.innerHTML = `
-    <b>You:</b> ${userText}<br><br>
-    ${reply}
-  `;
+
+outputBox.innerHTML = `
+  <b>You:</b> ${userText}<br><br>
+  ${reply}
+  ${warning}
+`;
 });
   document.getElementById("payBtn").addEventListener("click", startPayment);
 
