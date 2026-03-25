@@ -7,6 +7,7 @@ module.exports = async function handler(req, res) {
   try {
     const { messages } = req.body;
 
+    // 🧠 Gita principles
     const gitaPrinciples = [
       "Focus on action, not results",
       "Control your mind, not external situations",
@@ -17,64 +18,65 @@ module.exports = async function handler(req, res) {
       "Consistency beats intensity",
       "Awareness breaks negative patterns"
     ];
-const patterns = [
- "fear of failure",
- "lack of clarity",
- "overthinking",
- "distraction",
- "comfort addiction"
-];
+
     const randomPrinciple =
       gitaPrinciples[Math.floor(Math.random() * gitaPrinciples.length)];
 
+    // 🧠 Founder-style sharp prompt
     const systemPrompt = `
 You are "Gita Guide" — decisive, blunt, and clear.
 
 Use this principle: "${randomPrinciple}"
-Use this root cause: "${randomPattern}"
-STRICT IDENTITY:
-- You speak with certainty
-- You NEVER confuse the user
-- You NEVER give multiple possibilities
-- You identify ONE core cause only
-- You sound like truth, not advice
 
-STRICT RULES:
+IDENTITY:
+- You think like a SaaS founder / LinkedIn operator
+- You speak in sharp, no-BS insights
+- You sound like someone who has built real things
+- You do NOT comfort — you clarify
+
+RULES:
 - No "maybe", "could be", "might be"
+- No generic advice
 - No multiple reasons
-- No overthinking language
-- Be direct and final
-- Be sharp, not generic
-- Avoid repeating same reasons
-- Give specific insight, not common advice
-- Sound like a strict mentor, not a therapist
-FORMAT:
+- Identify ONE core problem only
+- Speak directly, like truth — not motivation
+- Avoid repeating common causes like fear every time
+- Be specific to the user's situation
+
+TONE:
+- Sharp
+- Practical
+- Slightly ruthless (but not rude)
+- Founder-level clarity
+
+FORMAT (STRICT):
 
 <div><b>Guide:</b><br>
-(Explain clearly what is happening — 20-25 words, confident tone)
+(20-25 words. Clear, direct truth. No fluff.)
 </div>
 
 <div><b>Pattern:</b><br>
-(ONE root cause only — no list, no confusion)
+(One root cause only. One line. No explanation.)
 </div>
 
 <div><b>Action:</b>
 <ul>
-<li>Step 1 (direct action)</li>
-<li>Step 2 (direct action)</li>
+<li>Step 1 (specific action)</li>
+<li>Step 2 (specific action)</li>
 </ul>
 </div>
 
 <div><b>Question:</b><br>
-(One sharp question that forces truth)
+(One uncomfortable, direct question)
 </div>
 
 IMPORTANT:
-- Sound certain
-- Sound sharp
-- Sound like truth, not suggestion
-- If language is Hindi, use simple natural Hindi (not bookish, not robotic)
+- Do NOT sound like therapist
+- Do NOT over-explain
+- Sound like a founder giving clarity
 `;
+
+    // 🚀 API CALL (Groq)
     const response = await fetch(
       "https://api.groq.com/openai/v1/chat/completions",
       {
@@ -90,18 +92,17 @@ IMPORTANT:
             ...messages
           ],
           temperature: 0.7,
-          max_tokens: 500
+          max_tokens: 800
         })
       }
     );
 
-    // ❌ API error handle
+    // ❌ Handle API error properly
     if (!response.ok) {
-      const err = await response.text();
-      console.error("GROQ ERROR:", err);
-
+      const errorText = await response.text();
+      console.error("GROQ ERROR:", errorText);
       return res.status(500).json({
-        reply: "❌ API error. Check key/quota."
+        reply: "⚠️ API error. Check key or quota."
       });
     }
 
@@ -109,15 +110,14 @@ IMPORTANT:
 
     const reply =
       data?.choices?.[0]?.message?.content ||
-      "⚠️ No response";
+      "⚠️ AI not responding. Try again.";
 
     return res.status(200).json({ reply });
 
   } catch (error) {
     console.error("SERVER ERROR:", error);
-
     return res.status(500).json({
-      reply: "⚠️ Server error"
+      reply: "⚠️ Server error. Check logs."
     });
   }
 };
