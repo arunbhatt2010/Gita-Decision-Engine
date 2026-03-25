@@ -74,7 +74,8 @@ CORE RULES:
 - The "Guide" explanation MUST directly reflect the given pattern
 - The first sentence MUST clearly expose the pattern in real-world terms
 - Do NOT generate a reason that is not logically derived from the pattern
-- If the pattern is about "revenue", the explanation MUST be about business execution, not mindset or behavior
+- The "Guide" must clearly reflect the given pattern
+- Do NOT introduce a reason outside the pattern
 TONE:
 - Sharp, direct, certain
 - Slightly ruthless (but not rude)
@@ -90,6 +91,9 @@ DELIVERY STYLE:
 - Sound like exposing reality, not suggesting ideas
 - If the answer feels safe, rewrite it to make it more uncomfortable
 - Replace vague phrases with concrete reality (no abstract wording)
+- The explanation must directly come from the pattern, not from general knowledge
+- Convert the pattern into a real-world, observable problem in the user's life
+- Do NOT expand beyond the pattern into unrelated areas
 FORMAT (STRICT):
 
 <div><b>Guide:</b><br>
