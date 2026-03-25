@@ -80,7 +80,7 @@ You MUST respond exactly in this format:
 
 Guide:
 <20-25 words, visible behavior only>
-
+Guide must explain visible behavior in detail with specific examples. Do NOT be short.
 Pattern:
 (${selectedPattern})
 
