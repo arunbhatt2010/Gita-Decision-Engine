@@ -81,7 +81,9 @@ async function startPayment() {
     order_id: data.id,
 
     handler: async function () {
-      await unlockDeepLoop();
+  console.log("Payment success, unlocking...");
+  await unlockDeepLoop();
+}
     },
 
     theme: {
@@ -158,7 +160,12 @@ async function unlockDeepLoop() {
 
   const data = await res.json();
 
-  outputBox.innerHTML += `<br><br>${data.reply}`;
+if (!data.reply) {
+  outputBox.innerHTML += `<br><br>⚠️ No response from AI`;
+  return;
+}
+
+outputBox.innerHTML += `<br><br>${data.reply}`;
 }
 
 // FIRST CALL
