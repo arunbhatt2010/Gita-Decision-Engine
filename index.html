@@ -76,8 +76,15 @@ const getBtn = document.getElementById("getBtn");
 let messages = [];
 let loopLevel = 1;
 let isPaid = false;
-let freeCount = 0;
+let freeCount = parseInt(localStorage.getItem("freeCount")) || 0;
+const today = new Date().toDateString();
+const lastDate = localStorage.getItem("date");
 
+if (lastDate !== today) {
+  freeCount = 0;
+  localStorage.setItem("date", today);
+  localStorage.setItem("freeCount", 0);
+}
 // 🔥 PAYMENT FIXED
 async function startPayment() {
   try {
@@ -105,13 +112,17 @@ async function startPayment() {
       name: "TruthLoop",
       description: "Unlock Deep Clarity",
       order_id: data.id,
+handler: async function () {
+  alert("Payment success ✅");
 
-      // ✅ FIXED HANDLER
-      handler: async function () {
-        alert("Payment success ✅");
-        isPaid = true;
-        await unlockDeepLoop();
-      },
+  isPaid = true;
+
+  // 🔥 reset free limit
+  localStorage.removeItem("freeCount");
+
+  // 🔓 unlock deep loop
+  await unlockDeepLoop();
+},
 
       theme: {
         color: "#ff5e00"
@@ -201,6 +212,7 @@ getBtn.addEventListener("click", async () => {
   const reply = await callAPI();
 
   freeCount++;
+localStorage.setItem("freeCount", freeCount);
 
   let warning = "";
 
