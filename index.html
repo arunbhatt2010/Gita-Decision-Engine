@@ -6,12 +6,45 @@
 <title>TruthLoop</title>
 
 <style>
-body { background:#0f0f0f; color:#fff; font-family:Arial; margin:0; }
-.container { max-width:500px; margin:auto; padding:15px; }
-h2 { text-align:center; }
-.output { height:45vh; overflow-y:auto; background:#000; padding:15px; border-radius:12px; margin-bottom:10px; }
-input { width:100%; padding:12px; margin-top:8px; border-radius:8px; border:none; }
-button { width:100%; padding:14px; margin-top:10px; background:linear-gradient(45deg, orange, #ff5e00); border:none; border-radius:10px; font-weight:bold; cursor:pointer; }
+body {
+  background:#0f0f0f;
+  color:#fff;
+  font-family:Arial;
+  margin:0;
+}
+.container {
+  max-width:500px;
+  margin:auto;
+  padding:15px;
+}
+h2 {
+  text-align:center;
+}
+.output {
+  height:45vh;
+  overflow-y:auto;
+  background:#000;
+  padding:15px;
+  border-radius:12px;
+  margin-bottom:10px;
+}
+input {
+  width:100%;
+  padding:12px;
+  margin-top:8px;
+  border-radius:8px;
+  border:none;
+}
+button {
+  width:100%;
+  padding:14px;
+  margin-top:10px;
+  background:linear-gradient(45deg, orange, #ff5e00);
+  border:none;
+  border-radius:10px;
+  font-weight:bold;
+  cursor:pointer;
+}
 </style>
 </head>
 
@@ -28,30 +61,24 @@ button { width:100%; padding:14px; margin-top:10px; background:linear-gradient(4
 
 <input id="reflectionInput" placeholder="Answer honestly..." />
 
-<button id="payBtn" style="display:none;">🔒 Unlock Deep Truth (₹19)</button>
-
+<button id="payBtn" style="display:none;">🔒 Go Deeper (₹19)</button>
 </div>
 
 <script>
+console.log("Razorpay check:", typeof Razorpay);
 
 // ELEMENTS
 const input = document.getElementById("mainInput");
 const reflectionInput = document.getElementById("reflectionInput");
 const outputBox = document.getElementById("outputBox");
 const getBtn = document.getElementById("getBtn");
-const payBtn = document.getElementById("payBtn");
 
-// STATE (PERSISTENT)
 let messages = [];
 let loopLevel = 1;
+let isPaid = false;
+let freeCount = 0;
 
-let freeCount = localStorage.getItem("freeCount")
-  ? parseInt(localStorage.getItem("freeCount"))
-  : 0;
-
-let isPaid = localStorage.getItem("isPaid") === "true";
-
-// 🔥 PAYMENT
+// 🔥 PAYMENT FIXED
 async function startPayment() {
   try {
 
@@ -60,7 +87,15 @@ async function startPayment() {
       return;
     }
 
+    if (typeof Razorpay === "undefined") {
+      alert("Razorpay not loaded ❌");
+      return;
+    }
+
     const res = await fetch("/api/create-order", { method: "POST" });
+
+    if (!res.ok) throw new Error("Order API failed");
+
     const data = await res.json();
 
     const options = {
@@ -71,16 +106,16 @@ async function startPayment() {
       description: "Unlock Deep Clarity",
       order_id: data.id,
 
+      // ✅ FIXED HANDLER
       handler: async function () {
         alert("Payment success ✅");
-
         isPaid = true;
-        localStorage.setItem("isPaid", "true");
-
         await unlockDeepLoop();
       },
 
-      theme: { color: "#ff5e00" }
+      theme: {
+        color: "#ff5e00"
+      }
     };
 
     const rzp = new Razorpay(options);
@@ -88,7 +123,7 @@ async function startPayment() {
 
   } catch (err) {
     console.error(err);
-    alert("Payment failed");
+    alert("Payment failed: " + err.message);
   }
 }
 
@@ -101,6 +136,8 @@ async function callAPI() {
       body: JSON.stringify({ messages, loopLevel })
     });
 
+    if (!res.ok) throw new Error("API failed");
+
     const data = await res.json();
 
     messages.push({ role: "assistant", content: data.reply });
@@ -108,15 +145,20 @@ async function callAPI() {
     return data.reply;
 
   } catch (err) {
-    return "⚠️ AI unstable";
+    console.error(err);
+    return "⚠️ AI unstable. Try again.";
   }
 }
 
-// 🔓 DEEP LOOP
+// 🔓 DEEP LOOP FIX (FORMAT)
 async function unlockDeepLoop() {
   try {
     const userText = reflectionInput.value.trim();
-    if (!userText) return;
+
+    if (!userText) {
+      outputBox.innerHTML += "<br><br>⚠️ Enter reflection first";
+      return;
+    }
 
     messages.push({ role: "user", content: userText });
 
@@ -130,20 +172,22 @@ async function unlockDeepLoop() {
 
     const data = await res.json();
 
-    outputBox.innerHTML += `<br><br>${data.reply}`;
+    const formattedReply = data.reply
+      .replace(/\n/g, "<br>");
+
+    outputBox.innerHTML += `<br><br>${formattedReply}`;
 
   } catch (err) {
+    console.error(err);
     outputBox.innerHTML += "<br><br>⚠️ Error loading deep response";
   }
 }
 
-// 🎯 MAIN FLOW
+// FIRST CALL
 getBtn.addEventListener("click", async () => {
-
   const userText = input.value.trim();
   if (!userText) return;
 
-  // 🚫 LIMIT FREE
   if (freeCount >= 2 && !isPaid) {
     outputBox.innerHTML += "<br><br>🔒 Unlock deeper clarity to continue.";
     return;
@@ -156,26 +200,26 @@ getBtn.addEventListener("click", async () => {
 
   const reply = await callAPI();
 
-  // ✅ SAVE COUNT
   freeCount++;
-  localStorage.setItem("freeCount", freeCount);
 
   let warning = "";
 
-  if (freeCount === 2 && !isPaid) {
-    payBtn.style.display = "block";
+  if (freeCount === 2) {
+    document.getElementById("payBtn").style.display = "block";
     warning = "<br><br>⚠️ You are still not seeing the real problem...";
   }
 
+  // ✅ FORMAT FIX
+  const formattedReply = reply.replace(/\n/g, "<br>");
+
   outputBox.innerHTML = `
     <b>You:</b> ${userText}<br><br>
-    ${reply}
+    ${formattedReply}
     ${warning}
   `;
 });
 
-// BUTTON
-payBtn.addEventListener("click", startPayment);
+document.getElementById("payBtn").addEventListener("click", startPayment);
 
 </script>
 
