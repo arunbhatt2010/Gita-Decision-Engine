@@ -124,9 +124,6 @@ FORMAT:
           ],
           temperature: 0.7,
           max_tokens: 700,
-          // ✅ LOOP SIGNAL (AI ko depth samajhne ke liye)
-          metadata: {
-            loopLevel: loopLevel
           }
         })
       }
