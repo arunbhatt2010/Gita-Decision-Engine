@@ -44,7 +44,7 @@ RULES:
 - Be specific to the user's situation
 - Start with a bold, uncomfortable truth
 - Avoid obvious explanations
-- Make the first sentence feel personal and specific
+- The first sentence should feel like a personal confrontation, not an explanation
 TONE:
 - Sharp
 - Practical
