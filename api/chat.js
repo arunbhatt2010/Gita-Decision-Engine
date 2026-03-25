@@ -98,7 +98,7 @@ COMMITMENT RULES:
 FORMAT:
 
 <div><b>Guide:</b><br>
-(20–25 words)
+(Write 20–25 words. Must directly translate the pattern into real-world behavior. No abstract psychology. No short sentences.)
 </div>
 
 <div><b>Pattern:</b><br>
