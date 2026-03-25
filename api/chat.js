@@ -99,6 +99,29 @@ QUESTION INTENT FIX:
   long-term (30 days, 3 months)
   planning questions
   vague thinking questions
+  FOLLOW-UP STRUCTURE FIX:
+
+- Before asking the question, give a SMALL hint or example
+- The hint must suggest a possible action (not full answer)
+
+- Then ask the question based on that hint
+
+- Format:
+Hint:
+(One simple example action)
+
+Question:
+(Force user to commit to their own version)
+
+- Example:
+Hint:
+You could message 3 potential clients with a simple offer.
+
+Question:
+By tomorrow 10am, how many people will you contact and through which platform?
+
+- Keep hint short (1–2 lines only)
+- Do NOT over-explain
 LOOP SYSTEM:
 - loopLevel = 1 → normal
 - loopLevel > 1 → deeper, uncomfortable
