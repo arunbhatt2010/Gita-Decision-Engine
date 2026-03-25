@@ -67,34 +67,6 @@ button {
 
 <script>
 
-// 🔥 PAYMENT FIXED
-async function startPayment() {
-  const res = await fetch("/api/create-order", { method: "POST" });
-  const data = await res.json();
-
-  const options = {
-    key: data.key, // backend se aa raha hai
-    amount: data.amount,
-    currency: "INR",
-    name: "TruthLoop",
-    description: "Unlock Deep Clarity",
-    order_id: data.id,
-
-    handler: async function () {
-  console.log("Payment success, unlocking...");
-  await unlockDeepLoop();
-}
-    },
-
-    theme: {
-      color: "#ff5e00"
-    }
-  };
-
-  const rzp = new Razorpay(options);
-  rzp.open();
-}
-
 // ELEMENTS
 const input = document.getElementById("mainInput");
 const reflectionInput = document.getElementById("reflectionInput");
@@ -104,21 +76,47 @@ const getBtn = document.getElementById("getBtn");
 let messages = [];
 let loopLevel = 1;
 
-// VALIDATION
-function isValidCommitment(text) {
-  return (
-    text.length > 20 &&
-    (text.match(/\d/) || text.toLowerCase().includes("am") || text.toLowerCase().includes("pm")) &&
-    (text.includes("build") ||
-     text.includes("create") ||
-     text.includes("finish") ||
-     text.includes("complete") ||
-     text.includes("write") ||
-     text.includes("design"))
-  );
+// 🔥 PAYMENT (SAFE VERSION)
+async function startPayment() {
+  try {
+    const res = await fetch("/api/create-order", { method: "POST" });
+
+    if (!res.ok) throw new Error("Order API failed");
+
+    const data = await res.json();
+
+    if (!data.id || !data.key) {
+      throw new Error("Invalid order data");
+    }
+
+    const options = {
+      key: data.key,
+      amount: data.amount,
+      currency: "INR",
+      name: "TruthLoop",
+      description: "Unlock Deep Clarity",
+      order_id: data.id,
+
+      handler: async function () {
+        console.log("Payment success");
+        await unlockDeepLoop();
+      },
+
+      theme: {
+        color: "#ff5e00"
+      }
+    };
+
+    const rzp = new Razorpay(options);
+    rzp.open();
+
+  } catch (err) {
+    console.error(err);
+    alert("Payment failed: " + err.message);
+  }
 }
 
-// ✅ FIXED API FUNCTION
+// ✅ API CALL (STABLE)
 async function callAPI() {
   try {
     const res = await fetch("/api/chat", {
@@ -143,29 +141,38 @@ async function callAPI() {
   }
 }
 
-// 🔓 DEEP LOOP FIXED (separate function)
+// 🔓 DEEP LOOP (SAFE)
 async function unlockDeepLoop() {
-  const userText = reflectionInput.value.trim();
-  if (!userText) return;
+  try {
+    const userText = reflectionInput.value.trim();
 
-  messages.push({ role: "user", content: userText });
+    if (!userText) {
+      outputBox.innerHTML += "<br><br>⚠️ Enter reflection first";
+      return;
+    }
 
-  outputBox.innerHTML += `<br><br><i>Going deeper...</i>`;
+    messages.push({ role: "user", content: userText });
 
-  const res = await fetch("/api/chat", {
-    method:"POST",
-    headers:{ "Content-Type":"application/json" },
-    body: JSON.stringify({ messages, loopLevel: 2 })
-  });
+    outputBox.innerHTML += "<br><br><i>Going deeper...</i>";
 
-  const data = await res.json();
+    const res = await fetch("/api/chat", {
+      method:"POST",
+      headers:{ "Content-Type":"application/json" },
+      body: JSON.stringify({ messages, loopLevel: 2 })
+    });
 
-if (!data.reply) {
-  outputBox.innerHTML += `<br><br>⚠️ No response from AI`;
-  return;
-}
+    if (!res.ok) throw new Error("Deep API failed");
 
-outputBox.innerHTML += `<br><br>${data.reply}`;
+    const data = await res.json();
+
+    if (!data.reply) throw new Error("No reply");
+
+    outputBox.innerHTML += `<br><br>${data.reply}`;
+
+  } catch (err) {
+    console.error(err);
+    outputBox.innerHTML += "<br><br>⚠️ Error loading deep response";
+  }
 }
 
 // FIRST CALL
@@ -188,5 +195,6 @@ getBtn.addEventListener("click", async () => {
 });
 
 </script>
+
 </body>
-  </html>
+</html>
