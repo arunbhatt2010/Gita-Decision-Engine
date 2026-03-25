@@ -1,3 +1,6 @@
+export const config = {
+  runtime: "nodejs"
+};
 const Razorpay = require("razorpay");
 
 const instance = new Razorpay({
