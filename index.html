@@ -11,26 +11,34 @@ body {
   font-family:Arial;
   margin:0;
 }
+
 .container {
   max-width:500px;
   margin:auto;
   padding:15px;
 }
-.chat-box {
-  height:50vh;
+
+h2 {
+  text-align:center;
+}
+
+.output {
+  height:45vh;
   overflow-y:auto;
   background:#000;
   padding:15px;
   border-radius:12px;
   margin-bottom:10px;
 }
-input, textarea {
+
+input {
   width:100%;
   padding:12px;
   margin-top:8px;
   border-radius:8px;
   border:none;
 }
+
 button {
   width:100%;
   padding:14px;
@@ -39,8 +47,8 @@ button {
   border:none;
   border-radius:10px;
   font-weight:bold;
+  cursor:pointer;
 }
-.hidden { display:none; }
 </style>
 </head>
 
@@ -50,82 +58,106 @@ button {
 
 <h2>TruthLoop</h2>
 
-<div id="chat" class="chat-box"></div>
+<!-- OUTPUT -->
+<div id="outputBox" class="output"></div>
 
-<input id="input" placeholder="What's really bothering you..." />
+<!-- USER INPUT -->
+<input id="mainInput" placeholder="What's really bothering you..." />
+<button id="getBtn">Get Clarity</button>
 
-<button onclick="send()">Get Clarity</button>
-
-<textarea id="reflection" class="hidden" placeholder="Answer honestly..."></textarea>
-<button id="reflectBtn" class="hidden" onclick="nextStep()">Continue</button>
-
-<textarea id="action" class="hidden" placeholder="What will you do in next 24 hours?"></textarea>
-<button id="actionBtn" class="hidden" onclick="saveAction()">Commit Action</button>
+<!-- REFLECTION -->
+<input id="reflectionInput" placeholder="Answer honestly..." />
+<button id="continueBtn">Continue</button>
 
 </div>
 
 <script>
 
-let lastPattern = "";
-let repeatCount = 0;
+// 🔹 ELEMENTS
+const input = document.getElementById("mainInput");
+const reflectionInput = document.getElementById("reflectionInput");
+const outputBox = document.getElementById("outputBox");
+const getBtn = document.getElementById("getBtn");
+const continueBtn = document.getElementById("continueBtn");
 
-async function send(){
+let messages = [];
+let loopLevel = 1;
 
-  const input = document.getElementById("input").value;
-  const chat = document.getElementById("chat");
+// 🔥 VALIDATION
+function isValidCommitment(text) {
+  return (
+    text.length > 20 &&
+    (text.match(/\d/) || text.toLowerCase().includes("am") || text.toLowerCase().includes("pm")) &&
+    (text.includes("build") ||
+     text.includes("create") ||
+     text.includes("finish") ||
+     text.includes("complete") ||
+     text.includes("write") ||
+     text.includes("design"))
+  );
+}
 
-  if(!input) return;
+// 🚀 FIRST CALL
+getBtn.addEventListener("click", async () => {
 
-  chat.innerHTML += `<div><b>You:</b> ${input}</div>`;
-  chat.innerHTML += `<div>Thinking...</div>`;
+  const userText = input.value.trim();
+  if (!userText) return;
+
+  loopLevel = 1;
+  messages = [{ role: "user", content: userText }];
+
+  outputBox.innerHTML = "Thinking...";
 
   const res = await fetch("/api/chat", {
     method:"POST",
     headers:{ "Content-Type":"application/json" },
-    body: JSON.stringify({
-      messages:[{ role:"user", content:input }]
-    })
+    body: JSON.stringify({ messages, loopLevel })
   });
 
   const data = await res.json();
 
-  chat.innerHTML += `<div>${data.reply}</div>`;
+  messages.push({ role: "assistant", content: data.reply });
 
-  // Show reflection lock
-  document.getElementById("reflection").classList.remove("hidden");
-  document.getElementById("reflectBtn").classList.remove("hidden");
-}
+  outputBox.innerHTML = `
+    <b>You:</b> ${userText}<br><br>
+    ${data.reply}
+  `;
+});
 
-function nextStep(){
+// 🔁 CONTINUE LOOP
+continueBtn.addEventListener("click", async () => {
 
-  const reflection = document.getElementById("reflection").value;
-  const chat = document.getElementById("chat");
+  const userText = reflectionInput.value.trim();
+  if (!userText) return;
 
-  if(!reflection){
-    alert("You skipped the hard part.");
+  if (!isValidCommitment(userText)) {
+    outputBox.innerHTML += `
+      <br><br><span style="color:red;">Too vague. Be specific with time + action.</span>
+    `;
     return;
   }
 
-  chat.innerHTML += `<div><b>You (Reflection):</b> ${reflection}</div>`;
+  loopLevel++;
 
-  document.getElementById("action").classList.remove("hidden");
-  document.getElementById("actionBtn").classList.remove("hidden");
-}
+  messages.push({ role: "user", content: userText });
 
-function saveAction(){
+  outputBox.innerHTML += `<br><br><i>Going deeper...</i>`;
 
-  const action = document.getElementById("action").value;
-  const chat = document.getElementById("chat");
+  const res = await fetch("/api/chat", {
+    method:"POST",
+    headers:{ "Content-Type":"application/json" },
+    body: JSON.stringify({ messages, loopLevel })
+  });
 
-  if(!action){
-    alert("No action = no change.");
-    return;
-  }
+  const data = await res.json();
 
-  chat.innerHTML += `<div><b>Committed Action:</b> ${action}</div>`;
-  chat.innerHTML += `<div>Clarity done. Execution pending.</div>`;
+  messages.push({ role: "assistant", content: data.reply });
 
-}
+  outputBox.innerHTML += `
+    <br><br><b>You (Reflection):</b> ${userText}<br><br>
+    ${data.reply}
+  `;
+});
 
 </script>
 
