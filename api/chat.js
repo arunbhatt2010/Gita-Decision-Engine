@@ -5,13 +5,21 @@ module.exports = async function handler(req, res) {
   }
 
   try {
-    // ✅ LOOP LEVEL ADDED
-    const { messages, loopLevel = 1 } = req.body;
+    // ✅ SAFE BODY PARSE (FIX)
+    const body = typeof req.body === "string"
+      ? JSON.parse(req.body)
+      : req.body;
+
+    const { messages, loopLevel = 1 } = body;
+
+    if (!messages || !messages.length) {
+      return res.status(400).json({ reply: "No input provided" });
+    }
 
     const userInput =
       messages[messages.length - 1].content.toLowerCase();
 
-    // 🧠 Pattern Detection (SMART, NOT RANDOM)
+    // 🧠 Pattern Detection (UNCHANGED)
     let selectedPattern = "lack of clarity";
 
     if (userInput.includes("client")) selectedPattern = "weak positioning";
@@ -21,7 +29,7 @@ module.exports = async function handler(req, res) {
     if (userInput.includes("tired")) selectedPattern = "burnout";
     if (userInput.includes("fear")) selectedPattern = "fear of failure";
 
-    // 🧠 Gita principles
+    // 🧠 Gita principles (UNCHANGED)
     const gitaPrinciples = [
       "Focus on action, not results",
       "Control your mind, not external situations",
@@ -36,7 +44,7 @@ module.exports = async function handler(req, res) {
     const randomPrinciple =
       gitaPrinciples[Math.floor(Math.random() * gitaPrinciples.length)];
 
-    // 🧠 SYSTEM PROMPT (TruthLoop v2)
+    // 🧠 SYSTEM PROMPT (UNCHANGED)
     const systemPrompt = `
 You are "TruthLoop" — a brutal clarity engine.
 
@@ -77,13 +85,13 @@ LOOP SYSTEM:
 - Do NOT repeat the same explanation
 
 COMMITMENT RULES:
-- Reject vague commitments (e.g. "I will work", "I will try")
+- Reject vague commitments
 - Force user to define:
   1. Exact time
   2. Exact action
   3. Measurable outcome
-- If vague → respond ONLY: "Too vague. Be specific."
-- If strong → respond ONLY: "Accepted. I’ll hold you accountable."
+- If vague → "Too vague. Be specific."
+- If strong → "Accepted. I’ll hold you accountable."
 
 FORMAT:
 
@@ -107,7 +115,7 @@ FORMAT:
 </div>
 `;
 
-    // 🚀 GROQ API CALL
+    // 🚀 API CALL (FIXED SAFE VERSION)
     const response = await fetch(
       "https://api.groq.com/openai/v1/chat/completions",
       {
@@ -123,23 +131,33 @@ FORMAT:
             ...messages
           ],
           temperature: 0.7,
-          max_tokens: 700,
-          }
+          max_tokens: 500
         })
       }
     );
 
+    // ✅ SAFE ERROR HANDLING
+    const text = await response.text();
+
     if (!response.ok) {
-      const err = await response.text();
-      console.error("API ERROR:", err);
+      console.error("GROQ ERROR:", text);
       return res.status(500).json({
         reply: "⚠️ AI unstable. Try again."
       });
     }
 
-    const data = await response.json();
+    let data;
 
-    let reply =
+    try {
+      data = JSON.parse(text);
+    } catch (e) {
+      console.error("INVALID JSON:", text);
+      return res.status(500).json({
+        reply: "⚠️ Invalid AI response"
+      });
+    }
+
+    const reply =
       data?.choices?.[0]?.message?.content ||
       "⚠️ No response";
 
