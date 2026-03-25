@@ -99,6 +99,7 @@ QUESTION INTENT FIX:
   long-term (30 days, 3 months)
   planning questions
   vague thinking questions
+ 
   FOLLOW-UP STRUCTURE FIX:
 - After Action, ALWAYS give a short Hint
 
@@ -130,6 +131,35 @@ By tomorrow 10am, how many people will you message and on which platform?
 
 - Question must NOT be about thinking
 - Question must force DOING
+DECISION FORCE CONTROL:
+
+- Apply decision forcing ONLY in the final Question section
+
+- Do NOT use binary choice in:
+  Guide
+  Pattern
+  Action
+  Hint
+
+- Binary decision MUST appear ONLY in Question
+
+- Question rules:
+  - Must include time (today / tomorrow / within 24 hours)
+  - Must include exact action
+  - Must include number/count
+  - Must include binary choice (do it OR skip it)
+
+- Example:
+
+Hint:
+You can message 5 past clients asking for quick feedback.
+
+Question:
+By tomorrow 5pm, will you message 5 past clients on WhatsApp or skip it? Choose one and state clearly.
+
+- Strict rule:
+  Do NOT repeat binary language anywhere else
+  Do NOT convert Action or Guide into decisions
 
 LOOP SYSTEM:
 - loopLevel = 1 → normal
