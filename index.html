@@ -2,7 +2,7 @@
 <html>
 <head>
 <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
+<script src="https://checkout.razorpay.com/v1/checkout.js"></script>
 <title>TruthLoop</title>
 
 <style>
@@ -12,17 +12,14 @@ body {
   font-family:Arial;
   margin:0;
 }
-
 .container {
   max-width:500px;
   margin:auto;
   padding:15px;
 }
-
 h2 {
   text-align:center;
 }
-
 .output {
   height:45vh;
   overflow-y:auto;
@@ -31,7 +28,6 @@ h2 {
   border-radius:12px;
   margin-bottom:10px;
 }
-
 input {
   width:100%;
   padding:12px;
@@ -39,7 +35,6 @@ input {
   border-radius:8px;
   border:none;
 }
-
 button {
   width:100%;
   padding:14px;
@@ -67,35 +62,25 @@ button {
 <input id="reflectionInput" placeholder="Answer honestly..." />
 
 <button onclick="startPayment()">🔒 Go Deeper (₹19)</button>
+
 </div>
 
 <script>
-async function startPayment() {
-  const res = await fetch("/api/create-order", {
-    method: "POST"
-  });
 
+// 🔥 PAYMENT FIXED
+async function startPayment() {
+  const res = await fetch("/api/create-order", { method: "POST" });
   const data = await res.json();
 
   const options = {
-  key: data.key,  // 🔥 यही fix है
-  amount: data.amount,
-  currency: "INR",
-  name: "TruthLoop",
-  description: "Unlock Deep Clarity",
-  order_id: data.id,
+    key: data.key, // backend se aa raha hai
+    amount: data.amount,
+    currency: "INR",
+    name: "TruthLoop",
+    description: "Unlock Deep Clarity",
+    order_id: data.id,
 
-  handler: async function (response) {
-    await unlockDeepLoop();
-  },
-
-  theme: {
-    color: "#ff5e00"
-  }
-};
-
-    handler: async function (response) {
-      // ✅ Payment success → unlock loop
+    handler: async function () {
       await unlockDeepLoop();
     },
 
@@ -106,13 +91,13 @@ async function startPayment() {
 
   const rzp = new Razorpay(options);
   rzp.open();
-  }
+}
+
 // ELEMENTS
 const input = document.getElementById("mainInput");
 const reflectionInput = document.getElementById("reflectionInput");
 const outputBox = document.getElementById("outputBox");
 const getBtn = document.getElementById("getBtn");
-const continueBtn = document.getElementById("continueBtn");
 
 let messages = [];
 let loopLevel = 1;
@@ -131,7 +116,7 @@ function isValidCommitment(text) {
   );
 }
 
-// COMMON API CALL (🔥 FIX)
+// ✅ FIXED API FUNCTION
 async function callAPI() {
   try {
     const res = await fetch("/api/chat", {
@@ -139,7 +124,24 @@ async function callAPI() {
       headers:{ "Content-Type":"application/json" },
       body: JSON.stringify({ messages, loopLevel })
     });
-// 🔓 UNLOCK DEEP LOOP (PAID)
+
+    if (!res.ok) throw new Error("API failed");
+
+    const data = await res.json();
+
+    if (!data.reply) throw new Error("Empty response");
+
+    messages.push({ role: "assistant", content: data.reply });
+
+    return data.reply;
+
+  } catch (err) {
+    console.error(err);
+    return "⚠️ AI unstable. Try again.";
+  }
+}
+
+// 🔓 DEEP LOOP FIXED (separate function)
 async function unlockDeepLoop() {
   const userText = reflectionInput.value.trim();
   if (!userText) return;
@@ -156,28 +158,7 @@ async function unlockDeepLoop() {
 
   const data = await res.json();
 
-  outputBox.innerHTML += `
-    <br><br>${data.reply}
-  `;
-  }
-    if (!res.ok) {
-      throw new Error("API failed");
-    }
-
-    const data = await res.json();
-
-    if (!data.reply) {
-      throw new Error("Empty response");
-    }
-
-    messages.push({ role: "assistant", content: data.reply });
-
-    return data.reply;
-
-  } catch (err) {
-    console.error(err);
-    return "⚠️ AI unstable. Try again.";
-  }
+  outputBox.innerHTML += `<br><br>${data.reply}`;
 }
 
 // FIRST CALL
@@ -199,33 +180,6 @@ getBtn.addEventListener("click", async () => {
   `;
 });
 
-// CONTINUE LOOP
-continueBtn.addEventListener("click", async () => {
-
-  const userText = reflectionInput.value.trim();
-  if (!userText) return;
-
-  if (!isValidCommitment(userText)) {
-    outputBox.innerHTML += `
-      <br><br><span style="color:red;">Too vague. Be specific with time + action.</span>
-    `;
-    return;
-  }
-
-  loopLevel++;
-
-  messages.push({ role: "user", content: userText });
-
-  outputBox.innerHTML += `<br><br><i>Going deeper...</i>`;
-
-  const reply = await callAPI();
-
-  outputBox.innerHTML += `
-    <br><br><b>You (Reflection):</b> ${userText}<br><br>
-    ${reply}
-  `;
-});
-
 </script>
 </body>
-</html>
+  </html>
