@@ -61,7 +61,7 @@ button {
 
 <input id="reflectionInput" placeholder="Answer honestly..." />
 
-<button id="payBtn" type="button">🔒 Go Deeper (₹19)</button>
+<button id="payBtn" style="display:none;">🔒 Unlock Deep Truth (₹19)</button>
 </div>
 
 <script>
@@ -75,6 +75,7 @@ const getBtn = document.getElementById("getBtn");
 let messages = [];
 let loopLevel = 1;
 let isPaid = false;
+  let freeCount = 0;
 // 🔥 PAYMENT (FINAL FIXED)
 async function startPayment() {
   try {
@@ -211,7 +212,10 @@ getBtn.addEventListener("click", async () => {
   outputBox.innerHTML = "Thinking...";
 
   const reply = await callAPI();
-
+freeCount++;
+  if (freeCount >= 2) {
+  document.getElementById("payBtn").style.display = "block";
+}
   outputBox.innerHTML = `
     <b>You:</b> ${userText}<br><br>
     ${reply}
