@@ -61,7 +61,7 @@ button {
 
 <input id="reflectionInput" placeholder="Answer honestly..." />
 
-<button id="payBtn" style="display:none;">🔒 Go Deeper (₹19)</button>
+<button id="payBtn" style="display:none;">👉 Reveal The Real Problem (₹19)</button>
 </div>
 
 <script>
@@ -207,11 +207,17 @@ getBtn.addEventListener("click", async () => {
   // 🚫 LIMIT CHECK (BEFORE API CALL)
   if (freeCount >= 2 && !isPaid) {
     outputBox.innerHTML += `
-    <br><br>
-    ⚠️ You’ve only scratched the surface.<br>
-    The real problem is deeper.<br><br>
-    🔒 Unlock deeper clarity to continue.
-    `;
+<br><br>
+⚠️ You’ve only scratched the surface.<br><br>
+
+Right now, you're seeing the obvious layer…<br>
+but the real reason is still hidden.<br><br>
+
+Most people stop here —<br>
+and keep repeating the same problem again and again.<br><br>
+
+🔒 Unlock deeper clarity to see what you're missing.
+`;
     return;
   }
 
