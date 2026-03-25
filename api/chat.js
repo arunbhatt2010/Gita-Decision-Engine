@@ -5,7 +5,8 @@ module.exports = async function handler(req, res) {
   }
 
   try {
-    const { messages } = req.body;
+    // ✅ LOOP LEVEL ADDED
+    const { messages, loopLevel = 1 } = req.body;
 
     const userInput =
       messages[messages.length - 1].content.toLowerCase();
@@ -35,7 +36,7 @@ module.exports = async function handler(req, res) {
     const randomPrinciple =
       gitaPrinciples[Math.floor(Math.random() * gitaPrinciples.length)];
 
-    // 🧠 SYSTEM PROMPT (TruthLoop)
+    // 🧠 SYSTEM PROMPT (TruthLoop v2)
     const systemPrompt = `
 You are "TruthLoop" — a brutal clarity engine.
 
@@ -67,6 +68,22 @@ DELIVERY STYLE:
 - Maintain intensity throughout
 - Convert the pattern into real-life behavior
 - Do NOT drift away from the pattern
+- If the answer feels safe, make it more uncomfortable
+
+LOOP SYSTEM:
+- loopLevel = 1 → initial clarity
+- loopLevel > 1 → deeper, more uncomfortable truth
+- Each loop must go deeper than previous
+- Do NOT repeat the same explanation
+
+COMMITMENT RULES:
+- Reject vague commitments (e.g. "I will work", "I will try")
+- Force user to define:
+  1. Exact time
+  2. Exact action
+  3. Measurable outcome
+- If vague → respond ONLY: "Too vague. Be specific."
+- If strong → respond ONLY: "Accepted. I’ll hold you accountable."
 
 FORMAT:
 
@@ -106,7 +123,11 @@ FORMAT:
             ...messages
           ],
           temperature: 0.7,
-          max_tokens: 700
+          max_tokens: 700,
+          // ✅ LOOP SIGNAL (AI ko depth samajhne ke liye)
+          metadata: {
+            loopLevel: loopLevel
+          }
         })
       }
     );
