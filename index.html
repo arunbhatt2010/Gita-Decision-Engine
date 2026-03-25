@@ -202,9 +202,14 @@ async function unlockDeepLoop() {
 
 // FIRST CALL
 getBtn.addEventListener("click", async () => {
-
   const userText = input.value.trim();
   if (!userText) return;
+
+  // 🚫 LIMIT FREE USAGE
+  if (freeCount >= 2 && !isPaid) {
+    outputBox.innerHTML += "<br><br>🔒 Unlock deeper clarity to continue.";
+    return;
+  }
 
   loopLevel = 1;
   messages = [{ role: "user", content: userText }];
@@ -213,20 +218,20 @@ getBtn.addEventListener("click", async () => {
 
   const reply = await callAPI();
 
-freeCount++;
+  freeCount++;
 
-let warning = "";
+  let warning = "";
 
-if (freeCount === 2) {
-  document.getElementById("payBtn").style.display = "block";
-  warning = "<br><br>⚠️ You are still not seeing the real problem...";
-}
+  if (freeCount === 2) {
+    document.getElementById("payBtn").style.display = "block";
+    warning = "<br><br>⚠️ You are still not seeing the real problem...";
+  }
 
-outputBox.innerHTML = `
-  <b>You:</b> ${userText}<br><br>
-  ${reply}
-  ${warning}
-`;
+  outputBox.innerHTML = `
+    <b>You:</b> ${userText}<br><br>
+    ${reply}
+    ${warning}
+  `;
 });
   document.getElementById("payBtn").addEventListener("click", startPayment);
 
