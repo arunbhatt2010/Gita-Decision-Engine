@@ -206,22 +206,26 @@ getBtn.addEventListener("click", async () => {
 
   // 🚫 LIMIT CHECK (BEFORE API CALL)
   if (freeCount >= 2 && !isPaid) {
-    outputBox.innerHTML += `
-<br><br>
-⚠️ You’ve only scratched the surface.<br><br>
+  outputBox.innerHTML += `
+  <br><br>
+  ⚠️ You’ve only scratched the surface.<br><br>
 
-Right now, you're seeing the obvious layer…<br>
-but the real reason is still hidden.<br><br>
+  Right now, you're seeing the obvious layer…<br>
+  but the real reason is still hidden.<br><br>
 
-Most people stop here —<br>
-and keep repeating the same problem again and again.<br><br>
+  Most people stop here —<br>
+  and keep repeating the same problem again and again.<br><br>
 
-🔒 Unlock deeper clarity to see what you're missing.
-// 🔥 BUTTON FORCE SHOW
-  document.getElementById("payBtn").style.display = "block";
-  
-    return;
+  🔒 Unlock deeper clarity to see what you're missing.
+  `;
+
+  const payBtn = document.getElementById("payBtn");
+  if (payBtn) {
+    payBtn.style.display = "block";
   }
+
+  return;
+                            }
 
   loopLevel = 1;
   messages = [{ role: "user", content: userText }];
