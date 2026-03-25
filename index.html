@@ -76,7 +76,7 @@ const getBtn = document.getElementById("getBtn");
 let messages = [];
 let loopLevel = 1;
 
-// 🔥 PAYMENT (SAFE VERSION)
+// 🔥 PAYMENT (FINAL FIXED)
 async function startPayment() {
   try {
     const res = await fetch("/api/create-order", { method: "POST" });
@@ -97,9 +97,21 @@ async function startPayment() {
       description: "Unlock Deep Clarity",
       order_id: data.id,
 
-      handler: async function () {
-        console.log("Payment success");
-        await unlockDeepLoop();
+      handler: async function (response) {
+        console.log("✅ Payment success", response);
+
+        try {
+          await unlockDeepLoop();
+        } catch (e) {
+          console.error("Unlock error:", e);
+          alert("Payment done but unlock failed");
+        }
+      },
+
+      modal: {
+        ondismiss: function () {
+          console.log("❌ Payment popup closed");
+        }
       },
 
       theme: {
@@ -141,7 +153,7 @@ async function callAPI() {
   }
 }
 
-// 🔓 DEEP LOOP (SAFE)
+// 🔓 DEEP LOOP (FINAL SAFE)
 async function unlockDeepLoop() {
   try {
     const userText = reflectionInput.value.trim();
@@ -165,7 +177,10 @@ async function unlockDeepLoop() {
 
     const data = await res.json();
 
-    if (!data.reply) throw new Error("No reply");
+    if (!data.reply) {
+      outputBox.innerHTML += "<br><br>⚠️ No response";
+      return;
+    }
 
     outputBox.innerHTML += `<br><br>${data.reply}`;
 
@@ -197,4 +212,4 @@ getBtn.addEventListener("click", async () => {
 </script>
 
 </body>
-</html>
+  </html>
