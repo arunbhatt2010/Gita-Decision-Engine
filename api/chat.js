@@ -1,12 +1,32 @@
 export default async function handler(req, res) {
+
+  // ✅ CORS fix
+  res.setHeader("Access-Control-Allow-Origin", "*");
+  res.setHeader("Access-Control-Allow-Methods", "POST, OPTIONS");
+  res.setHeader("Access-Control-Allow-Headers", "Content-Type");
+
+  // ✅ Handle preflight
+  if (req.method === "OPTIONS") {
+    return res.status(200).end();
+  }
+
+  if (req.method !== "POST") {
+    return res.status(405).json({ reply: "Method not allowed" });
+  }
+
   try {
 
     const body = typeof req.body === "string"
       ? JSON.parse(req.body)
       : req.body;
 
-    // ✅ ONLY THIS LINE UPDATED
-    const { messages, loopLevel = 1, userGoal = "", userProblem = "", userAction = "" } = body;
+    const {
+      messages,
+      loopLevel = 1,
+      userGoal = "",
+      userProblem = "",
+      userAction = ""
+    } = body;
 
     if (!messages || !messages.length) {
       return res.status(400).json({ reply: "No input provided" });
@@ -185,9 +205,8 @@ Drive toward commitment
     );
 
     if (!response.ok) {
-      return res.status(500).json({
-        reply: "API error"
-      });
+      console.error("Groq API error:", await response.text());
+      return res.status(500).json({ reply: "API error" });
     }
 
     const data = await response.json();
@@ -199,8 +218,9 @@ Drive toward commitment
     return res.status(200).json({ reply });
 
   } catch (error) {
+    console.error("Server error:", error);
     return res.status(500).json({
       reply: "Server error"
     });
   }
-}
+      }
