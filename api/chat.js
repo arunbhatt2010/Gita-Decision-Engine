@@ -147,7 +147,14 @@ Loop 3 (90):
 - Increase tension
 - DO NOT give solution
 - DO NOT give clear steps
+Guide:
+<deep uncomfortable truth + hidden pattern + emotional reason>
 
+Pattern:
+(${selectedPattern})
+
+Question:
+<forced decision that pushes deeper commitment>
 Loop 4 (100):
 - Give full clarity
 - Give ONE exact step
