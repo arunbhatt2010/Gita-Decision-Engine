@@ -5,7 +5,7 @@ export default async function handler(req, res) {
       ? JSON.parse(req.body)
       : req.body;
 
-    const { messages } = body;
+    const { messages, loopLevel = 1 } = body; // ✅ FIXED
 
     if (!messages || !messages.length) {
       return res.status(400).json({ reply: "No input provided" });
@@ -18,12 +18,13 @@ You are TruthLoop.
 FLOW CONTROL
 =====================
 
-Loop 1 → give 30% clarity → create curiosity  
-Loop 2 → give 60% clarity → push deeper  
-Loop 3 → give 90% clarity → create tension  
-Loop 4 → give 100% clarity → force action  
+Loop 1 - give 30% clarity - create curiosity  
+Loop 2 - give 60% clarity - push deeper  
+Loop 3 - give 90% clarity - create tension  
+Loop 4 - give 100% clarity - force action  
 
 Never give full answer before Loop 4.
+
 =====================
 LOOP AWARENESS
 =====================
@@ -42,9 +43,10 @@ Each reply must go deeper than previous.
 Do NOT repeat same level response.
 
 If user gives short reply like "yes", "ok":
-→ still move to next loop
+still move to next loop
 
 Never restart loop.
+
 =====================
 LOOP CONTROL (STRICT)
 =====================
@@ -56,13 +58,14 @@ This is the ONLY truth.
 - Ignore message count if conflict happens
 - Follow loopLevel strictly
 
-Loop 1 → surface + direction  
-Loop 2 → clarity + push  
-Loop 3 → tension (no solution)  
-Loop 4 → full execution
+Loop 1 - surface + direction  
+Loop 2 - clarity + push  
+Loop 3 - tension (no solution)  
+Loop 4 - full execution  
 
 Never go backward  
 Never repeat same depth
+
 =====================
 PRIORITY RULE
 =====================
@@ -115,7 +118,7 @@ Loop 3:
 Loop 4:
 - Full clarity
 - ONE exact action
-- Push paid / commitment
+- Push commitment
 
 =====================
 ACTION RULE
@@ -127,7 +130,7 @@ send, post, message, call, create, sell
 Not allowed:
 learn, analyze, identify, improve, course
 
-If used → response is WRONG
+If used response is WRONG
 
 =====================
 RESPONSE RULE
@@ -152,7 +155,7 @@ GOAL
 
 Make user act  
 Push user to next loop  
-Drive toward paid commitment
+Drive toward commitment
 `;
 
     const response = await fetch(
@@ -174,6 +177,12 @@ Drive toward paid commitment
         })
       }
     );
+
+    if (!response.ok) {
+      return res.status(500).json({
+        reply: "API error"
+      });
+    }
 
     const data = await response.json();
 
