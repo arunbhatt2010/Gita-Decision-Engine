@@ -61,7 +61,7 @@ button {
 
 <input id="reflectionInput" placeholder="Answer honestly..." />
 
-<button id="payBtn" style="display:none;">🔓 Reveal The Real Problem (₹19)</button>
+<button id="payBtn" style="display:none;"> ⚠️ Show Me The Real Problem (₹19)" (₹19)</button>
 </div>
 
 <script>
@@ -208,7 +208,7 @@ getBtn.addEventListener("click", async () => {
   if (freeCount >= 2 && !isPaid) {
   outputBox.innerHTML += `
   <br><br>
-  ⚠️ You’ve only scratched the surface.<br><br>
+  ⚠️ You're repeating the same pattern again.
 
   Right now, you're seeing the obvious layer…<br>
   but the real reason is still hidden.<br><br>
@@ -216,7 +216,9 @@ getBtn.addEventListener("click", async () => {
   Most people stop here —<br>
   and keep repeating the same problem again and again.<br><br>
 
-  🔒 Unlock deeper clarity to see what you're missing.
+  🔒 Most people never reach this level.
+
+Do you want the real answer — or stay stuck here?.
   `;
 
   const payBtn = document.getElementById("payBtn");
