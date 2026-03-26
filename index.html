@@ -54,6 +54,28 @@ button {
 
 <h2>TruthLoop</h2>
 
+<!-- 🔥 KYC SCREENS -->
+
+<div id="goalScreen">
+  <p>What are you trying to fix?</p>
+  <button onclick="selectGoal('Getting clients')">Getting clients</button>
+  <button onclick="selectGoal('Growing business')">Growing business</button>
+  <button onclick="selectGoal('Lack of focus')">Lack of focus</button>
+</div>
+
+<div id="problemScreen" style="display:none;">
+  <input id="problemInput" placeholder="What’s actually not working?" />
+  <button onclick="saveProblem()">Next</button>
+</div>
+
+<div id="actionScreen" style="display:none;">
+  <input id="actionInput" placeholder="What did you do in last 48 hours?" />
+  <button onclick="saveAction()">Start</button>
+</div>
+
+<!-- 🔥 MAIN APP -->
+<div id="mainApp" style="display:none;">
+
 <div id="outputBox" class="output"></div>
 
 <input id="mainInput" placeholder="What's really bothering you..." />
@@ -65,7 +87,14 @@ button {
 
 </div>
 
+</div>
+
 <script>
+
+// 🔥 USER CONTEXT
+let userGoal = "";
+let userProblem = "";
+let userAction = "";
 
 // 🔥 TEST MODE
 let isPaid = true;
@@ -78,8 +107,6 @@ if (!deviceId) {
 }
 
 // ELEMENTS
-const input = document.getElementById("mainInput");
-const reflectionInput = document.getElementById("reflectionInput");
 const outputBox = document.getElementById("outputBox");
 const getBtn = document.getElementById("getBtn");
 const payBtn = document.getElementById("payBtn");
@@ -87,7 +114,7 @@ const payBtn = document.getElementById("payBtn");
 let messages = [];
 let loopLevel = 1;
 
-// STORAGE FIX
+// STORAGE
 let freeCount = parseInt(localStorage.getItem("freeCount_" + deviceId)) || 0;
 const today = new Date().toDateString();
 const lastDate = localStorage.getItem("date_" + deviceId);
@@ -98,7 +125,40 @@ if (lastDate !== today) {
   localStorage.setItem("freeCount_" + deviceId, 0);
 }
 
-// ✅ FORMAT FUNCTION
+// =====================
+// KYC FUNCTIONS
+// =====================
+
+function selectGoal(selectedOption) {
+  userGoal = selectedOption;
+  document.getElementById("goalScreen").style.display = "none";
+  document.getElementById("problemScreen").style.display = "block";
+}
+
+function saveProblem() {
+  const val = document.getElementById("problemInput").value.trim();
+  if (!val) return alert("Enter problem");
+
+  userProblem = val;
+
+  document.getElementById("problemScreen").style.display = "none";
+  document.getElementById("actionScreen").style.display = "block";
+}
+
+function saveAction() {
+  const val = document.getElementById("actionInput").value.trim();
+  if (!val) return alert("Enter action");
+
+  userAction = val;
+
+  document.getElementById("actionScreen").style.display = "none";
+  document.getElementById("mainApp").style.display = "block";
+}
+
+// =====================
+// FORMAT FUNCTION
+// =====================
+
 function formatReply(text) {
   return text
     .replace(/Guide:/g, "<br><br><b>Guide:</b><br>")
@@ -110,20 +170,23 @@ function formatReply(text) {
     .replace(/\n/g, "<br>");
 }
 
+// =====================
 // API CALL
+// =====================
+
 async function callAPI() {
   try {
     const res = await fetch("/api/chat", {
-  method: "POST",
-  headers: { "Content-Type": "application/json" },
-  body: JSON.stringify({
-    messages,
-    loopLevel,
-    userGoal,
-    userProblem,
-    userAction
-  })
-});
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        messages,
+        loopLevel,
+        userGoal,
+        userProblem,
+        userAction
+      })
+    });
 
     const data = await res.json();
     messages.push({ role: "assistant", content: data.reply });
@@ -135,35 +198,13 @@ async function callAPI() {
   }
 }
 
-// 🔓 DEEP LOOP
-async function unlockDeepLoop() {
-  const userText = reflectionInput.value.trim();
+// =====================
+// MAIN BUTTON
+// =====================
 
-  if (!userText) {
-    outputBox.innerHTML += "<br><br>⚠️ Enter reflection first";
-    return;
-  }
-
-  messages.push({ role: "user", content: userText });
-
-  outputBox.innerHTML += "<br><br><i>Going deeper...</i>";
-
-  const res = await fetch("/api/chat", {
-    method:"POST",
-    headers:{ "Content-Type":"application/json" },
-    body: JSON.stringify({ messages, loopLevel: 2 })
-  });
-
-  const data = await res.json();
-
-  const formattedReply = formatReply(data.reply);
-
-  outputBox.innerHTML += `<br><br>${formattedReply}`;
-}
-
-// FIRST CALL
 getBtn.addEventListener("click", async () => {
-  const userText = input.value.trim();
+
+  const userText = document.getElementById("mainInput").value.trim();
   if (!userText) return;
 
   if (!isPaid && freeCount >= 2) {
@@ -196,9 +237,6 @@ getBtn.addEventListener("click", async () => {
     ${formattedReply}
   `;
 });
-
-// BUTTON
-payBtn.addEventListener("click", unlockDeepLoop);
 
 </script>
 
