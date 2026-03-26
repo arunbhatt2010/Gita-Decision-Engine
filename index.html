@@ -65,10 +65,7 @@ button {
 </div>
 
 <script>
-  let isPaid = localStorage.getItem("isPaid") === "true";
-
-// 👇 TEMP TEST MODE (mobile testing)
-isPaid = true;
+  let isPaid = true; // testing mode
 console.log("Razorpay check:", typeof Razorpay);
 let deviceId = localStorage.getItem("deviceId");
 
@@ -84,7 +81,7 @@ const getBtn = document.getElementById("getBtn");
 
 let messages = [];
 let loopLevel = 1;
-let isPaid = false;
+
 let freeCount = parseInt(localStorage.getItem("freeCount_" + deviceId)) || 0;
 const today = new Date().toDateString();
 const lastDate = localStorage.getItem("date");
