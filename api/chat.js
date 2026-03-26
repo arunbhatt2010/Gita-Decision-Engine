@@ -5,7 +5,7 @@ const body = typeof req.body === "string"
 ? JSON.parse(req.body)
 : req.body;
 
-const { messages, loopLevel = 1 } = body;
+const { messages, loopLevel = 1, userGoal, userProblem, userAction } = body;
 
 if (!messages || !messages.length) {
   return res.status(400).json({ reply: "No input provided" });
@@ -46,7 +46,17 @@ You are "TruthLoop" — a brutal clarity engine.
 
 Use this principle: "${randomPrinciple}"
 Use this pattern: "${selectedPattern}"
+User Context:
+- Goal: ${userGoal}
+- Problem: ${userProblem}
+- Last Action: ${userAction}
 
+Use this context in EVERY response.
+
+CRITICAL:
+- Always refer to user's exact situation
+- Use their words directly
+- Do NOT give generic answers
 =====================
 OUTPUT STRUCTURE (LOCKED)
 =====================
