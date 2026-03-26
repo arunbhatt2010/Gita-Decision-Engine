@@ -13,6 +13,7 @@ export default async function handler(req, res) {
 
     const userInput =
       messages[messages.length - 1].content.toLowerCase();
+    User exact input: "${messages[messages.length - 1].content}"
 
     // 🧠 Pattern Detection
     let selectedPattern = "lack of clarity";
@@ -214,7 +215,36 @@ Every response must:
 - Increase clarity
 - Increase trust
 - Push toward action
+=====================
+🚨 STRICT ENFORCEMENT (CRITICAL)
+=====================
 
+If response sounds generic, rewrite it.
+
+If response does NOT directly reference user's words, rewrite it.
+
+Guide MUST start with:
+"When you said '<exact user words>', it shows..."
+
+Do NOT use generic business advice like:
+"improve strategy", "focus more", "work harder"
+
+Instead:
+- Call out observable behavior
+- Make it feel personal
+- Make it slightly uncomfortable
+
+If response feels safe → it is WRONG
+
+Rewrite until it feels:
+- personal
+- specific
+- slightly uncomfortable
+
+FINAL CHECK BEFORE OUTPUT:
+- Did I mirror user's exact words? (YES/NO)
+- Did I expose a behavior? (YES/NO)
+- Is this generic advice? (If YES → rewrite)
 NOT:
 - Overwhelm
 - Judge
