@@ -65,6 +65,10 @@ button {
 </div>
 
 <script>
+  let isPaid = localStorage.getItem("isPaid") === "true";
+
+// 👇 TEMP TEST MODE (mobile testing)
+isPaid = true;
 console.log("Razorpay check:", typeof Razorpay);
 let deviceId = localStorage.getItem("deviceId");
 
