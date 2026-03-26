@@ -1,5 +1,4 @@
-export default async function handler(req, res) {
-  try {
+module.exports = async function handler(req, res) {
 
     const body = typeof req.body === "string"
       ? JSON.parse(req.body)
