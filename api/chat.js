@@ -5,7 +5,8 @@ export default async function handler(req, res) {
       ? JSON.parse(req.body)
       : req.body;
 
-    const { messages, loopLevel = 1 } = body; // ✅ FIXED
+    // ✅ ONLY THIS LINE UPDATED
+    const { messages, loopLevel = 1, userGoal = "", userProblem = "", userAction = "" } = body;
 
     if (!messages || !messages.length) {
       return res.status(400).json({ reply: "No input provided" });
@@ -13,6 +14,11 @@ export default async function handler(req, res) {
 
     const systemPrompt = `
 You are TruthLoop.
+
+User Context:
+Goal: ${userGoal}
+Problem: ${userProblem}
+Action: ${userAction}
 
 =====================
 FLOW CONTROL
