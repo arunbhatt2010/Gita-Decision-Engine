@@ -54,17 +54,16 @@ button {
 
 <h2>TruthLoop</h2>
 
-<!-- 🔥 KYC SCREENS -->
-
+<!-- KYC -->
 <div id="goalScreen">
   <p>Where are you stuck right now and avoiding fixing it?</p>
-<p style="font-size:12px;opacity:0.7;">Pick the one you keep ignoring.</p>
+  <p style="font-size:12px;opacity:0.7;">Pick the one you keep ignoring.</p>
 
-<button onclick="selectGoal('Money stuck / not growing')">Money stuck / not growing</button>
-<button onclick="selectGoal('No clarity, just confusion')">No clarity, just confusion</button>
-<button onclick="selectGoal('Keep starting, can’t stay consistent')">Keep starting, can’t stay consistent</button>
-<button onclick="selectGoal('Overthinking, no action')">Overthinking, no action</button>
-<button onclick="selectGoal('Something else')">Something else</button>
+  <button onclick="selectGoal('Money stuck / not growing')">Money stuck / not growing</button>
+  <button onclick="selectGoal('No clarity, just confusion')">No clarity, just confusion</button>
+  <button onclick="selectGoal('Keep starting, can’t stay consistent')">Keep starting, can’t stay consistent</button>
+  <button onclick="selectGoal('Overthinking, no action')">Overthinking, no action</button>
+  <button onclick="selectGoal('Something else')">Something else</button>
 </div>
 
 <div id="problemScreen" style="display:none;">
@@ -77,7 +76,7 @@ button {
   <button onclick="saveAction()">Start</button>
 </div>
 
-<!-- 🔥 MAIN APP -->
+<!-- MAIN -->
 <div id="mainApp" style="display:none;">
 
 <div id="outputBox" class="output"></div>
@@ -86,8 +85,9 @@ button {
 <button id="getBtn">Get Clarity</button>
 
 <input id="reflectionInput" placeholder="Answer honestly..." />
+<button id="nextBtn">Next</button>
 
-<button id="payBtn" style="display:none;"> ⚠️ Show Me The Real Problem (₹19)</button>
+<button id="payBtn" style="display:none;">⚠️ Show Me The Real Problem (₹19)</button>
 
 </div>
 
@@ -95,15 +95,14 @@ button {
 
 <script>
 
-// 🔥 USER CONTEXT
+// CONTEXT
 let userGoal = "";
 let userProblem = "";
 let userAction = "";
 
-// 🔥 TEST MODE
 let isPaid = true;
 
-// DEVICE ID
+// DEVICE
 let deviceId = localStorage.getItem("deviceId");
 if (!deviceId) {
   deviceId = "device_" + Math.random().toString(36).substring(2);
@@ -113,12 +112,13 @@ if (!deviceId) {
 // ELEMENTS
 const outputBox = document.getElementById("outputBox");
 const getBtn = document.getElementById("getBtn");
+const nextBtn = document.getElementById("nextBtn");
 const payBtn = document.getElementById("payBtn");
 
 let messages = [];
 let loopLevel = 1;
 
-// STORAGE
+// RESET DAILY LIMIT
 let freeCount = parseInt(localStorage.getItem("freeCount_" + deviceId)) || 0;
 const today = new Date().toDateString();
 const lastDate = localStorage.getItem("date_" + deviceId);
@@ -129,40 +129,32 @@ if (lastDate !== today) {
   localStorage.setItem("freeCount_" + deviceId, 0);
 }
 
-// =====================
-// KYC FUNCTIONS
-// =====================
-
-function selectGoal(selectedOption) {
-  userGoal = selectedOption;
-  document.getElementById("goalScreen").style.display = "none";
-  document.getElementById("problemScreen").style.display = "block";
+// KYC
+function selectGoal(val) {
+  userGoal = val;
+  goalScreen.style.display = "none";
+  problemScreen.style.display = "block";
 }
 
 function saveProblem() {
-  const val = document.getElementById("problemInput").value.trim();
+  const val = problemInput.value.trim();
   if (!val) return alert("Enter problem");
 
   userProblem = val;
-
-  document.getElementById("problemScreen").style.display = "none";
-  document.getElementById("actionScreen").style.display = "block";
+  problemScreen.style.display = "none";
+  actionScreen.style.display = "block";
 }
 
 function saveAction() {
-  const val = document.getElementById("actionInput").value.trim();
+  const val = actionInput.value.trim();
   if (!val) return alert("Enter action");
 
   userAction = val;
-
-  document.getElementById("actionScreen").style.display = "none";
-  document.getElementById("mainApp").style.display = "block";
+  actionScreen.style.display = "none";
+  mainApp.style.display = "block";
 }
 
-// =====================
-// FORMAT FUNCTION
-// =====================
-
+// FORMAT
 function formatReply(text) {
   return text
     .replace(/Guide:/g, "<br><br><b>Guide:</b><br>")
@@ -174,15 +166,14 @@ function formatReply(text) {
     .replace(/\n/g, "<br>");
 }
 
-// =====================
-// API CALL
-// =====================
-
+// API
 async function callAPI() {
   try {
     const res = await fetch("/api/chat", {
       method: "POST",
-      headers: { "Content-Type": "application/json" },
+      headers: {
+        "Content-Type": "application/json"
+      },
       body: JSON.stringify({
         messages,
         loopLevel,
@@ -193,33 +184,22 @@ async function callAPI() {
     });
 
     const data = await res.json();
+
     messages.push({ role: "assistant", content: data.reply });
 
     return data.reply;
 
-  } catch {
-    return "⚠️ AI unstable. Try again.";
+  } catch (e) {
+    console.error(e);
+    return "⚠️ AI error";
   }
 }
 
-// =====================
-// MAIN BUTTON
-// =====================
-
+// FIRST CLICK
 getBtn.addEventListener("click", async () => {
 
-  const userText = document.getElementById("mainInput").value.trim();
+  const userText = mainInput.value.trim();
   if (!userText) return;
-
-  if (!isPaid && freeCount >= 2) {
-    outputBox.innerHTML += `
-    <br><br>
-    ⚠️ You're repeating the same pattern again.<br><br>
-    🔒 Unlock deeper clarity to continue.
-    `;
-    payBtn.style.display = "block";
-    return;
-  }
 
   loopLevel = 1;
   messages = [{ role: "user", content: userText }];
@@ -227,19 +207,31 @@ getBtn.addEventListener("click", async () => {
   outputBox.innerHTML = "Thinking...";
 
   const reply = await callAPI();
-  const formattedReply = formatReply(reply);
-
-  freeCount++;
-  localStorage.setItem("freeCount_" + deviceId, freeCount);
-
-  if (!isPaid && freeCount === 2) {
-    payBtn.style.display = "block";
-  }
 
   outputBox.innerHTML = `
     <b>You:</b> ${userText}<br><br>
-    ${formattedReply}
+    ${formatReply(reply)}
   `;
+});
+
+// NEXT LOOP (IMPORTANT FIX 🔥)
+nextBtn.addEventListener("click", async () => {
+
+  const userText = reflectionInput.value.trim();
+  if (!userText) return;
+
+  loopLevel++; // 🔥 loop increase
+
+  messages.push({ role: "user", content: userText });
+
+  outputBox.innerHTML += `<br><br><b>You:</b> ${userText}<br>Thinking...`;
+
+  const reply = await callAPI();
+
+  outputBox.innerHTML += `<br>${formatReply(reply)}`;
+
+  reflectionInput.value = "";
+
 });
 
 </script>
