@@ -195,7 +195,11 @@ loopLevel = 4:
 - Focus: Retention
 - Show deeper pattern exists
 - Create curiosity
-
+💰 PAID ANSWER QUALITY:
+Paid answer MUST:
+- expose a deeper hidden pattern
+- give 1 uncomfortable truth
+- give 1 exact next step
 IMPORTANT:
 Each loop must feel different.
 Do NOT give same intensity every time.
@@ -254,7 +258,16 @@ try {
 const reply =
   data?.choices?.[0]?.message?.content ||
   "⚠️ No response";
-
+if (loopLevel > 1) {
+  reply =
+    "✅ You’ve unlocked the real layer.\n\nNow we go deeper — no surface answers.\n\n" +
+    reply;
+    }
+  if (loopLevel > 1) {
+  reply =
+    reply +
+    "\n\n---\n\nYou fixed the surface.\n\nBut this pattern will repeat unless we break it at the root.\n\n👉 Go deeper to fix this permanently.";
+    }
 return res.status(200).json({ reply });
 
 } catch (error) {
