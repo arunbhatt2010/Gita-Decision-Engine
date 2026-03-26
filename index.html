@@ -124,8 +124,15 @@ async function unlockDeepLoop() {
     });
 
     const data = await res.json();
-
-    const formattedReply = data.reply.replace(/\n/g, "<br>");
+const formattedReply = data.reply
+  .replace(/Guide:/g, "<br><br><b>Guide:</b><br>")
+  .replace(/Pattern:/g, "<br><br><b>Pattern:</b><br>")
+  .replace(/Action:/g, "<br><br><b>Action:</b><br>")
+  .replace(/Hint:/g, "<br><br><b>Hint:</b><br>")
+  .replace(/Question:/g, "<br><br><b>Question:</b><br>")
+  .replace(/\n- /g, "<br>• ")
+  .replace(/\n/g, "<br>");
+    
 
     outputBox.innerHTML += `<br><br>${formattedReply}`;
 
