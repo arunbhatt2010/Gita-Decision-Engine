@@ -195,22 +195,28 @@ getBtn.addEventListener("click", async () => {
   outputBox.innerHTML = `<b>You:</b> ${text}<br><br>${formatReply(reply)}`;
 });
 // NEXT LOOP
-nextBtn.addEventListener("click", async ()=>{
+nextBtn.addEventListener("click", async () => {
+
   const text = reflectionInput.value.trim();
-  if(!text) return;
+  if (!text) return;
+
+  getBtn.disabled = true;
+  nextBtn.disabled = true;
 
   loopLevel++;
-  messages.push({ role:"user", content:text });
+  messages.push({ role: "user", content: text });
 
   outputBox.innerHTML += `<br><br><b>You:</b> ${text}<br>`;
 
   const reply = await callAPI();
 
+  getBtn.disabled = false;
+  nextBtn.disabled = false;
+
   outputBox.innerHTML += `<br>${formatReply(reply)}`;
 
   reflectionInput.value = "";
 });
-
 });
 
 </script>
