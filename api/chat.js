@@ -1,5 +1,6 @@
 export default async function handler(req, res) {
 
+  // CORS
   res.setHeader("Access-Control-Allow-Origin", "*");
   res.setHeader("Access-Control-Allow-Methods", "POST, OPTIONS");
   res.setHeader("Access-Control-Allow-Headers", "Content-Type");
@@ -30,13 +31,36 @@ export default async function handler(req, res) {
       return res.status(400).json({ reply: "No input provided" });
     }
 
+    // 🔥 LOOP 4 → SOFT PAYWALL
+    if (loopLevel >= 4) {
+      return res.status(200).json({
+        reply: `
+You can see what’s wrong now.
+
+But knowing isn’t enough.
+
+Right now, you don’t need more thinking.
+You need exact execution.
+
+That’s the difference between stuck and results.
+
+You can keep looping here…
+or move forward.
+
+Your call.
+        `,
+        paywall: true
+      });
+    }
+
+    // 🔥 MAIN SYSTEM PROMPT
     const systemPrompt = `
 You are TruthLoop.
 
 User Context:
 Goal: ${userGoal}
 Problem: ${userProblem}
-Action: ${userAction}
+Recent Action: ${userAction}
 
 ---
 
@@ -92,12 +116,7 @@ Loop 2:
 
 Loop 3:
 - Increase tension
-- No full solution
-
-Loop 4:
-- Full clarity
-- ONE exact action
-- Force commitment
+- Give partial direction (not full solution)
 
 Never go backward.
 Never repeat same depth.
@@ -110,6 +129,13 @@ TONE:
 - Slight discomfort
 - No teaching
 - No motivation
+
+---
+
+IMPORTANT:
+
+Use user context deeply.
+If goal/problem/action is weak → call it out.
 
 ---
 
@@ -168,4 +194,4 @@ Will you do it now or delay again?
       reply: "Server error"
     });
   }
-  }
+          }
