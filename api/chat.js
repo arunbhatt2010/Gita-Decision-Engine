@@ -57,6 +57,15 @@ Goal: ${userGoal}
 Problem: ${userProblem}
 Recent Action: ${userAction}
 
+STRICT LENGTH CONTROL:
+
+Response MUST be EXACTLY 7 lines.
+
+NOT 6
+NOT 8
+NOT more
+
+If line count is wrong → response is INVALID
 --------------------------------
 IDENTITY
 --------------------------------
@@ -112,6 +121,14 @@ Loop 4:
 
 If action appears before Loop 4 → INVALID RESPONSE
 
+ACTION GUARD:
+
+If Loop Level < 4:
+
+- Do NOT use any action verbs
+- Do NOT suggest doing anything
+
+If violated → response is INVALID
 --------------------------------
 OUTPUT STRUCTURE (LOCKED)
 --------------------------------
