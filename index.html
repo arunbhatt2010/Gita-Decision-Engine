@@ -27,6 +27,8 @@ h2 {
   padding:15px;
   border-radius:12px;
   margin-bottom:10px;
+  line-height:1.6;
+  font-size:15px;
 }
 input {
   width:100%;
@@ -81,168 +83,18 @@ button {
 
 <div id="outputBox" class="output"></div>
 
-<input id="mainInput" placeholder="What's really bothering you..." />
-<button id="getBtn">Get Clarity</button>
+<input id="mainInput" placeholder="Say it clearly. No hiding." />
+<button id="getBtn">Face It</button>
 
 <input id="reflectionInput" placeholder="Answer honestly..." />
-<button id="nextBtn">Next</button>
+<button id="nextBtn">Continue</button>
 
-<button id="payBtn" style="display:none;">⚠️ Show Me The Real Problem (₹19)</button>
+<button id="payBtn" style="display:none;">⚠️ Unlock Full Clarity (₹19)</button>
 
 </div>
 
 </div>
 
 <script>
-const goalScreen = document.getElementById("goalScreen");
-const problemScreen = document.getElementById("problemScreen");
-const actionScreen = document.getElementById("actionScreen");
-const mainApp = document.getElementById("mainApp");
-
-const problemInput = document.getElementById("problemInput");
-const actionInput = document.getElementById("actionInput");
-const mainInput = document.getElementById("mainInput");
-const reflectionInput = document.getElementById("reflectionInput");
 // CONTEXT
-let userGoal = "";
-let userProblem = "";
-let userAction = "";
-
-let isPaid = true;
-
-// DEVICE
-let deviceId = localStorage.getItem("deviceId");
-if (!deviceId) {
-  deviceId = "device_" + Math.random().toString(36).substring(2);
-  localStorage.setItem("deviceId", deviceId);
-}
-
-// ELEMENTS
-const outputBox = document.getElementById("outputBox");
-const getBtn = document.getElementById("getBtn");
-const nextBtn = document.getElementById("nextBtn");
-const payBtn = document.getElementById("payBtn");
-
-let messages = [];
-let loopLevel = 1;
-
-// RESET DAILY LIMIT
-let freeCount = parseInt(localStorage.getItem("freeCount_" + deviceId)) || 0;
-const today = new Date().toDateString();
-const lastDate = localStorage.getItem("date_" + deviceId);
-
-if (lastDate !== today) {
-  freeCount = 0;
-  localStorage.setItem("date_" + deviceId, today);
-  localStorage.setItem("freeCount_" + deviceId, 0);
-}
-
-// KYC
-function selectGoal(val) {
-  userGoal = val;
-  goalScreen.style.display = "none";
-  problemScreen.style.display = "block";
-}
-
-function saveProblem() {
-  const val = problemInput.value.trim();
-  if (!val) return alert("Enter problem");
-
-  userProblem = val;
-  problemScreen.style.display = "none";
-  actionScreen.style.display = "block";
-}
-
-function saveAction() {
-  const val = actionInput.value.trim();
-  if (!val) return alert("Enter action");
-
-  userAction = val;
-  actionScreen.style.display = "none";
-  mainApp.style.display = "block";
-}
-
-// FORMAT
-function formatReply(text) {
-  return text
-    .replace(/Guide:/g, "<br><br><b>Guide:</b><br>")
-    .replace(/Pattern:/g, "<br><br><b>Pattern:</b><br>")
-    .replace(/Action:/g, "<br><br><b>Action:</b><br>")
-    .replace(/Hint:/g, "<br><br><b>Hint:</b><br>")
-    .replace(/Question:/g, "<br><br><b>Question:</b><br>")
-    .replace(/\n- /g, "<br>• ")
-    .replace(/\n/g, "<br>");
-}
-
-// API
-async function callAPI() {
-  try {
-    const res = await fetch("/api/chat", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json"
-      },
-      body: JSON.stringify({
-        messages,
-        loopLevel,
-        userGoal,
-        userProblem,
-        userAction
-      })
-    });
-
-    const data = await res.json();
-
-    messages.push({ role: "assistant", content: data.reply });
-
-    return data.reply;
-
-  } catch (e) {
-    console.error(e);
-    return "⚠️ AI error";
-  }
-}
-
-// FIRST CLICK
-getBtn.addEventListener("click", async () => {
-
-  const userText = mainInput.value.trim();
-  if (!userText) return;
-
-  loopLevel = 1;
-  messages = [{ role: "user", content: userText }];
-
-  outputBox.innerHTML = "Thinking...";
-
-  const reply = await callAPI();
-
-  outputBox.innerHTML = `
-    <b>You:</b> ${userText}<br><br>
-    ${formatReply(reply)}
-  `;
-});
-
-// NEXT LOOP (IMPORTANT FIX 🔥)
-nextBtn.addEventListener("click", async () => {
-
-  const userText = reflectionInput.value.trim();
-  if (!userText) return;
-
-  loopLevel++; // 🔥 loop increase
-
-  messages.push({ role: "user", content: userText });
-
-  outputBox.innerHTML += `<br><br><b>You:</b> ${userText}<br>Thinking...`;
-
-  const reply = await callAPI();
-
-  outputBox.innerHTML += `<br>${formatReply(reply)}`;
-
-  reflectionInput.value = "";
-
-});
-
-</script>
-
-</body>
-  </html>
+let userGoal
