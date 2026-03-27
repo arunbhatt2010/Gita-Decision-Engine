@@ -1,10 +1,7 @@
-<!DOCTYPE html>
-<html>
+<!DOCTYPE html><html>
 <head>
 <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-<title>TruthLoop</title>
-
-<style>
+<title>TruthLoop</title><style>
 body {
   background:#0f0f0f;
   color:#fff;
@@ -46,57 +43,22 @@ button {
   font-weight:bold;
   cursor:pointer;
 }
-</style>
-</head>
-
-<body>
-
-<div class="container">
-
-<h2>TruthLoop</h2>
-
-<!-- KYC -->
-<div id="goalScreen">
+</style></head><body><div class="container"><h2>TruthLoop</h2><!-- KYC --><div id="goalScreen">
   <p>Where are you stuck right now and avoiding fixing it?</p>
-  <p style="font-size:12px;opacity:0.7;">Pick the one you keep ignoring.</p>
+  <p style="font-size:12px;opacity:0.7;">Pick the one you keep ignoring.</p><button onclick="selectGoal('Money stuck / not growing')">Money stuck / not growing</button> <button onclick="selectGoal('No clarity, just confusion')">No clarity, just confusion</button> <button onclick="selectGoal('Keep starting, can’t stay consistent')">Keep starting, can’t stay consistent</button> <button onclick="selectGoal('Overthinking, no action')">Overthinking, no action</button> <button onclick="selectGoal('Something else')">Something else</button>
 
-  <button onclick="selectGoal('Money stuck / not growing')">Money stuck / not growing</button>
-  <button onclick="selectGoal('No clarity, just confusion')">No clarity, just confusion</button>
-  <button onclick="selectGoal('Keep starting, can’t stay consistent')">Keep starting, can’t stay consistent</button>
-  <button onclick="selectGoal('Overthinking, no action')">Overthinking, no action</button>
-  <button onclick="selectGoal('Something else')">Something else</button>
-</div>
-
-<div id="problemScreen" style="display:none;">
+</div><div id="problemScreen" style="display:none;">
   <input id="problemInput" placeholder="What’s actually not working?" />
   <button onclick="saveProblem()">Next</button>
-</div>
-
-<div id="actionScreen" style="display:none;">
+</div><div id="actionScreen" style="display:none;">
   <input id="actionInput" placeholder="What did you do in last 48 hours?" />
   <button onclick="saveAction()">Start</button>
-</div>
+</div><!-- MAIN --><div id="mainApp" style="display:none;"><div id="outputBox" class="output"></div><input id="mainInput" placeholder="Say it clearly. No hiding." />
+<button id="getBtn">Face It</button><input id="reflectionInput" placeholder="Answer honestly..." />
+<button id="nextBtn">Continue</button><button id="payBtn" style="display:none;">⚠️ Unlock Full Clarity (₹19)</button> <button id="newSessionBtn" style="display:none;">🔄 Start New Problem</button>
 
-<!-- MAIN -->
-<div id="mainApp" style="display:none;">
+</div></div><script>
 
-<div id="outputBox" class="output"></div>
-
-<input id="mainInput" placeholder="Say it clearly. No hiding." />
-<button id="getBtn">Face It</button>
-
-<input id="reflectionInput" placeholder="Answer honestly..." />
-<button id="nextBtn">Continue</button>
-
-<button id="payBtn" style="display:none;">⚠️ Unlock Full Clarity (₹19)</button>
-
-</div>
-
-</div>
-
-<script>
-
-// 🔥 WAIT FOR DOM
 document.addEventListener("DOMContentLoaded", () => {
 
 let userGoal = "";
@@ -106,7 +68,6 @@ let userAction = "";
 let messages = [];
 let loopLevel = 1;
 
-// ELEMENTS
 const goalScreen = document.getElementById("goalScreen");
 const problemScreen = document.getElementById("problemScreen");
 const actionScreen = document.getElementById("actionScreen");
@@ -120,8 +81,9 @@ const reflectionInput = document.getElementById("reflectionInput");
 const outputBox = document.getElementById("outputBox");
 const getBtn = document.getElementById("getBtn");
 const nextBtn = document.getElementById("nextBtn");
+const payBtn = document.getElementById("payBtn");
+const newSessionBtn = document.getElementById("newSessionBtn");
 
-// FORMAT REPLY 🔥
 function formatReply(text) {
   return text
     .split("\n")
@@ -129,7 +91,7 @@ function formatReply(text) {
     .map(line => `<div style="margin-bottom:14px; line-height:1.6;">${line}</div>`)
     .join("");
 }
-  // FUNCTIONS
+
 window.selectGoal = function(val){
   userGoal = val;
   goalScreen.style.display = "none";
@@ -154,7 +116,6 @@ window.saveAction = function(){
   mainApp.style.display = "block";
 }
 
-// API
 async function callAPI(){
   const res = await fetch("/api/chat",{
     method:"POST",
@@ -169,21 +130,26 @@ async function callAPI(){
   });
 
   const data = await res.json();
+
   messages.push({ role:"assistant", content:data.reply });
+
+  if (data.paywall) {
+    payBtn.style.display = "block";
+    newSessionBtn.style.display = "block";
+  }
+
   return data.reply;
 }
 
-// FIRST LOOP
-getBtn.addEventListener("click", async () => {
-
+getBtn.addEventListener("click", async ()=>{
   const text = mainInput.value.trim();
-  if (!text) return;
+  if(!text) return;
 
   getBtn.disabled = true;
   nextBtn.disabled = true;
 
   loopLevel = 1;
-  messages = [{ role: "user", content: text }];
+  messages = [{ role:"user", content:text }];
 
   outputBox.innerHTML = "";
 
@@ -194,17 +160,16 @@ getBtn.addEventListener("click", async () => {
 
   outputBox.innerHTML = `<b>You:</b> ${text}<br><br>${formatReply(reply)}`;
 });
-// NEXT LOOP
-nextBtn.addEventListener("click", async () => {
 
+nextBtn.addEventListener("click", async ()=>{
   const text = reflectionInput.value.trim();
-  if (!text) return;
+  if(!text) return;
 
   getBtn.disabled = true;
   nextBtn.disabled = true;
 
   loopLevel++;
-  messages.push({ role: "user", content: text });
+  messages.push({ role:"user", content:text });
 
   outputBox.innerHTML += `<br><br><b>You:</b> ${text}<br>`;
 
@@ -217,9 +182,21 @@ nextBtn.addEventListener("click", async () => {
 
   reflectionInput.value = "";
 });
+
+newSessionBtn.addEventListener("click", ()=>{
+  messages = [];
+  loopLevel = 1;
+
+  outputBox.innerHTML = "";
+
+  mainInput.value = "";
+  reflectionInput.value = "";
+
+  payBtn.style.display = "none";
+  newSessionBtn.style.display = "none";
 });
 
-</script>
+});
 
-</body>
+</script></body>
   </html>
