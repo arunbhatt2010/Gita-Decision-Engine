@@ -181,7 +181,7 @@ getBtn.addEventListener("click", async ()=>{
   loopLevel = 1;
   messages = [{ role:"user", content:text }];
 
-  outputBox.innerHTML = "Thinking...";
+outputBox.innerHTML = "";
 
   const reply = await callAPI();
 
@@ -196,7 +196,7 @@ nextBtn.addEventListener("click", async ()=>{
   loopLevel++;
   messages.push({ role:"user", content:text });
 
-  outputBox.innerHTML += `<br><br><b>You:</b> ${text}<br>Thinking...`;
+  outputBox.innerHTML += `<br><br><b>You:</b> ${text}<br>`;
 
   const reply = await callAPI();
 
