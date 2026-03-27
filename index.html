@@ -121,7 +121,15 @@ const outputBox = document.getElementById("outputBox");
 const getBtn = document.getElementById("getBtn");
 const nextBtn = document.getElementById("nextBtn");
 
-// FUNCTIONS
+// FORMAT REPLY 🔥
+function formatReply(text) {
+  return text
+    .split("\n")
+    .filter(line => line.trim() !== "")
+    .map(line => `<div style="margin-bottom:14px; line-height:1.6;">${line}</div>`)
+    .join("");
+}
+  // FUNCTIONS
 window.selectGoal = function(val){
   userGoal = val;
   goalScreen.style.display = "none";
@@ -177,7 +185,7 @@ getBtn.addEventListener("click", async ()=>{
 
   const reply = await callAPI();
 
-  outputBox.innerHTML = `<b>You:</b> ${text}<br><br>${reply}`;
+outputBox.innerHTML = `<b>You:</b> ${text}<br><br>${formatReply(reply)}`;
 });
 
 // NEXT LOOP
@@ -192,7 +200,7 @@ nextBtn.addEventListener("click", async ()=>{
 
   const reply = await callAPI();
 
-  outputBox.innerHTML += `<br>${reply}`;
+  outputBox.innerHTML += `<br>${formatReply(reply)}`;
 
   reflectionInput.value = "";
 });
