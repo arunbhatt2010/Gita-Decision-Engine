@@ -174,20 +174,26 @@ async function callAPI(){
 }
 
 // FIRST LOOP
-getBtn.addEventListener("click", async ()=>{
+getBtn.addEventListener("click", async () => {
+
   const text = mainInput.value.trim();
-  if(!text) return;
+  if (!text) return;
+
+  getBtn.disabled = true;
+  nextBtn.disabled = true;
 
   loopLevel = 1;
-  messages = [{ role:"user", content:text }];
+  messages = [{ role: "user", content: text }];
 
-outputBox.innerHTML = "";
+  outputBox.innerHTML = "";
 
   const reply = await callAPI();
 
-outputBox.innerHTML = `<b>You:</b> ${text}<br><br>${formatReply(reply)}`;
-});
+  getBtn.disabled = false;
+  nextBtn.disabled = false;
 
+  outputBox.innerHTML = `<b>You:</b> ${text}<br><br>${formatReply(reply)}`;
+});
 // NEXT LOOP
 nextBtn.addEventListener("click", async ()=>{
   const text = reflectionInput.value.trim();
