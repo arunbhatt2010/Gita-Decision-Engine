@@ -2,7 +2,6 @@
 <html>
 <head>
 <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-<script src="https://checkout.razorpay.com/v1/checkout.js" defer></script>
 <title>TruthLoop</title>
 
 <style>
@@ -55,17 +54,7 @@ button {
 <div class="container">
 
 <h2>TruthLoop</h2>
-  <script>
-// SCREENS FIX 🔥
-const goalScreen = document.getElementById("goalScreen");
-const problemScreen = document.getElementById("problemScreen");
-const actionScreen = document.getElementById("actionScreen");
-const mainApp = document.getElementById("mainApp");
 
-// INPUTS
-const problemInput = document.getElementById("problemInput");
-const actionInput = document.getElementById("actionInput");
-  </script>
 <!-- KYC -->
 <div id="goalScreen">
   <p>Where are you stuck right now and avoiding fixing it?</p>
@@ -107,7 +96,110 @@ const actionInput = document.getElementById("actionInput");
 
 <script>
 
+// 🔥 WAIT FOR DOM
+document.addEventListener("DOMContentLoaded", () => {
 
-<script>
-// CONTEXT
-let userGoal
+let userGoal = "";
+let userProblem = "";
+let userAction = "";
+
+let messages = [];
+let loopLevel = 1;
+
+// ELEMENTS
+const goalScreen = document.getElementById("goalScreen");
+const problemScreen = document.getElementById("problemScreen");
+const actionScreen = document.getElementById("actionScreen");
+const mainApp = document.getElementById("mainApp");
+
+const problemInput = document.getElementById("problemInput");
+const actionInput = document.getElementById("actionInput");
+const mainInput = document.getElementById("mainInput");
+const reflectionInput = document.getElementById("reflectionInput");
+
+const outputBox = document.getElementById("outputBox");
+const getBtn = document.getElementById("getBtn");
+const nextBtn = document.getElementById("nextBtn");
+
+// FUNCTIONS
+window.selectGoal = function(val){
+  userGoal = val;
+  goalScreen.style.display = "none";
+  problemScreen.style.display = "block";
+}
+
+window.saveProblem = function(){
+  const val = problemInput.value.trim();
+  if(!val) return alert("Enter problem");
+
+  userProblem = val;
+  problemScreen.style.display = "none";
+  actionScreen.style.display = "block";
+}
+
+window.saveAction = function(){
+  const val = actionInput.value.trim();
+  if(!val) return alert("Enter action");
+
+  userAction = val;
+  actionScreen.style.display = "none";
+  mainApp.style.display = "block";
+}
+
+// API
+async function callAPI(){
+  const res = await fetch("/api/chat",{
+    method:"POST",
+    headers:{ "Content-Type":"application/json" },
+    body:JSON.stringify({
+      messages,
+      loopLevel,
+      userGoal,
+      userProblem,
+      userAction
+    })
+  });
+
+  const data = await res.json();
+  messages.push({ role:"assistant", content:data.reply });
+  return data.reply;
+}
+
+// FIRST LOOP
+getBtn.addEventListener("click", async ()=>{
+  const text = mainInput.value.trim();
+  if(!text) return;
+
+  loopLevel = 1;
+  messages = [{ role:"user", content:text }];
+
+  outputBox.innerHTML = "Thinking...";
+
+  const reply = await callAPI();
+
+  outputBox.innerHTML = `<b>You:</b> ${text}<br><br>${reply}`;
+});
+
+// NEXT LOOP
+nextBtn.addEventListener("click", async ()=>{
+  const text = reflectionInput.value.trim();
+  if(!text) return;
+
+  loopLevel++;
+  messages.push({ role:"user", content:text });
+
+  outputBox.innerHTML += `<br><br><b>You:</b> ${text}<br>Thinking...`;
+
+  const reply = await callAPI();
+
+  outputBox.innerHTML += `<br>${reply}`;
+
+  reflectionInput.value = "";
+});
+
+});
+
+</script>
+
+</body>
+  </html>
