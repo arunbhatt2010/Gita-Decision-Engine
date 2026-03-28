@@ -168,14 +168,14 @@ Push action
           Authorization: "Bearer " + process.env.GROQ_API_KEY
         },
         body: JSON.stringify({
-          model: "llama-3.3-70b-versatile",
-          messages: [
-            { role: "system", content: systemPrompt },
-            ...messages
-          ],
-          temperature: 0.7,
-          max_tokens: 220
-        })
+  model: "llama-3.3-70b-versatile",
+  messages: [
+    { role: "system", content: systemPrompt },
+    { role: "user", content: lastUserMessage }
+  ],
+  temperature: 0.7,
+  max_tokens: 180
+})
       }
     );
 
