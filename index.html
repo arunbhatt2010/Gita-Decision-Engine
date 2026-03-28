@@ -169,7 +169,7 @@ async function callAPI(){
   messages.push({ role:"assistant", content:data.reply });
 
   // 🔥 PAYWALL CONTROL
-  if (data.paywall && !hasPaid) {
+ if (loopLevel >= 3 && !hasPaid)
     payBtn.style.display = "block";
     newSessionBtn.style.display = "block";
 
@@ -214,7 +214,7 @@ nextBtn.addEventListener("click", async ()=>{
   if(!text) return;
 
   // 🔒 BLOCK if not paid
-  if (loopLevel >= 3 && !hasPaid) {
+  if (loopLevel > 3 && !hasPaid) {
     alert("⚠️ Unlock required to continue");
     return;
   }
