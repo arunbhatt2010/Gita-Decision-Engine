@@ -63,16 +63,16 @@ button {
 
 <!-- GOAL -->
 <div id="goalScreen">
-  <p>Where are you stuck right now and avoiding fixing it?</p>
-  <button onclick="selectGoal('Money stuck')">Money stuck</button>
-  <button onclick="selectGoal('No clarity')">No clarity</button>
-  <button onclick="selectGoal('Consistency issue')">Consistency issue</button>
+  <p>Where are you stuck?</p>
+  <button onclick="selectGoal('Money')">Money</button>
+  <button onclick="selectGoal('Clarity')">Clarity</button>
+  <button onclick="selectGoal('Consistency')">Consistency</button>
   <button onclick="selectGoal('Overthinking')">Overthinking</button>
 </div>
 
 <!-- PROBLEM -->
 <div id="problemScreen" style="display:none;">
-  <input id="problemInput" placeholder="What’s actually not working?" />
+  <input id="problemInput" placeholder="What’s not working?" />
   <button onclick="saveProblem()">Next</button>
 </div>
 
@@ -105,7 +105,7 @@ document.addEventListener("DOMContentLoaded", () => {
 let userGoal="", userProblem="", userAction="";
 let messages=[], loopLevel=1;
 
-// 🔥 PAYMENT STATES
+// 🔥 PAYMENT STATE
 let paid49=false;
 let paid99=false;
 
@@ -127,9 +127,7 @@ const newSessionBtn=document.getElementById("newSessionBtn");
 
 // FORMAT
 function formatReply(text){
-  return text.split("\n")
-    .map(line=>`<div style="margin-bottom:12px;">${line}</div>`)
-    .join("");
+  return text.split("\n").map(l=>`<div>${l}</div>`).join("");
 }
 
 // FLOW
@@ -165,25 +163,11 @@ async function callAPI(){
 
   const data=await res.json();
   messages.push({role:"assistant",content:data.reply});
-
-  // 🔥 PAYWALL CONTROL
-  if(loopLevel===2 && !paid49){
-    payBtn.style.display="block";
-    payBtn.innerText="⚠️ Unlock Clarity (₹49)";
-    nextBtn.disabled=true;
-  }
-
-  if(loopLevel===3 && paid49 && !paid99){
-    payBtn.style.display="block";
-    payBtn.innerText="🔥 Unlock Full Execution (₹99)";
-    nextBtn.disabled=true;
-  }
-
   return data.reply;
 }
 
 // LOOP 1
-getBtn.addEventListener("click",async()=>{
+getBtn.addEventListener("click", async ()=>{
   const text=mainInput.value.trim();
   if(!text) return;
 
@@ -198,51 +182,54 @@ getBtn.addEventListener("click",async()=>{
   outputBox.innerHTML=`<b>You:</b> ${text}<br><br>${formatReply(reply)}`;
 });
 
-// LOOP 2–4
-nextBtn.addEventListener("click",async()=>{
+// NEXT LOOP (🔥 MAIN CONTROL)
+nextBtn.addEventListener("click", async ()=>{
   const text=reflectionInput.value.trim();
   if(!text) return;
 
-  // 🔒 LOCKS
+  // 🔒 BLOCK BEFORE LOOP 3
   if(loopLevel===2 && !paid49){
-    alert("Unlock ₹49 first");
+    payBtn.style.display="block";
+    payBtn.innerText="⚠️ Unlock Clarity (₹49)";
     return;
   }
 
+  // 🔒 BLOCK BEFORE LOOP 4
   if(loopLevel===3 && !paid99){
-    alert("Unlock ₹99 first");
+    payBtn.style.display="block";
+    payBtn.innerText="🔥 Unlock Full Execution (₹99)";
     return;
   }
 
   loopLevel++;
+
   messages.push({role:"user",content:text});
-
   outputBox.innerHTML+=`<br><b>You:</b> ${text}<br>`;
-  const reply=await callAPI();
 
+  const reply=await callAPI();
   outputBox.innerHTML+=formatReply(reply);
+
   reflectionInput.value="";
 });
 
-// 💰 PAYMENT (TEST MODE)
-payBtn.addEventListener("click",()=>{
+// 💰 PAYMENT (TEST)
+payBtn.addEventListener("click", ()=>{
 
   if(loopLevel===2){
-    alert("✅ ₹49 success");
+    alert("✅ ₹49 Payment Success");
     paid49=true;
   }
 
   else if(loopLevel===3){
-    alert("🔥 ₹99 success");
+    alert("🔥 ₹99 Payment Success");
     paid99=true;
   }
 
   payBtn.style.display="none";
-  nextBtn.disabled=false;
 });
 
 // RESET
-newSessionBtn.addEventListener("click",()=>{
+newSessionBtn.addEventListener("click", ()=>{
   messages=[];
   loopLevel=1;
   paid49=false;
