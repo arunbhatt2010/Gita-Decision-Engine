@@ -18,40 +18,74 @@ export default async function handler(req, res) {
     const body = typeof req.body === "string"
       ? JSON.parse(req.body)
       : req.body;
-const {
-  messages,
-  loopLevel = 1,
-  userGoal = "",
-  userProblem = "",
-  userAction = ""
-} = body;
 
-// 🔥 FILTER FIRST (always run)
-const lastUserMessage = messages?.[messages.length - 1]?.content || "";
-const lowerMsg = lastUserMessage.toLowerCase();
+    const {
+      messages,
+      loopLevel = 1,
+      userGoal = "",
+      userProblem = "",
+      userAction = ""
+    } = body;
 
-// 🔥 Language detect (solid version)
-const isHindi = /[\u0900-\u097F]/.test(lastUserMessage);
+    if (!messages || !messages.length) {
+      return res.status(400).json({ reply: "No input provided" });
+    }
 
-// 🔥 Domain patterns
-const healthPatterns = [
-  "दर्द", "दांत", "सर दर्द", "pain", "doctor", "medicine", "health"
-];
+    const lastUserMessage = messages[messages.length - 1]?.content || "";
 
-const relationshipPatterns = [
-  "relationship", "breakup", "love", "girlfriend",
-  "boyfriend", "wife", "husband", "marriage"
-];
+    // 🔥 STEP 1: INTENT CLASSIFIER (AI BASED)
+    const categoryCheck = await fetch(
+      "https://api.groq.com/openai/v1/chat/completions",
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: "Bearer " + process.env.GROQ_API_KEY
+        },
+        body: JSON.stringify({
+          model: "llama-3.3-70b-versatile",
+          messages: [
+            {
+              role: "system",
+              content: `
+Classify the user query into ONE category:
 
-const isHealth = healthPatterns.some(word => lowerMsg.includes(word));
-const isRelationship = relationshipPatterns.some(word => lowerMsg.includes(word));
+- business
+- career
+- money
+- mindset
+- health
+- relationship
+- other
 
-if (isHealth || isRelationship) {
+Reply ONLY one word.
+No explanation.
+`
+            },
+            {
+              role: "user",
+              content: lastUserMessage
+            }
+          ],
+          temperature: 0,
+          max_tokens: 5
+        })
+      }
+    );
 
-  console.log("⛔ BLOCKED:", lastUserMessage);
+    const categoryData = await categoryCheck.json();
+    const category =
+      categoryData?.choices?.[0]?.message?.content?.trim().toLowerCase();
 
-  const reply = isHindi
-    ? `यह सिस्टम medical या relationship समस्याओं के लिए नहीं है।
+    console.log("📊 CATEGORY:", category);
+
+    // 🔥 STEP 2: BLOCK
+    if (category === "health" || category === "relationship") {
+
+      const isHindi = /[\u0900-\u097F]/.test(lastUserMessage);
+
+      const reply = isHindi
+        ? `यह सिस्टम medical या relationship समस्याओं के लिए नहीं है।
 
 इसे इन चीज़ों के लिए उपयोग करें:
 • पैसे / income
@@ -61,7 +95,7 @@ if (isHealth || isRelationship) {
 • discipline / consistency
 
 सही समस्या के साथ वापस आएं।`
-    : `This system does not handle medical or relationship problems.
+        : `This system does not handle medical or relationship problems.
 
 Use it for:
 • Money / income
@@ -72,15 +106,10 @@ Use it for:
 
 Come back with a real decision problem.`;
 
-  return res.status(200).json({ reply });
-}
+      return res.status(200).json({ reply });
+    }
 
-// ✅ THEN validation
-if (!messages || !messages.length) {
-  return res.status(400).json({ reply: "No input provided" });
-}
-    
-    // 🔥 SYSTEM PROMPT
+    // 🔥 MAIN SYSTEM PROMPT
     const systemPrompt = `
 You are TruthLoop.
 
@@ -202,4 +231,4 @@ No generic answers
       reply: "Server error"
     });
   }
-          }
+      }
