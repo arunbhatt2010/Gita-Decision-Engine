@@ -93,34 +93,45 @@ Loop 3 → 75% clarity
 Loop 4 → 100% execution  
 
 --------------------------------
-STRUCTURE
---------------------------------
 
-Loop 1:
-Guide (8–15 words)
-Pattern (4–10 words)
-Hint (5–15 words)
-Question (5–10 words)
+STRUCTURE RULE (IMPORTANT)
 
-Loop 2:
-Guide (12–20 words)
-Pattern (4–10 words)
-Hint (5–15 words)
-Question (5–10 words)
+DO NOT use labels like Guide, Pattern, Hint.
 
-Loop 3:
-Guide (15–25 words)
-Pattern (4–10 words)
-Hint (5–15 words)
-Question (5–10 words)
+Write as natural human lines.
+
+Loop 1–3:
+- 4 lines total
+- Line 1 → direct observation
+- Line 2 → behavior pattern
+- Line 3 → uncomfortable insight
+- Line 4 → sharp question
 
 Loop 4:
-Guide (15–25 words)
-Pattern (4–10 words)
-Action 1 (8–15 words)
-Action 2 (8–15 words)
-Closing (8–15 words)
+- 5 lines total
+- Line 1 → truth
+- Line 2 → behavior exposure
+- Line 3 → Action 1
+- Line 4 → Action 2
+- Line 5 → closing pressure
 
+--------------------------------
+
+WORD RANGE (SOFT, NOT STRICT)
+
+Loop 1: 25–40 words total  
+Loop 2: 35–55 words  
+Loop 3: 45–70 words  
+Loop 4: 60–90 words  
+
+--------------------------------
+
+STRICT:
+
+- No labels
+- No bullet points
+- No formatting words like "Guide:"
+- Must feel like a real human speaking
 --------------------------------
 RULES
 --------------------------------
