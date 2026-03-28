@@ -4,31 +4,35 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
 <title>TruthLoop</title>
 
-<!-- Google Analytics -->
-<script async src="https://www.googletagmanager.com/gtag/js?id=G-RBMQ2F6P9Q"></script>
-<script>
-window.dataLayer = window.dataLayer || [];
-function gtag(){dataLayer.push(arguments);}
-gtag('js', new Date());
-gtag('config', 'G-RBMQ2F6P9Q');
-</script>
-
 <style>
 body { background:#0f0f0f; color:#fff; font-family:Arial; margin:0; }
 .container { max-width:500px; margin:auto; padding:15px; }
 h2 { text-align:center; }
+
 .output {
-  height:45vh; overflow-y:auto; background:#000;
-  padding:15px; border-radius:12px; margin-bottom:10px;
+  height:40vh;
+  overflow-y:auto;
+  background:#000;
+  padding:15px;
+  border-radius:12px;
+  margin-bottom:10px;
+  line-height:1.6;
 }
+
 input,button {
-  width:100%; padding:12px; margin-top:10px;
-  border-radius:8px; border:none;
+  width:100%;
+  padding:12px;
+  margin-top:10px;
+  border-radius:8px;
+  border:none;
 }
+
 button {
   background:linear-gradient(45deg, orange, #ff5e00);
-  font-weight:bold; cursor:pointer;
+  font-weight:bold;
+  cursor:pointer;
 }
+
 #finalScreen {
   display:none;
   text-align:center;
@@ -44,7 +48,8 @@ button {
 
 <!-- GOAL -->
 <div id="goalScreen">
-  <p>Where are you stuck?</p>
+  <p>Where are you stuck right now?</p>
+
   <button onclick="selectGoal('Money')">Money</button>
   <button onclick="selectGoal('Clarity')">Clarity</button>
   <button onclick="selectGoal('Consistency')">Consistency</button>
@@ -53,37 +58,41 @@ button {
 
 <!-- PROBLEM -->
 <div id="problemScreen" style="display:none;">
-  <input id="problemInput" placeholder="What’s not working?" />
-  <button onclick="saveProblem()">Next</button>
+  <input id="problemInput" placeholder="What’s actually not working?" />
+  <button onclick="saveProblem()">Continue</button>
 </div>
 
 <!-- ACTION -->
 <div id="actionScreen" style="display:none;">
-  <input id="actionInput" placeholder="What did you do?" />
+  <input id="actionInput" placeholder="What did you do in last 48 hours?" />
   <button onclick="saveAction()">Start</button>
 </div>
 
 <!-- MAIN -->
 <div id="mainApp" style="display:none;">
+  
   <div id="outputBox" class="output"></div>
 
-  <input id="mainInput" placeholder="Say it clearly." />
+  <input id="mainInput" placeholder="Say it clearly. No hiding." />
   <button id="getBtn">Face It</button>
 
   <input id="reflectionInput" placeholder="Answer honestly..." />
   <button id="nextBtn">Continue</button>
 
   <button id="payBtn" style="display:none;"></button>
+
 </div>
 
-<!-- FINAL SCREEN -->
+<!-- FINAL -->
 <div id="finalScreen">
-  <p>✅ This conversation is complete.</p>
+
+  <p>⚠️ You now see the truth.</p>
 
   <div id="summaryBox" style="background:#000; padding:15px; border-radius:10px;"></div>
 
   <button id="upgradeBtn">🚀 Unlock Full System (₹299)</button>
-  <button id="restartBtn">🔄 Start New Conversation</button>
+  <button id="restartBtn">🔄 Start Again</button>
+
 </div>
 
 </div>
@@ -117,7 +126,7 @@ const restartBtn=document.getElementById("restartBtn");
 const upgradeBtn=document.getElementById("upgradeBtn");
 
 function formatReply(text){
-  return text.split("\n").map(l=>`<div>${l}</div>`).join("");
+  return text.split("\n").map(l=>`<div style="margin-bottom:12px;">${l}</div>`).join("");
 }
 
 // FLOW
@@ -166,7 +175,7 @@ async function callAPI(){
   }
 }
 
-// LOOP 1
+// START
 getBtn.addEventListener("click", async ()=>{
   const text=mainInput.value.trim();
   if(!text) return;
@@ -183,36 +192,37 @@ getBtn.addEventListener("click", async ()=>{
   outputBox.innerHTML=`<b>You:</b> ${text}<br><br>${formatReply(reply)}`;
 });
 
-// NEXT LOOP
+// CONTINUE
 nextBtn.addEventListener("click", async ()=>{
   const text = reflectionInput.value.trim();
   if(!text) return;
 
-  // 🔒 LOCK ₹49
+  // ₹49 lock
   if(loopLevel === 2 && !paid49){
     payBtn.style.display="block";
-    payBtn.innerText="⚠️ Unlock Clarity (₹49)";
+    payBtn.innerText="⚠️ Go Deeper (₹49)";
     return;
   }
 
-  // 🔒 LOCK ₹99
+  // ₹99 lock
   if(loopLevel === 3 && !paid99){
     payBtn.style.display="block";
-    payBtn.innerText="🔥 Unlock Full Execution (₹99)";
+    payBtn.innerText="🔥 Get Clear Action (₹99)";
     return;
   }
 
-  // 🛑 FINAL STOP
+  // FINAL STOP
   if(loopLevel === 4){
+
     summaryBox.innerHTML = `
-      <b>Your Pattern:</b><br>
-      You avoid execution and delay decisions.<br><br>
+      <b>Reality:</b><br>
+      You were not stuck. You were avoiding the real move.<br><br>
 
-      <b>What you need:</b><br>
-      Direct action + accountability.<br><br>
+      <b>Truth:</b><br>
+      You don’t need more thinking. You need execution.<br><br>
 
-      <b>Next Step:</b><br>
-      Upgrade for full execution system.
+      <b>Now:</b><br>
+      Act today, or stay exactly where you are.
     `;
 
     finalScreen.style.display="block";
@@ -236,19 +246,19 @@ nextBtn.addEventListener("click", async ()=>{
 payBtn.addEventListener("click", ()=>{
 
   if(loopLevel === 2){
-    alert("✅ ₹49 Payment Success");
+    alert("✅ Payment successful");
     paid49=true;
   }
 
   else if(loopLevel === 3){
-    alert("🔥 ₹99 Payment Success");
+    alert("🔥 Payment successful");
     paid99=true;
   }
 
   payBtn.style.display="none";
 });
 
-// RESTART
+// RESET
 restartBtn.addEventListener("click", ()=>{
   messages=[];
   loopLevel=1;
@@ -265,7 +275,7 @@ restartBtn.addEventListener("click", ()=>{
 
 // CTA
 upgradeBtn.addEventListener("click", ()=>{
-  alert("🚀 ₹299 Upgrade coming soon");
+  alert("🚀 Full system coming soon");
 });
 
 });
