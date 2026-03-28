@@ -4,6 +4,15 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
 <title>TruthLoop</title>
 
+<!-- 🔥 GOOGLE ANALYTICS -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-RBMQ2F6P9Q"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+  gtag('config', 'G-RBMQ2F6P9Q');
+</script>
+
 <style>
 body {
   background:#0f0f0f;
@@ -16,9 +25,7 @@ body {
   margin:auto;
   padding:15px;
 }
-h2 {
-  text-align:center;
-}
+h2 { text-align:center; }
 .output {
   height:45vh;
   overflow-y:auto;
@@ -54,33 +61,26 @@ button {
 <div class="container">
 <h2>TruthLoop</h2>
 
-<!-- GOAL -->
 <div id="goalScreen">
   <p>Where are you stuck right now and avoiding fixing it?</p>
-  <p style="font-size:12px;opacity:0.7;">Pick the one you keep ignoring.</p>
-
   <button onclick="selectGoal('Money stuck / not growing')">Money stuck / not growing</button>
   <button onclick="selectGoal('No clarity, just confusion')">No clarity, just confusion</button>
-  <button onclick="selectGoal('Keep starting, can’t stay consistent')">Keep starting, can’t stay consistent</button>
-  <button onclick="selectGoal('Overthinking, no action')">Overthinking, no action</button>
+  <button onclick="selectGoal('Keep starting, can’t stay consistent')">Keep starting</button>
+  <button onclick="selectGoal('Overthinking, no action')">Overthinking</button>
   <button onclick="selectGoal('Something else')">Something else</button>
 </div>
 
-<!-- PROBLEM -->
 <div id="problemScreen" style="display:none;">
   <input id="problemInput" placeholder="What’s actually not working?" />
   <button onclick="saveProblem()">Next</button>
 </div>
 
-<!-- ACTION -->
 <div id="actionScreen" style="display:none;">
   <input id="actionInput" placeholder="What did you do in last 48 hours?" />
   <button onclick="saveAction()">Start</button>
 </div>
 
-<!-- MAIN -->
 <div id="mainApp" style="display:none;">
-  
   <div id="outputBox" class="output"></div>
 
   <input id="mainInput" placeholder="Say it clearly. No hiding." />
@@ -89,15 +89,13 @@ button {
   <input id="reflectionInput" placeholder="Answer honestly..." />
   <button id="nextBtn">Continue</button>
 
-  <button id="payBtn" style="display:none;">⚠️ Unlock Clarity</button>
+  <button id="payBtn" style="display:none;">⚠️ Unlock</button>
   <button id="newSessionBtn" style="display:none;">🔄 Start New Problem</button>
-
 </div>
 
 </div>
 
 <script>
-
 document.addEventListener("DOMContentLoaded", () => {
 
 let userGoal = "";
@@ -143,7 +141,6 @@ window.selectGoal = function(val){
 window.saveProblem = function(){
   const val = problemInput.value.trim();
   if(!val) return alert("Enter problem");
-
   userProblem = val;
   problemScreen.style.display = "none";
   actionScreen.style.display = "block";
@@ -152,7 +149,6 @@ window.saveProblem = function(){
 window.saveAction = function(){
   const val = actionInput.value.trim();
   if(!val) return alert("Enter action");
-
   userAction = val;
   actionScreen.style.display = "none";
   mainApp.style.display = "block";
@@ -160,6 +156,10 @@ window.saveAction = function(){
 
 // API
 async function callAPI(){
+
+  // 🔥 LOOP TRACK
+  gtag('event', 'loop_reached', { loop: loopLevel });
+
   const res = await fetch("/api/chat",{
     method:"POST",
     headers:{ "Content-Type":"application/json" },
@@ -173,19 +173,15 @@ async function callAPI(){
   });
 
   const data = await res.json();
-
   messages.push({ role:"assistant", content:data.reply });
 
-  // PAYWALL SHOW
   if (loopLevel >= 3 && !hasPaid) {
     payBtn.style.display = "block";
     newSessionBtn.style.display = "block";
 
-    if (loopLevel === 3) {
-      payBtn.innerText = "⚠️ Unlock Clarity (₹49)";
-    } else {
-      payBtn.innerText = "🔥 Unlock Full Execution (₹99)";
-    }
+    payBtn.innerText = loopLevel === 3 
+      ? "⚠️ Unlock Clarity (₹49)" 
+      : "🔥 Unlock Full Execution (₹99)";
 
     nextBtn.disabled = true;
   }
@@ -193,24 +189,19 @@ async function callAPI(){
   return data.reply;
 }
 
-// FIRST LOOP
+// LOOP 1
 getBtn.addEventListener("click", async ()=>{
   const text = mainInput.value.trim();
   if(!text) return;
 
-  getBtn.disabled = true;
-  nextBtn.disabled = true;
+  gtag('event', 'face_it_clicked');
 
   loopLevel = 1;
   hasPaid = false;
-
   messages = [{ role:"user", content:text }];
   outputBox.innerHTML = "";
 
   const reply = await callAPI();
-
-  getBtn.disabled = false;
-  nextBtn.disabled = false;
 
   outputBox.innerHTML = `<b>You:</b> ${text}<br><br>${formatReply(reply)}`;
 });
@@ -220,14 +211,10 @@ nextBtn.addEventListener("click", async ()=>{
   const text = reflectionInput.value.trim();
   if(!text) return;
 
-  // LOCK BEFORE LOOP 4
   if (loopLevel === 3 && !hasPaid) {
-    alert("⚠️ Unlock required to continue");
+    alert("⚠️ Unlock required");
     return;
   }
-
-  getBtn.disabled = true;
-  nextBtn.disabled = true;
 
   loopLevel++;
   messages.push({ role:"user", content:text });
@@ -235,33 +222,31 @@ nextBtn.addEventListener("click", async ()=>{
   outputBox.innerHTML += `<br><br><b>You:</b> ${text}<br>`;
 
   const reply = await callAPI();
-
-  getBtn.disabled = false;
-  nextBtn.disabled = false;
-
   outputBox.innerHTML += `<br>${formatReply(reply)}`;
 
   reflectionInput.value = "";
 });
 
-// PAYMENT (TEST)
+// PAYMENT
 payBtn.addEventListener("click", ()=>{
+  gtag('event', 'payment_clicked');
+
   alert("✅ Test Payment Successful");
 
   hasPaid = true;
-
   payBtn.style.display = "none";
   nextBtn.disabled = false;
 });
 
 // RESET
 newSessionBtn.addEventListener("click", ()=>{
+  gtag('event', 'new_problem_started');
+
   messages = [];
   loopLevel = 1;
   hasPaid = false;
 
   outputBox.innerHTML = "";
-
   mainInput.value = "";
   reflectionInput.value = "";
 
@@ -270,7 +255,6 @@ newSessionBtn.addEventListener("click", ()=>{
 });
 
 });
-
 </script>
 
 </body>
