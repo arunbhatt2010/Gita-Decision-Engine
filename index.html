@@ -185,7 +185,7 @@ getBtn.addEventListener("click", async ()=>{
   paid99=false;
 
   messages=[{role:"user",content:text}];
-  outputBox.innerHTML="⏳ Thinking...";
+  outputBox.innerHTML="⚡ Thinking fast...";
 
   const reply=await callAPI();
 
@@ -239,7 +239,7 @@ Nothing changes from here… unless your actions change.
   loopLevel++;
 
   messages.push({role:"user", content:text});
-  outputBox.innerHTML += `<br><b>You:</b> ${text}<br>⏳ Thinking...`;
+  outputBox.innerHTML += `<br><b>You:</b> ${text}<br>⚡ Thinking fast...`;
 
   const reply = await callAPI();
 
