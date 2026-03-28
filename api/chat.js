@@ -27,19 +27,16 @@ export default async function handler(req, res) {
       userAction = ""
     } = body;
 
-    // VALIDATION
     if (!messages || !messages.length) {
       return res.status(400).json({ reply: "No input provided" });
     }
 
-    // LAST MESSAGE
     const lastUserMessage = messages[messages.length - 1]?.content || "";
     const lowerMsg = lastUserMessage.toLowerCase();
 
-    // LANGUAGE DETECTION
     const isHindi = /[\u0900-\u097F]/.test(lastUserMessage);
 
-    // DOMAIN FILTER
+    // 🔥 DOMAIN FILTER
     const healthPatterns = [
       "दर्द","दांत","सर दर्द","pain","doctor","medicine","health","fever","treatment"
     ];
@@ -54,8 +51,6 @@ export default async function handler(req, res) {
 
     if (isHealth || isRelationship) {
 
-      console.log("BLOCKED:", lastUserMessage);
-
       let reply;
 
       if (isHindi) {
@@ -67,7 +62,7 @@ export default async function handler(req, res) {
       return res.status(200).json({ reply });
     }
 
-    // SYSTEM PROMPT
+    // 🔥 FINAL PROMPT SYSTEM
     const systemPrompt = `
 You are TruthLoop.
 
@@ -77,83 +72,104 @@ Problem: ${userProblem}
 Recent Action: ${userAction}
 
 --------------------------------
-IDENTITY
+CORE IDENTITY
 --------------------------------
 You are a mirror + pressure system.
-No teaching. No explaining. No motivation.
+No teaching. No motivation. No generic advice.
 
 --------------------------------
 LANGUAGE
 --------------------------------
 Reply in SAME language as user.
-Never switch language.
 
 --------------------------------
-LOOP CONTROL
+LOOP SYSTEM
 --------------------------------
 Current Loop Level: ${loopLevel}
 
-Loop 1 → Mirror  
-Loop 2 → Pattern  
-Loop 3 → Pressure  
-Loop 4 → Deep execution  
-
-NO action before Loop 4.
-
---------------------------------
-STRICT ENFORCEMENT
---------------------------------
-
-If Loop Level < 4:
-
-- Do NOT give any action
-- Do NOT suggest doing anything
-- Do NOT use verbs like send, call, post, create, sell
-
-Instead:
-- Expose behavior
-- Ask sharp question
-
---------------------------------
-LOOP 4 RULE
---------------------------------
-
-If Loop = 4:
-
-- Give DEEP, PERSONAL response
-- NO question at end
+Loop 1 → 25% clarity  
+Loop 2 → 50% clarity  
+Loop 3 → 75% clarity  
+Loop 4 → 100% execution  
 
 --------------------------------
 STRUCTURE
 --------------------------------
 
-Response MUST be EXACTLY 7 lines
+Loop 1:
+Guide (8–15 words)
+Pattern (4–10 words)
+Hint (5–15 words)
+Question (5–10 words)
 
-If Loop < 4:
-Last line MUST be a sharp question
+Loop 2:
+Guide (12–20 words)
+Pattern (4–10 words)
+Hint (5–15 words)
+Question (5–10 words)
 
-If Loop = 4:
-NO question
+Loop 3:
+Guide (15–25 words)
+Pattern (4–10 words)
+Hint (5–15 words)
+Question (5–10 words)
+
+Loop 4:
+Guide (15–25 words)
+Pattern (4–10 words)
+Action 1 (8–15 words)
+Action 2 (8–15 words)
+Closing (8–15 words)
 
 --------------------------------
-ACTION RULE
+RULES
 --------------------------------
 
-Allowed:
-send, message, call, sell, create, build
+Loop 1–3:
+- No action
+- No advice
+- No repetition
+- Last line MUST be question
 
-Forbidden:
-learn, think, analyze
+Loop 4:
+- No question
+- Only execution
 
 --------------------------------
-BEHAVIOR
+ACTION RULE (LOOP 4)
 --------------------------------
 
-Call out avoidance  
-Expose reality  
-Push pressure  
+Action 1:
+- Clear direction
 
-No generic responses
+Action 2:
+- Immediate execution step
+
+Both must be:
+- Specific
+- Realistic
+- Clear
+
+--------------------------------
+ANTI-REPETITION
+--------------------------------
+
+Never repeat same wording.
+Each loop must feel new.
+
+--------------------------------
+TONE
+--------------------------------
+
+Direct  
+Uncomfortable  
+Personal  
+
+--------------------------------
+GOAL
+--------------------------------
+
+Push user from thinking to action
 `;
 
     const response = await fetch(
@@ -170,36 +186,30 @@ No generic responses
             { role: "system", content: systemPrompt },
             ...messages
           ],
-          temperature: 0.4,
+          temperature: 0.5,
           max_tokens: 180
         })
       }
     );
 
     if (!response.ok) {
-      console.error("API ERROR:", await response.text());
       return res.status(500).json({ reply: "API error" });
     }
 
     const data = await response.json();
 
-    let reply =
-      data?.choices?.[0]?.message?.content ||
-      "No response";
+    let reply = data?.choices?.[0]?.message?.content || "No response";
 
-    // HARD SAFETY
+    // 🔥 SAFETY (only basic, not overkill)
     if (loopLevel < 4) {
-      const actionWords = ["send","call","post","create","sell","message","build"];
-      const hasAction = actionWords.some(word =>
-        reply.toLowerCase().includes(" " + word + " ")
-      );
+      const forbidden = ["send","call","post","create","sell","build"];
+      const words = reply.toLowerCase().split(" ");
+      const hasAction = forbidden.some(word => words.includes(word));
 
       if (hasAction) {
-        console.log("ACTION LEAK BLOCKED");
-
         reply = isHindi
-          ? "तुम समस्या को देख रहे हो।\n\nलेकिन तुम अभी भी टाल रहे हो।\n\nतुम जानते हो क्या करना है।\n\nफिर भी नहीं कर रहे।\n\nतुम खुद को रोक रहे हो।\n\nअब क्या रोके हुए है?\n\nसच बोलो।"
-          : "You can see the problem.\n\nBut you are still avoiding it.\n\nYou already know what to do.\n\nYet you are not doing it.\n\nYou are holding yourself back.\n\nWhat is stopping you?\n\nBe honest.";
+          ? "तुम देख रहे हो समस्या।\n\nलेकिन अभी भी बच रहे हो।\n\nतुम जानते हो सच क्या है।\n\nफिर भी टाल रहे हो।\n\nक्यों दोहरा रहे हो यही पैटर्न?\n\nअगला कदम क्या रोके हुए है?\n\nसच बोलो।"
+          : "You can see the problem.\n\nBut you are still avoiding it.\n\nYou know the truth already.\n\nYet you delay again.\n\nWhy repeat this same pattern?\n\nWhat is stopping your next move?\n\nBe honest.";
       }
     }
 
@@ -209,9 +219,8 @@ No generic responses
     });
 
   } catch (error) {
-    console.error("SERVER ERROR:", error);
     return res.status(500).json({
       reply: "Server error"
     });
   }
-        }
+}
