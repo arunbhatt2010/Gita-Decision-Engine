@@ -14,44 +14,20 @@ gtag('config', 'G-RBMQ2F6P9Q');
 </script>
 
 <style>
-body {
-  background:#0f0f0f;
-  color:#fff;
-  font-family:Arial;
-  margin:0;
-}
-.container {
-  max-width:500px;
-  margin:auto;
-  padding:15px;
-}
+body { background:#0f0f0f; color:#fff; font-family:Arial; margin:0; }
+.container { max-width:500px; margin:auto; padding:15px; }
 h2 { text-align:center; }
 .output {
-  height:45vh;
-  overflow-y:auto;
-  background:#000;
-  padding:15px;
-  border-radius:12px;
-  margin-bottom:10px;
-  line-height:1.6;
-  font-size:15px;
+  height:45vh; overflow-y:auto; background:#000;
+  padding:15px; border-radius:12px; margin-bottom:10px;
 }
-input {
-  width:100%;
-  padding:12px;
-  margin-top:8px;
-  border-radius:8px;
-  border:none;
+input,button {
+  width:100%; padding:12px; margin-top:10px;
+  border-radius:8px; border:none;
 }
 button {
-  width:100%;
-  padding:14px;
-  margin-top:10px;
   background:linear-gradient(45deg, orange, #ff5e00);
-  border:none;
-  border-radius:10px;
-  font-weight:bold;
-  cursor:pointer;
+  font-weight:bold; cursor:pointer;
 }
 </style>
 </head>
@@ -61,7 +37,6 @@ button {
 <div class="container">
 <h2>TruthLoop</h2>
 
-<!-- GOAL -->
 <div id="goalScreen">
   <p>Where are you stuck?</p>
   <button onclick="selectGoal('Money')">Money</button>
@@ -70,19 +45,16 @@ button {
   <button onclick="selectGoal('Overthinking')">Overthinking</button>
 </div>
 
-<!-- PROBLEM -->
 <div id="problemScreen" style="display:none;">
   <input id="problemInput" placeholder="What’s not working?" />
   <button onclick="saveProblem()">Next</button>
 </div>
 
-<!-- ACTION -->
 <div id="actionScreen" style="display:none;">
-  <input id="actionInput" placeholder="What did you do in last 48 hours?" />
+  <input id="actionInput" placeholder="What did you do?" />
   <button onclick="saveAction()">Start</button>
 </div>
 
-<!-- MAIN -->
 <div id="mainApp" style="display:none;">
   <div id="outputBox" class="output"></div>
 
@@ -104,10 +76,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
 let userGoal="", userProblem="", userAction="";
 let messages=[], loopLevel=1;
-
-// 🔥 PAYMENT STATE
-let paid49=false;
-let paid99=false;
+let paid49=false, paid99=false;
 
 const goalScreen=document.getElementById("goalScreen");
 const problemScreen=document.getElementById("problemScreen");
@@ -125,7 +94,6 @@ const nextBtn=document.getElementById("nextBtn");
 const payBtn=document.getElementById("payBtn");
 const newSessionBtn=document.getElementById("newSessionBtn");
 
-// FORMAT
 function formatReply(text){
   return text.split("\n").map(l=>`<div>${l}</div>`).join("");
 }
@@ -151,8 +119,23 @@ window.saveAction=()=>{
   mainApp.style.display="block";
 };
 
-// API
-  async function callAPI(){
+// 🔥 API WITH LOCK
+async function callAPI(){
+
+  // LOCK BEFORE LOOP 3
+  if(loopLevel === 3 && !paid49){
+    payBtn.style.display="block";
+    payBtn.innerText="⚠️ Unlock Clarity (₹49)";
+    return "🔒 Unlock required";
+  }
+
+  // LOCK BEFORE LOOP 4
+  if(loopLevel === 4 && !paid99){
+    payBtn.style.display="block";
+    payBtn.innerText="🔥 Unlock Full Execution (₹99)";
+    return "🔒 Unlock required";
+  }
+
   const res=await fetch("/api/chat",{
     method:"POST",
     headers:{ "Content-Type":"application/json" },
@@ -179,28 +162,14 @@ getBtn.addEventListener("click", async ()=>{
   outputBox.innerHTML="";
 
   const reply=await callAPI();
-  // 🔒 HARD LOCK BEFORE LOOP 3
-if(loopLevel === 3 && !paid49){
-  payBtn.style.display = "block";
-  payBtn.innerText = "⚠️ Unlock Clarity (₹49)";
-  return "🔒 Unlock required";
-}
 
-// 🔒 HARD LOCK BEFORE LOOP 4
-if(loopLevel === 4 && !paid99){
-  payBtn.style.display = "block";
-  payBtn.innerText = "🔥 Unlock Full Execution (₹99)";
-  return "🔒 Unlock required";
-}
   outputBox.innerHTML=`<b>You:</b> ${text}<br><br>${formatReply(reply)}`;
 });
 
-// NEXT LOOP (🔥 MAIN CONTROL)
+// NEXT LOOP
 nextBtn.addEventListener("click", async ()=>{
   const text = reflectionInput.value.trim();
   if(!text) return;
-
-  loopLevel++;
 
   messages.push({role:"user", content:text});
   outputBox.innerHTML += `<br><b>You:</b> ${text}<br>`;
@@ -209,18 +178,20 @@ nextBtn.addEventListener("click", async ()=>{
 
   outputBox.innerHTML += formatReply(reply);
 
+  loopLevel++; // 🔥 AFTER API
+
   reflectionInput.value="";
 });
 
-// 💰 PAYMENT (TEST)
+// PAYMENT
 payBtn.addEventListener("click", ()=>{
 
-  if(loopLevel===2){
+  if(loopLevel===3){
     alert("✅ ₹49 Payment Success");
     paid49=true;
   }
 
-  else if(loopLevel===3){
+  else if(loopLevel===4){
     alert("🔥 ₹99 Payment Success");
     paid99=true;
   }
@@ -234,7 +205,6 @@ newSessionBtn.addEventListener("click", ()=>{
   loopLevel=1;
   paid49=false;
   paid99=false;
-
   outputBox.innerHTML="";
   payBtn.style.display="none";
 });
