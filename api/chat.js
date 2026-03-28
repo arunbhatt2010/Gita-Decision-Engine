@@ -27,13 +27,15 @@ const {
 } = body;
 
 // 🔥 FILTER FIRST (always run)
-const lastUserMessage = messages?.[messages.length - 1]?.content?.toLowerCase() || "";
+const lastUserMessage = messages?.[messages.length - 1]?.content || "";
+const lowerMsg = lastUserMessage.toLowerCase();
 
-console.log("🧠 USER INPUT:", lastUserMessage);
+// 🔥 Language detect (solid version)
+const isHindi = /[\u0900-\u097F]/.test(lastUserMessage);
 
+// 🔥 Domain patterns
 const healthPatterns = [
-  "दर्द", "दांत", "सर दर्द", "body pain", "pain",
-  "medical", "doctor", "treatment", "medicine", "health"
+  "दर्द", "दांत", "सर दर्द", "pain", "doctor", "medicine", "health"
 ];
 
 const relationshipPatterns = [
@@ -41,14 +43,25 @@ const relationshipPatterns = [
   "boyfriend", "wife", "husband", "marriage"
 ];
 
-const isHealth = healthPatterns.some(word => lastUserMessage.includes(word));
-const isRelationship = relationshipPatterns.some(word => lastUserMessage.includes(word));
+const isHealth = healthPatterns.some(word => lowerMsg.includes(word));
+const isRelationship = relationshipPatterns.some(word => lowerMsg.includes(word));
 
 if (isHealth || isRelationship) {
+
   console.log("⛔ BLOCKED:", lastUserMessage);
 
-  return res.status(200).json({
-    reply: `This system does not handle medical or relationship problems.
+  const reply = isHindi
+    ? `यह सिस्टम medical या relationship समस्याओं के लिए नहीं है।
+
+इसे इन चीज़ों के लिए उपयोग करें:
+• पैसे / income
+• business / clients
+• career direction
+• overthinking / confusion
+• discipline / consistency
+
+सही समस्या के साथ वापस आएं।`
+    : `This system does not handle medical or relationship problems.
 
 Use it for:
 • Money / income
@@ -57,8 +70,9 @@ Use it for:
 • Overthinking / confusion
 • Discipline / consistency
 
-Come back with a real decision problem.`
-  });
+Come back with a real decision problem.`;
+
+  return res.status(200).json({ reply });
 }
 
 // ✅ THEN validation
