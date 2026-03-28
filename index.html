@@ -4,6 +4,15 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
 <title>TruthLoop</title>
 
+<!-- ✅ GOOGLE ANALYTICS (SAFE) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-RBMQ2F6P9Q"></script>
+<script>
+window.dataLayer = window.dataLayer || [];
+function gtag(){dataLayer.push(arguments);}
+gtag('js', new Date());
+gtag('config', 'G-RBMQ2F6P9Q');
+</script>
+
 <style>
 body { background:#0f0f0f; color:#fff; font-family:Arial; margin:0; }
 .container { max-width:500px; margin:auto; padding:15px; }
@@ -49,7 +58,6 @@ button {
 <!-- GOAL -->
 <div id="goalScreen">
   <p>Where are you stuck right now?</p>
-
   <button onclick="selectGoal('Money')">Money</button>
   <button onclick="selectGoal('Clarity')">Clarity</button>
   <button onclick="selectGoal('Consistency')">Consistency</button>
@@ -90,7 +98,7 @@ button {
 
   <div id="summaryBox" style="background:#000; padding:15px; border-radius:10px;"></div>
 
-  <button id="upgradeBtn">🚀 Get Full Execution Plan (₹299) </button>
+  <button id="upgradeBtn">🚀 Get Full Execution Plan (₹299)</button>
   <button id="restartBtn">🔄 Start Again</button>
 
 </div>
@@ -126,6 +134,7 @@ const restartBtn=document.getElementById("restartBtn");
 const upgradeBtn=document.getElementById("upgradeBtn");
 
 function formatReply(text){
+  if(!text) return "<div>⚠️ Empty response</div>";
   return text.split("\n").map(l=>`<div style="margin-bottom:12px;">${l}</div>`).join("");
 }
 
@@ -134,6 +143,8 @@ window.selectGoal=(v)=>{
   userGoal=v;
   goalScreen.style.display="none";
   problemScreen.style.display="block";
+
+  gtag('event', 'goal_selected', { goal: v });
 };
 
 window.saveProblem=()=>{
@@ -190,6 +201,8 @@ getBtn.addEventListener("click", async ()=>{
   const reply=await callAPI();
 
   outputBox.innerHTML=`<b>You:</b> ${text}<br><br>${formatReply(reply)}`;
+
+  gtag('event', 'started_conversation');
 });
 
 // CONTINUE
@@ -197,42 +210,36 @@ nextBtn.addEventListener("click", async ()=>{
   const text = reflectionInput.value.trim();
   if(!text) return;
 
-  // ₹49 lock
   if(loopLevel === 2 && !paid49){
     payBtn.style.display="block";
     payBtn.innerText="⚠️ Go Deeper (₹49)";
     return;
   }
 
-  // ₹99 lock
   if(loopLevel === 3 && !paid99){
     payBtn.style.display="block";
     payBtn.innerText="🔥 Get Clear Action (₹99)";
     return;
   }
 
-  // FINAL STOP
   if(loopLevel === 4){
 
-summaryBox.innerHTML = `
-<div style="background:#000; padding:15px; border-radius:10px; text-align:left;">
-
-You were not stuck.<br><br>
-
-You were avoiding the real move.<br><br>
-
-You kept doing what feels safe… but not what actually moves things forward.<br><br>
-
-You already know what matters.<br>
-You just haven’t acted on it.<br><br>
-
-Nothing changes from here… unless your actions change.
-
-</div>
-`;
+    summaryBox.innerHTML = `
+    <div style="background:#000; padding:15px; border-radius:10px; text-align:left;">
+    You were not stuck.<br><br>
+    You were avoiding the real move.<br><br>
+    You kept doing what feels safe… but not what actually moves things forward.<br><br>
+    You already know what matters.<br>
+    You just haven’t acted on it.<br><br>
+    Nothing changes from here… unless your actions change.
+    </div>
+    `;
 
     finalScreen.style.display="block";
     mainApp.style.display="none";
+
+    gtag('event', 'completed_flow');
+
     return;
   }
 
@@ -243,7 +250,7 @@ Nothing changes from here… unless your actions change.
 
   const reply = await callAPI();
 
-  outputBox.innerHTML = outputBox.innerHTML.replace("⏳ Thinking...", formatReply(reply));
+  outputBox.innerHTML += `<br>${formatReply(reply)}`;
 
   reflectionInput.value="";
 });
@@ -254,11 +261,13 @@ payBtn.addEventListener("click", ()=>{
   if(loopLevel === 2){
     alert("✅ Payment successful");
     paid49=true;
+    gtag('event', 'paid_49');
   }
 
   else if(loopLevel === 3){
     alert("🔥 Payment successful");
     paid99=true;
+    gtag('event', 'paid_99');
   }
 
   payBtn.style.display="none";
@@ -282,6 +291,7 @@ restartBtn.addEventListener("click", ()=>{
 // CTA
 upgradeBtn.addEventListener("click", ()=>{
   alert("🚀 Full system coming soon");
+  gtag('event', 'clicked_upgrade');
 });
 
 });
