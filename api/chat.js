@@ -27,62 +27,34 @@ export default async function handler(req, res) {
       userAction = ""
     } = body;
 
+    // 🔥 VALIDATION
     if (!messages || !messages.length) {
       return res.status(400).json({ reply: "No input provided" });
     }
 
+    // 🔥 LAST MESSAGE
     const lastUserMessage = messages[messages.length - 1]?.content || "";
+    const lowerMsg = lastUserMessage.toLowerCase();
 
-    // 🔥 STEP 1: INTENT CLASSIFIER (AI BASED)
-    const categoryCheck = await fetch(
-      "https://api.groq.com/openai/v1/chat/completions",
-      {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: "Bearer " + process.env.GROQ_API_KEY
-        },
-        body: JSON.stringify({
-          model: "llama-3.3-70b-versatile",
-          messages: [
-            {
-              role: "system",
-              content: `
-Classify the user query into ONE category:
+    // 🔥 LANGUAGE DETECTION (STRONG)
+    const isHindi = /[\u0900-\u097F]/.test(lastUserMessage);
 
-- business
-- career
-- money
-- mindset
-- health
-- relationship
-- other
+    // 🔥 DOMAIN FILTER (SMART + SAFE)
+    const healthPatterns = [
+      "दर्द","दांत","सर दर्द","pain","doctor","medicine","health","fever","treatment"
+    ];
 
-Reply ONLY one word.
-No explanation.
-`
-            },
-            {
-              role: "user",
-              content: lastUserMessage
-            }
-          ],
-          temperature: 0,
-          max_tokens: 5
-        })
-      }
-    );
+    const relationshipPatterns = [
+      "relationship","breakup","love","girlfriend",
+      "boyfriend","wife","husband","marriage","ex"
+    ];
 
-    const categoryData = await categoryCheck.json();
-    const category =
-      categoryData?.choices?.[0]?.message?.content?.trim().toLowerCase();
+    const isHealth = healthPatterns.some(word => lowerMsg.includes(word));
+    const isRelationship = relationshipPatterns.some(word => lowerMsg.includes(word));
 
-    console.log("📊 CATEGORY:", category);
+    if (isHealth || isRelationship) {
 
-    // 🔥 STEP 2: BLOCK
-    if (category === "health" || category === "relationship") {
-
-      const isHindi = /[\u0900-\u097F]/.test(lastUserMessage);
+      console.log("⛔ BLOCKED:", lastUserMessage);
 
       const reply = isHindi
         ? `यह सिस्टम medical या relationship समस्याओं के लिए नहीं है।
@@ -109,7 +81,7 @@ Come back with a real decision problem.`;
       return res.status(200).json({ reply });
     }
 
-    // 🔥 MAIN SYSTEM PROMPT
+    // 🔥 SYSTEM PROMPT (LOCKED + CONTROLLED)
     const systemPrompt = `
 You are TruthLoop.
 
@@ -128,7 +100,7 @@ No teaching. No explaining. No motivation.
 LANGUAGE
 --------------------------------
 Reply in SAME language as user.
-Never switch.
+Never switch language.
 
 --------------------------------
 LOOP CONTROL
@@ -143,13 +115,29 @@ Loop 4 → Deep execution
 NO action before Loop 4.
 
 --------------------------------
+STRICT ENFORCEMENT
+--------------------------------
+
+If Loop Level < 4:
+
+- Do NOT give any action
+- Do NOT suggest doing anything
+- Do NOT use verbs like send, call, post, create, sell
+
+Instead:
+- Expose behavior
+- Ask sharp question
+
+If violated → response is WRONG
+
+--------------------------------
 LOOP 4 RULE (CRITICAL)
 --------------------------------
 
 If Loop = 4:
 
 - Give DEEP, PERSONAL response
-- Use user context
+- Use user context strongly
 - NO question at end
 
 Structure:
@@ -161,14 +149,14 @@ Line 6 → Action 2
 Line 7 → Final pressure line  
 
 --------------------------------
-STRUCTURE
+STRUCTURE (MANDATORY)
 --------------------------------
 
 Response MUST be EXACTLY 7 lines
 
 - One idea per line
 - No paragraphs
-- No extra text
+- No extra lines
 
 --------------------------------
 ACTION RULE
@@ -188,7 +176,7 @@ Call out avoidance
 Expose reality  
 Push action  
 
-No generic answers
+No generic responses
 `;
 
     const response = await fetch(
@@ -212,14 +200,55 @@ No generic answers
     );
 
     if (!response.ok) {
+      console.error("API ERROR:", await response.text());
       return res.status(500).json({ reply: "API error" });
     }
 
     const data = await response.json();
 
-    const reply =
+    let reply =
       data?.choices?.[0]?.message?.content ||
       "No response";
+
+    // 🔥 HARD SAFETY (ANTI-ACTION LEAK)
+    if (loopLevel < 4) {
+      const actionWords = ["send","call","post","create","sell","message","build"];
+      const hasAction = actionWords.some(word =>
+        reply.toLowerCase().includes(word)
+      );
+
+      if (hasAction) {
+        console.log("⚠️ ACTION LEAK BLOCKED");
+
+        reply = isHindi
+          ? `तुम समस्या को देख रहे हो।
+
+लेकिन तुम अभी भी टाल रहे हो।
+
+तुम जानते हो क्या करना है।
+
+फिर भी नहीं कर रहे।
+
+तुम खुद को रोक रहे हो।
+
+अब क्या रोके हुए है?
+
+सच बोलो।`
+          : `You can see the problem.
+
+But you are still avoiding it.
+
+You already know what to do.
+
+Yet you are not doing it.
+
+You are holding yourself back.
+
+What is stopping you?
+
+Be honest.`;
+      }
+    }
 
     return res.status(200).json({
       reply,
@@ -227,8 +256,9 @@ No generic answers
     });
 
   } catch (error) {
+    console.error("SERVER ERROR:", error);
     return res.status(500).json({
       reply: "Server error"
     });
   }
-      }
+    }
