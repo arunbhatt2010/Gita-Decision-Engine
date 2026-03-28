@@ -252,10 +252,10 @@ Push action
         body: JSON.stringify({
   model: "llama-3.3-70b-versatile",
   messages: [
-    { role: "system", content: systemPrompt },
-    { role: "user", content: lastUserMessage }
-  ],
-  temperature: 0.9,
+  { role: "system", content: systemPrompt },
+  ...messages
+],
+  temperature: 0.6,
   max_tokens: 400
 })
       }
