@@ -62,7 +62,7 @@ export default async function handler(req, res) {
       return res.status(200).json({ reply });
     }
 
-    // 🔥 FINAL PROMPT SYSTEM
+    // 🔥 FINAL PROMPT (FIXED HUMAN OUTPUT)
     const systemPrompt = `
 You are TruthLoop.
 
@@ -93,54 +93,47 @@ Loop 3 → 75% clarity
 Loop 4 → 100% execution  
 
 --------------------------------
-
-STRUCTURE RULE (IMPORTANT)
-
-DO NOT use labels like Guide, Pattern, Hint.
-
-Write as natural human lines.
+STRUCTURE (CRITICAL)
+--------------------------------
 
 Loop 1–3:
-- 4 lines total
-- Line 1 → direct observation
-- Line 2 → behavior pattern
-- Line 3 → uncomfortable insight
-- Line 4 → sharp question
+- Exactly 4 lines
+- Each line MUST be a complete sentence (minimum 8 words)
+
+Line 1 → clear observation  
+Line 2 → behavior pattern  
+Line 3 → uncomfortable truth  
+Line 4 → sharp question  
 
 Loop 4:
-- 5 lines total
-- Line 1 → truth
-- Line 2 → behavior exposure
-- Line 3 → Action 1
-- Line 4 → Action 2
-- Line 5 → closing pressure
+- Exactly 5 lines
+- Each line MUST be a complete sentence
+
+Line 1 → truth  
+Line 2 → behavior exposure  
+Line 3 → action 1  
+Line 4 → action 2  
+Line 5 → closing pressure  
 
 --------------------------------
-
-WORD RANGE (SOFT, NOT STRICT)
-
-Loop 1: 25–40 words total  
-Loop 2: 35–55 words  
-Loop 3: 45–70 words  
-Loop 4: 60–90 words  
-
+STRICT RULES
 --------------------------------
 
-STRICT:
+- NO labels like Guide, Pattern, Hint  
+- NO short fragments  
+- NO broken phrases  
+- NO bullet style writing  
 
-- No labels
-- No bullet points
-- No formatting words like "Guide:"
-- Must feel like a real human speaking
+Each line must feel like natural human speech.
+
 --------------------------------
-RULES
+LOOP RULES
 --------------------------------
 
 Loop 1–3:
 - No action
 - No advice
-- No repetition
-- Last line MUST be question
+- Last line MUST be a question
 
 Loop 4:
 - No question
@@ -150,23 +143,13 @@ Loop 4:
 ACTION RULE (LOOP 4)
 --------------------------------
 
-Action 1:
-- Clear direction
-
-Action 2:
-- Immediate execution step
+- Action 1 = clear direction  
+- Action 2 = immediate execution  
 
 Both must be:
-- Specific
-- Realistic
-- Clear
-
---------------------------------
-ANTI-REPETITION
---------------------------------
-
-Never repeat same wording.
-Each loop must feel new.
+- specific  
+- realistic  
+- direct  
 
 --------------------------------
 TONE
@@ -197,8 +180,8 @@ Push user from thinking to action
             { role: "system", content: systemPrompt },
             ...messages
           ],
-          temperature: 0.5,
-          max_tokens: 180
+          temperature: 0.6,
+          max_tokens: 220
         })
       }
     );
@@ -211,16 +194,17 @@ Push user from thinking to action
 
     let reply = data?.choices?.[0]?.message?.content || "No response";
 
-    // 🔥 SAFETY (only basic, not overkill)
+    // 🔥 SAFETY (ANTI ACTION LEAK)
     if (loopLevel < 4) {
       const forbidden = ["send","call","post","create","sell","build"];
-      const words = reply.toLowerCase().split(" ");
-      const hasAction = forbidden.some(word => words.includes(word));
+      const hasAction = forbidden.some(word =>
+        reply.toLowerCase().includes(word)
+      );
 
       if (hasAction) {
         reply = isHindi
-          ? "तुम देख रहे हो समस्या।\n\nलेकिन अभी भी बच रहे हो।\n\nतुम जानते हो सच क्या है।\n\nफिर भी टाल रहे हो।\n\nक्यों दोहरा रहे हो यही पैटर्न?\n\nअगला कदम क्या रोके हुए है?\n\nसच बोलो।"
-          : "You can see the problem.\n\nBut you are still avoiding it.\n\nYou know the truth already.\n\nYet you delay again.\n\nWhy repeat this same pattern?\n\nWhat is stopping your next move?\n\nBe honest.";
+          ? "तुम समस्या देख रहे हो, लेकिन अभी भी उससे बच रहे हो।\n\nतुम्हें पता है क्या करना चाहिए, फिर भी कदम नहीं उठा रहे हो।\n\nतुम activity में छिप रहे हो, action से नहीं।\n\nअब असली वजह क्या है जो तुम्हें रोक रही है?"
+          : "You can clearly see the problem, but you are still avoiding it.\n\nYou already know what needs to be done, yet you are not acting on it.\n\nYou are hiding behind activity instead of taking real action.\n\nWhat is actually stopping you right now?";
       }
     }
 
