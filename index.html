@@ -1,7 +1,10 @@
-<!DOCTYPE html><html>
+<!DOCTYPE html>
+<html>
 <head>
 <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-<title>TruthLoop</title><style>
+<title>TruthLoop</title>
+
+<style>
 body {
   background:#0f0f0f;
   color:#fff;
@@ -43,52 +46,56 @@ button {
   font-weight:bold;
   cursor:pointer;
 }
-</style></head><body><div class="container"><h2>TruthLoop</h2><!-- KYC --><div id="goalScreen">
-  <p>Where are you stuck right now and avoiding fixing it?</p>
-  <p style="font-size:12px;opacity:0.7;">Pick the one you keep ignoring.</p><button onclick="selectGoal('Money stuck / not growing')">Money stuck / not growing</button> <button onclick="selectGoal('No clarity, just confusion')">No clarity, just confusion</button> <button onclick="selectGoal('Keep starting, can’t stay consistent')">Keep starting, can’t stay consistent</button> <button onclick="selectGoal('Overthinking, no action')">Overthinking, no action</button> <button onclick="selectGoal('Something else')">Something else</button>
+</style>
+</head>
 
-</div><div id="problemScreen" style="display:none;">
+<body>
+
+<div class="container">
+<h2>TruthLoop</h2>
+
+<!-- GOAL -->
+<div id="goalScreen">
+  <p>Where are you stuck right now and avoiding fixing it?</p>
+  <p style="font-size:12px;opacity:0.7;">Pick the one you keep ignoring.</p>
+
+  <button onclick="selectGoal('Money stuck / not growing')">Money stuck / not growing</button>
+  <button onclick="selectGoal('No clarity, just confusion')">No clarity, just confusion</button>
+  <button onclick="selectGoal('Keep starting, can’t stay consistent')">Keep starting, can’t stay consistent</button>
+  <button onclick="selectGoal('Overthinking, no action')">Overthinking, no action</button>
+  <button onclick="selectGoal('Something else')">Something else</button>
+</div>
+
+<!-- PROBLEM -->
+<div id="problemScreen" style="display:none;">
   <input id="problemInput" placeholder="What’s actually not working?" />
   <button onclick="saveProblem()">Next</button>
-</div><div id="actionScreen" style="display:none;">
+</div>
+
+<!-- ACTION -->
+<div id="actionScreen" style="display:none;">
   <input id="actionInput" placeholder="What did you do in last 48 hours?" />
   <button onclick="saveAction()">Start</button>
-</div><!-- MAIN --><div id="mainApp" style="display:none;"><div id="outputBox" class="output"></div><input id="mainInput" placeholder="Say it clearly. No hiding." />
-<button id="getBtn">Face It</button><input id="reflectionInput" placeholder="Answer honestly..." />
-<button id="nextBtn">Continue</button><button id="payBtn" style="display:none;">⚠️ Unlock Full Clarity (₹19)</button> <button id="newSessionBtn" style="display:none;">🔄 Start New Problem</button>
+</div>
 
-</div></div><script>
+<!-- MAIN -->
+<div id="mainApp" style="display:none;">
+  
+  <div id="outputBox" class="output"></div>
 
-document.addEventListener("DOMContentLoaded", () => {
+  <input id="mainInput" placeholder="Say it clearly. No hiding." />
+  <button id="getBtn">Face It</button>
 
-let userGoal = "";
-let userProblem = "";
-let userAction = "";
+  <input id="reflectionInput" placeholder="Answer honestly..." />
+  <button id="nextBtn">Continue</button>
 
-let messages = [];
-let loopLevel = 1;
+  <button id="payBtn" style="display:none;">⚠️ Unlock Clarity</button>
+  <button id="newSessionBtn" style="display:none;">🔄 Start New Problem</button>
 
-const goalScreen = document.getElementById("goalScreen");
-const problemScreen = document.getElementById("problemScreen");
-const actionScreen = document.getElementById("actionScreen");
-const mainApp = document.getElementById("mainApp");
+</div>
 
-const problemInput = document.getElementById("problemInput");
-const actionInput = document.getElementById("actionInput");
-const mainInput = document.getElementById("mainInput");
-const reflectionInput = document.getElementById("reflectionInput");
+</div>
 
-const outputBox = document.getElementById("outputBox");
-const getBtn = document.getElementById("getBtn");
-const nextBtn = document.getElementById("nextBtn");
-const payBtn = document.getElementById("payBtn");
-const newSessionBtn = document.getElementById("newSessionBtn");
-
-function formatReply(text) {
-  return text
-    .split("\n")
-    .filter(line => line.trim() !== "")
-    .map(line => `<div style="margin-bottom:14px; line-height:1.6;">${line}</div>`)
 <script>
 
 document.addEventListener("DOMContentLoaded", () => {
@@ -99,8 +106,6 @@ let userAction = "";
 
 let messages = [];
 let loopLevel = 1;
-
-// 🔥 PAYMENT STATE
 let hasPaid = false;
 
 const goalScreen = document.getElementById("goalScreen");
@@ -119,14 +124,16 @@ const nextBtn = document.getElementById("nextBtn");
 const payBtn = document.getElementById("payBtn");
 const newSessionBtn = document.getElementById("newSessionBtn");
 
+// FORMAT
 function formatReply(text) {
   return text
     .split("\n")
     .filter(line => line.trim() !== "")
-    .map(line => `<div style="margin-bottom:14px; line-height:1.6;">${line}</div>`)
+    .map(line => `<div style="margin-bottom:14px;">${line}</div>`)
     .join("");
 }
 
+// FLOW
 window.selectGoal = function(val){
   userGoal = val;
   goalScreen.style.display = "none";
@@ -151,6 +158,7 @@ window.saveAction = function(){
   mainApp.style.display = "block";
 }
 
+// API
 async function callAPI(){
   const res = await fetch("/api/chat",{
     method:"POST",
@@ -168,8 +176,8 @@ async function callAPI(){
 
   messages.push({ role:"assistant", content:data.reply });
 
-  // 🔥 PAYWALL CONTROL
- if (loopLevel >= 3 && !hasPaid)
+  // PAYWALL SHOW
+  if (loopLevel >= 3 && !hasPaid) {
     payBtn.style.display = "block";
     newSessionBtn.style.display = "block";
 
@@ -185,7 +193,7 @@ async function callAPI(){
   return data.reply;
 }
 
-// 🔥 LOOP 1
+// FIRST LOOP
 getBtn.addEventListener("click", async ()=>{
   const text = mainInput.value.trim();
   if(!text) return;
@@ -197,7 +205,6 @@ getBtn.addEventListener("click", async ()=>{
   hasPaid = false;
 
   messages = [{ role:"user", content:text }];
-
   outputBox.innerHTML = "";
 
   const reply = await callAPI();
@@ -208,13 +215,13 @@ getBtn.addEventListener("click", async ()=>{
   outputBox.innerHTML = `<b>You:</b> ${text}<br><br>${formatReply(reply)}`;
 });
 
-// 🔥 LOOP 2–4
+// NEXT LOOP
 nextBtn.addEventListener("click", async ()=>{
   const text = reflectionInput.value.trim();
   if(!text) return;
 
-  // 🔒 BLOCK if not paid
-  if (loopLevel > 3 && !hasPaid) {
+  // LOCK BEFORE LOOP 4
+  if (loopLevel === 3 && !hasPaid) {
     alert("⚠️ Unlock required to continue");
     return;
   }
@@ -237,10 +244,8 @@ nextBtn.addEventListener("click", async ()=>{
   reflectionInput.value = "";
 });
 
-// 🔥 PAYMENT CLICK (TEST MODE)
+// PAYMENT (TEST)
 payBtn.addEventListener("click", ()=>{
-
-  // 👉 अभी test phase है → fake success
   alert("✅ Test Payment Successful");
 
   hasPaid = true;
@@ -249,7 +254,7 @@ payBtn.addEventListener("click", ()=>{
   nextBtn.disabled = false;
 });
 
-// 🔥 RESET
+// RESET
 newSessionBtn.addEventListener("click", ()=>{
   messages = [];
   loopLevel = 1;
@@ -267,5 +272,6 @@ newSessionBtn.addEventListener("click", ()=>{
 });
 
 </script>
-    </body>
+
+</body>
   </html>
