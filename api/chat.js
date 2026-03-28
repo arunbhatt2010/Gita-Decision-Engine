@@ -18,53 +18,54 @@ export default async function handler(req, res) {
     const body = typeof req.body === "string"
       ? JSON.parse(req.body)
       : req.body;
+const {
+  messages,
+  loopLevel = 1,
+  userGoal = "",
+  userProblem = "",
+  userAction = ""
+} = body;
 
-    const {
-      messages,
-      loopLevel = 1,
-      userGoal = "",
-      userProblem = "",
-      userAction = ""
-    } = body;
+// 🔥 FILTER FIRST (always run)
+const lastUserMessage = messages?.[messages.length - 1]?.content?.toLowerCase() || "";
 
-    if (!messages || !messages.length) {
-      return res.status(400).json({ reply: "No input provided" });
-    }
+console.log("🧠 USER INPUT:", lastUserMessage);
 
-    // 🔥 DOMAIN FILTER
-    const lastUserMessage = messages[messages.length - 1]?.content?.toLowerCase() || "";
+const healthPatterns = [
+  "दर्द", "दांत", "सर दर्द", "body pain", "pain",
+  "medical", "doctor", "treatment", "medicine", "health"
+];
 
-    const restrictedKeywords = [
-      "pain","dard","health","medical","doctor","treatment",
-      "relationship","love","breakup","girlfriend","boyfriend","marriage"
-    ];
+const relationshipPatterns = [
+  "relationship", "breakup", "love", "girlfriend",
+  "boyfriend", "wife", "husband", "marriage"
+];
 
-    const isRestricted = restrictedKeywords.some(word =>
-      lastUserMessage.includes(word)
-    );
+const isHealth = healthPatterns.some(word => lastUserMessage.includes(word));
+const isRelationship = relationshipPatterns.some(word => lastUserMessage.includes(word));
 
-    if (isRestricted) {
-      return res.status(200).json({
-        reply: `This system does not handle medical or relationship problems.
+if (isHealth || isRelationship) {
+  console.log("⛔ BLOCKED:", lastUserMessage);
 
-It is built for decision clarity and action.
-
-You are asking the wrong type of question.
+  return res.status(200).json({
+    reply: `This system does not handle medical or relationship problems.
 
 Use it for:
+• Money / income
+• Business / clients
+• Career direction
+• Overthinking / confusion
+• Discipline / consistency
 
-• Money / income  
-• Business / clients  
-• Career direction  
-• Overthinking / confusion  
-• Discipline / consistency  
+Come back with a real decision problem.`
+  });
+}
 
-Come back with a real problem.
-
-Or stay stuck in the wrong one.`
-      });
-    }
-
+// ✅ THEN validation
+if (!messages || !messages.length) {
+  return res.status(400).json({ reply: "No input provided" });
+}
+    
     // 🔥 SYSTEM PROMPT
     const systemPrompt = `
 You are TruthLoop.
