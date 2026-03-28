@@ -89,6 +89,41 @@ function formatReply(text) {
     .split("\n")
     .filter(line => line.trim() !== "")
     .map(line => `<div style="margin-bottom:14px; line-height:1.6;">${line}</div>`)
+<script>
+
+document.addEventListener("DOMContentLoaded", () => {
+
+let userGoal = "";
+let userProblem = "";
+let userAction = "";
+
+let messages = [];
+let loopLevel = 1;
+
+// 🔥 PAYMENT STATE
+let hasPaid = false;
+
+const goalScreen = document.getElementById("goalScreen");
+const problemScreen = document.getElementById("problemScreen");
+const actionScreen = document.getElementById("actionScreen");
+const mainApp = document.getElementById("mainApp");
+
+const problemInput = document.getElementById("problemInput");
+const actionInput = document.getElementById("actionInput");
+const mainInput = document.getElementById("mainInput");
+const reflectionInput = document.getElementById("reflectionInput");
+
+const outputBox = document.getElementById("outputBox");
+const getBtn = document.getElementById("getBtn");
+const nextBtn = document.getElementById("nextBtn");
+const payBtn = document.getElementById("payBtn");
+const newSessionBtn = document.getElementById("newSessionBtn");
+
+function formatReply(text) {
+  return text
+    .split("\n")
+    .filter(line => line.trim() !== "")
+    .map(line => `<div style="margin-bottom:14px; line-height:1.6;">${line}</div>`)
     .join("");
 }
 
@@ -133,14 +168,24 @@ async function callAPI(){
 
   messages.push({ role:"assistant", content:data.reply });
 
-  if (data.paywall) {
+  // 🔥 PAYWALL CONTROL
+  if (data.paywall && !hasPaid) {
     payBtn.style.display = "block";
     newSessionBtn.style.display = "block";
+
+    if (loopLevel === 3) {
+      payBtn.innerText = "⚠️ Unlock Clarity (₹49)";
+    } else {
+      payBtn.innerText = "🔥 Unlock Full Execution (₹99)";
+    }
+
+    nextBtn.disabled = true;
   }
 
   return data.reply;
 }
 
+// 🔥 LOOP 1
 getBtn.addEventListener("click", async ()=>{
   const text = mainInput.value.trim();
   if(!text) return;
@@ -149,6 +194,8 @@ getBtn.addEventListener("click", async ()=>{
   nextBtn.disabled = true;
 
   loopLevel = 1;
+  hasPaid = false;
+
   messages = [{ role:"user", content:text }];
 
   outputBox.innerHTML = "";
@@ -161,9 +208,16 @@ getBtn.addEventListener("click", async ()=>{
   outputBox.innerHTML = `<b>You:</b> ${text}<br><br>${formatReply(reply)}`;
 });
 
+// 🔥 LOOP 2–4
 nextBtn.addEventListener("click", async ()=>{
   const text = reflectionInput.value.trim();
   if(!text) return;
+
+  // 🔒 BLOCK if not paid
+  if (loopLevel >= 3 && !hasPaid) {
+    alert("⚠️ Unlock required to continue");
+    return;
+  }
 
   getBtn.disabled = true;
   nextBtn.disabled = true;
@@ -183,9 +237,23 @@ nextBtn.addEventListener("click", async ()=>{
   reflectionInput.value = "";
 });
 
+// 🔥 PAYMENT CLICK (TEST MODE)
+payBtn.addEventListener("click", ()=>{
+
+  // 👉 अभी test phase है → fake success
+  alert("✅ Test Payment Successful");
+
+  hasPaid = true;
+
+  payBtn.style.display = "none";
+  nextBtn.disabled = false;
+});
+
+// 🔥 RESET
 newSessionBtn.addEventListener("click", ()=>{
   messages = [];
   loopLevel = 1;
+  hasPaid = false;
 
   outputBox.innerHTML = "";
 
@@ -198,5 +266,6 @@ newSessionBtn.addEventListener("click", ()=>{
 
 });
 
-</script></body>
+</script>
+    </body>
   </html>
