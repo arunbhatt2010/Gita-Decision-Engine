@@ -191,7 +191,7 @@ No generic responses
     if (loopLevel < 4) {
       const actionWords = ["send","call","post","create","sell","message","build"];
       const hasAction = actionWords.some(word =>
-        reply.toLowerCase().includes(word)
+        reply.toLowerCase().includes(" " + word + " ")
       );
 
       if (hasAction) {
