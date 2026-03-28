@@ -7,10 +7,10 @@
 <!-- 🔥 GOOGLE ANALYTICS -->
 <script async src="https://www.googletagmanager.com/gtag/js?id=G-RBMQ2F6P9Q"></script>
 <script>
-  window.dataLayer = window.dataLayer || [];
-  function gtag(){dataLayer.push(arguments);}
-  gtag('js', new Date());
-  gtag('config', 'G-RBMQ2F6P9Q');
+window.dataLayer = window.dataLayer || [];
+function gtag(){dataLayer.push(arguments);}
+gtag('js', new Date());
+gtag('config', 'G-RBMQ2F6P9Q');
 </script>
 
 <style>
@@ -61,200 +61,199 @@ button {
 <div class="container">
 <h2>TruthLoop</h2>
 
+<!-- GOAL -->
 <div id="goalScreen">
   <p>Where are you stuck right now and avoiding fixing it?</p>
-  <button onclick="selectGoal('Money stuck / not growing')">Money stuck / not growing</button>
-  <button onclick="selectGoal('No clarity, just confusion')">No clarity, just confusion</button>
-  <button onclick="selectGoal('Keep starting, can’t stay consistent')">Keep starting</button>
-  <button onclick="selectGoal('Overthinking, no action')">Overthinking</button>
-  <button onclick="selectGoal('Something else')">Something else</button>
+  <button onclick="selectGoal('Money stuck')">Money stuck</button>
+  <button onclick="selectGoal('No clarity')">No clarity</button>
+  <button onclick="selectGoal('Consistency issue')">Consistency issue</button>
+  <button onclick="selectGoal('Overthinking')">Overthinking</button>
 </div>
 
+<!-- PROBLEM -->
 <div id="problemScreen" style="display:none;">
   <input id="problemInput" placeholder="What’s actually not working?" />
   <button onclick="saveProblem()">Next</button>
 </div>
 
+<!-- ACTION -->
 <div id="actionScreen" style="display:none;">
   <input id="actionInput" placeholder="What did you do in last 48 hours?" />
   <button onclick="saveAction()">Start</button>
 </div>
 
+<!-- MAIN -->
 <div id="mainApp" style="display:none;">
   <div id="outputBox" class="output"></div>
 
-  <input id="mainInput" placeholder="Say it clearly. No hiding." />
+  <input id="mainInput" placeholder="Say it clearly." />
   <button id="getBtn">Face It</button>
 
   <input id="reflectionInput" placeholder="Answer honestly..." />
   <button id="nextBtn">Continue</button>
 
-  <button id="payBtn" style="display:none;">⚠️ Unlock</button>
-  <button id="newSessionBtn" style="display:none;">🔄 Start New Problem</button>
+  <button id="payBtn" style="display:none;"></button>
+  <button id="newSessionBtn" style="display:none;">🔄 Start New</button>
 </div>
 
 </div>
 
 <script>
+
 document.addEventListener("DOMContentLoaded", () => {
 
-let userGoal = "";
-let userProblem = "";
-let userAction = "";
+let userGoal="", userProblem="", userAction="";
+let messages=[], loopLevel=1;
 
-let messages = [];
-let loopLevel = 1;
-let hasPaid = false;
+// 🔥 PAYMENT STATES
+let paid49=false;
+let paid99=false;
 
-const goalScreen = document.getElementById("goalScreen");
-const problemScreen = document.getElementById("problemScreen");
-const actionScreen = document.getElementById("actionScreen");
-const mainApp = document.getElementById("mainApp");
+const goalScreen=document.getElementById("goalScreen");
+const problemScreen=document.getElementById("problemScreen");
+const actionScreen=document.getElementById("actionScreen");
+const mainApp=document.getElementById("mainApp");
 
-const problemInput = document.getElementById("problemInput");
-const actionInput = document.getElementById("actionInput");
-const mainInput = document.getElementById("mainInput");
-const reflectionInput = document.getElementById("reflectionInput");
+const problemInput=document.getElementById("problemInput");
+const actionInput=document.getElementById("actionInput");
+const mainInput=document.getElementById("mainInput");
+const reflectionInput=document.getElementById("reflectionInput");
 
-const outputBox = document.getElementById("outputBox");
-const getBtn = document.getElementById("getBtn");
-const nextBtn = document.getElementById("nextBtn");
-const payBtn = document.getElementById("payBtn");
-const newSessionBtn = document.getElementById("newSessionBtn");
+const outputBox=document.getElementById("outputBox");
+const getBtn=document.getElementById("getBtn");
+const nextBtn=document.getElementById("nextBtn");
+const payBtn=document.getElementById("payBtn");
+const newSessionBtn=document.getElementById("newSessionBtn");
 
 // FORMAT
-function formatReply(text) {
-  return text
-    .split("\n")
-    .filter(line => line.trim() !== "")
-    .map(line => `<div style="margin-bottom:14px;">${line}</div>`)
+function formatReply(text){
+  return text.split("\n")
+    .map(line=>`<div style="margin-bottom:12px;">${line}</div>`)
     .join("");
 }
 
 // FLOW
-window.selectGoal = function(val){
-  userGoal = val;
-  goalScreen.style.display = "none";
-  problemScreen.style.display = "block";
-}
+window.selectGoal=(v)=>{
+  userGoal=v;
+  goalScreen.style.display="none";
+  problemScreen.style.display="block";
+};
 
-window.saveProblem = function(){
-  const val = problemInput.value.trim();
-  if(!val) return alert("Enter problem");
-  userProblem = val;
-  problemScreen.style.display = "none";
-  actionScreen.style.display = "block";
-}
+window.saveProblem=()=>{
+  userProblem=problemInput.value.trim();
+  if(!userProblem) return alert("Enter problem");
+  problemScreen.style.display="none";
+  actionScreen.style.display="block";
+};
 
-window.saveAction = function(){
-  const val = actionInput.value.trim();
-  if(!val) return alert("Enter action");
-  userAction = val;
-  actionScreen.style.display = "none";
-  mainApp.style.display = "block";
-}
+window.saveAction=()=>{
+  userAction=actionInput.value.trim();
+  if(!userAction) return alert("Enter action");
+  actionScreen.style.display="none";
+  mainApp.style.display="block";
+};
 
 // API
 async function callAPI(){
-
-  // 🔥 LOOP TRACK
-  gtag('event', 'loop_reached', { loop: loopLevel });
-
-  const res = await fetch("/api/chat",{
+  const res=await fetch("/api/chat",{
     method:"POST",
     headers:{ "Content-Type":"application/json" },
     body:JSON.stringify({
-      messages,
-      loopLevel,
-      userGoal,
-      userProblem,
-      userAction
+      messages, loopLevel, userGoal, userProblem, userAction
     })
   });
 
-  const data = await res.json();
-  messages.push({ role:"assistant", content:data.reply });
+  const data=await res.json();
+  messages.push({role:"assistant",content:data.reply});
 
-  if (loopLevel >= 3 && !hasPaid) {
-    payBtn.style.display = "block";
-    newSessionBtn.style.display = "block";
+  // 🔥 PAYWALL CONTROL
+  if(loopLevel===2 && !paid49){
+    payBtn.style.display="block";
+    payBtn.innerText="⚠️ Unlock Clarity (₹49)";
+    nextBtn.disabled=true;
+  }
 
-    payBtn.innerText = loopLevel === 3 
-      ? "⚠️ Unlock Clarity (₹49)" 
-      : "🔥 Unlock Full Execution (₹99)";
-
-    nextBtn.disabled = true;
+  if(loopLevel===3 && paid49 && !paid99){
+    payBtn.style.display="block";
+    payBtn.innerText="🔥 Unlock Full Execution (₹99)";
+    nextBtn.disabled=true;
   }
 
   return data.reply;
 }
 
 // LOOP 1
-getBtn.addEventListener("click", async ()=>{
-  const text = mainInput.value.trim();
+getBtn.addEventListener("click",async()=>{
+  const text=mainInput.value.trim();
   if(!text) return;
 
-  gtag('event', 'face_it_clicked');
+  loopLevel=1;
+  paid49=false;
+  paid99=false;
 
-  loopLevel = 1;
-  hasPaid = false;
-  messages = [{ role:"user", content:text }];
-  outputBox.innerHTML = "";
+  messages=[{role:"user",content:text}];
+  outputBox.innerHTML="";
 
-  const reply = await callAPI();
-
-  outputBox.innerHTML = `<b>You:</b> ${text}<br><br>${formatReply(reply)}`;
+  const reply=await callAPI();
+  outputBox.innerHTML=`<b>You:</b> ${text}<br><br>${formatReply(reply)}`;
 });
 
-// NEXT LOOP
-nextBtn.addEventListener("click", async ()=>{
-  const text = reflectionInput.value.trim();
+// LOOP 2–4
+nextBtn.addEventListener("click",async()=>{
+  const text=reflectionInput.value.trim();
   if(!text) return;
 
-  if (loopLevel === 3 && !hasPaid) {
-    alert("⚠️ Unlock required");
+  // 🔒 LOCKS
+  if(loopLevel===2 && !paid49){
+    alert("Unlock ₹49 first");
+    return;
+  }
+
+  if(loopLevel===3 && !paid99){
+    alert("Unlock ₹99 first");
     return;
   }
 
   loopLevel++;
-  messages.push({ role:"user", content:text });
+  messages.push({role:"user",content:text});
 
-  outputBox.innerHTML += `<br><br><b>You:</b> ${text}<br>`;
+  outputBox.innerHTML+=`<br><b>You:</b> ${text}<br>`;
+  const reply=await callAPI();
 
-  const reply = await callAPI();
-  outputBox.innerHTML += `<br>${formatReply(reply)}`;
-
-  reflectionInput.value = "";
+  outputBox.innerHTML+=formatReply(reply);
+  reflectionInput.value="";
 });
 
-// PAYMENT
-payBtn.addEventListener("click", ()=>{
-  gtag('event', 'payment_clicked');
+// 💰 PAYMENT (TEST MODE)
+payBtn.addEventListener("click",()=>{
 
-  alert("✅ Test Payment Successful");
+  if(loopLevel===2){
+    alert("✅ ₹49 success");
+    paid49=true;
+  }
 
-  hasPaid = true;
-  payBtn.style.display = "none";
-  nextBtn.disabled = false;
+  else if(loopLevel===3){
+    alert("🔥 ₹99 success");
+    paid99=true;
+  }
+
+  payBtn.style.display="none";
+  nextBtn.disabled=false;
 });
 
 // RESET
-newSessionBtn.addEventListener("click", ()=>{
-  gtag('event', 'new_problem_started');
+newSessionBtn.addEventListener("click",()=>{
+  messages=[];
+  loopLevel=1;
+  paid49=false;
+  paid99=false;
 
-  messages = [];
-  loopLevel = 1;
-  hasPaid = false;
-
-  outputBox.innerHTML = "";
-  mainInput.value = "";
-  reflectionInput.value = "";
-
-  payBtn.style.display = "none";
-  newSessionBtn.style.display = "none";
+  outputBox.innerHTML="";
+  payBtn.style.display="none";
 });
 
 });
+
 </script>
 
 </body>
