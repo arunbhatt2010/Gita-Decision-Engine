@@ -83,7 +83,6 @@ Come back with a real decision problem.`;
 
     // 🔥 SYSTEM PROMPT (LOCKED + CONTROLLED)
     const systemPrompt = `
-const systemPrompt = `
 You are TruthLoop.
 
 User Context:
