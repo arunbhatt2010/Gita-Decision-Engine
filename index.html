@@ -4,7 +4,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
 <title>TruthLoop</title>
 
-<!-- 🔥 GOOGLE ANALYTICS -->
+<!-- Google Analytics -->
 <script async src="https://www.googletagmanager.com/gtag/js?id=G-RBMQ2F6P9Q"></script>
 <script>
 window.dataLayer = window.dataLayer || [];
@@ -29,6 +29,11 @@ button {
   background:linear-gradient(45deg, orange, #ff5e00);
   font-weight:bold; cursor:pointer;
 }
+#finalScreen {
+  display:none;
+  text-align:center;
+  margin-top:15px;
+}
 </style>
 </head>
 
@@ -37,6 +42,7 @@ button {
 <div class="container">
 <h2>TruthLoop</h2>
 
+<!-- GOAL -->
 <div id="goalScreen">
   <p>Where are you stuck?</p>
   <button onclick="selectGoal('Money')">Money</button>
@@ -45,16 +51,19 @@ button {
   <button onclick="selectGoal('Overthinking')">Overthinking</button>
 </div>
 
+<!-- PROBLEM -->
 <div id="problemScreen" style="display:none;">
   <input id="problemInput" placeholder="What’s not working?" />
   <button onclick="saveProblem()">Next</button>
 </div>
 
+<!-- ACTION -->
 <div id="actionScreen" style="display:none;">
   <input id="actionInput" placeholder="What did you do?" />
   <button onclick="saveAction()">Start</button>
 </div>
 
+<!-- MAIN -->
 <div id="mainApp" style="display:none;">
   <div id="outputBox" class="output"></div>
 
@@ -65,7 +74,16 @@ button {
   <button id="nextBtn">Continue</button>
 
   <button id="payBtn" style="display:none;"></button>
-  <button id="newSessionBtn" style="display:none;">🔄 Start New</button>
+</div>
+
+<!-- FINAL SCREEN -->
+<div id="finalScreen">
+  <p>✅ This conversation is complete.</p>
+
+  <div id="summaryBox" style="background:#000; padding:15px; border-radius:10px;"></div>
+
+  <button id="upgradeBtn">🚀 Unlock Full System (₹299)</button>
+  <button id="restartBtn">🔄 Start New Conversation</button>
 </div>
 
 </div>
@@ -92,7 +110,11 @@ const outputBox=document.getElementById("outputBox");
 const getBtn=document.getElementById("getBtn");
 const nextBtn=document.getElementById("nextBtn");
 const payBtn=document.getElementById("payBtn");
-const newSessionBtn=document.getElementById("newSessionBtn");
+
+const finalScreen=document.getElementById("finalScreen");
+const summaryBox=document.getElementById("summaryBox");
+const restartBtn=document.getElementById("restartBtn");
+const upgradeBtn=document.getElementById("upgradeBtn");
 
 function formatReply(text){
   return text.split("\n").map(l=>`<div>${l}</div>`).join("");
@@ -119,34 +141,29 @@ window.saveAction=()=>{
   mainApp.style.display="block";
 };
 
-// 🔥 API WITH LOCK
+// API
 async function callAPI(){
+  try{
+    const res=await fetch("/api/chat",{
+      method:"POST",
+      headers:{ "Content-Type":"application/json" },
+      body:JSON.stringify({
+        messages, loopLevel, userGoal, userProblem, userAction
+      })
+    });
 
-  // LOCK BEFORE LOOP 3
-  if(loopLevel === 3 && !paid49){
-    payBtn.style.display="block";
-    payBtn.innerText="⚠️ Unlock Clarity (₹49)";
-    return "🔒 Unlock required";
+    const data=await res.json();
+
+    if(!data || !data.reply){
+      return "⚠️ No response";
+    }
+
+    messages.push({role:"assistant",content:data.reply});
+    return data.reply;
+
+  } catch(e){
+    return "⚠️ Connection error";
   }
-
-  // LOCK BEFORE LOOP 4
-  if(loopLevel === 4 && !paid99){
-    payBtn.style.display="block";
-    payBtn.innerText="🔥 Unlock Full Execution (₹99)";
-    return "🔒 Unlock required";
-  }
-
-  const res=await fetch("/api/chat",{
-    method:"POST",
-    headers:{ "Content-Type":"application/json" },
-    body:JSON.stringify({
-      messages, loopLevel, userGoal, userProblem, userAction
-    })
-  });
-
-  const data=await res.json();
-  messages.push({role:"assistant",content:data.reply});
-  return data.reply;
 }
 
 // LOOP 1
@@ -159,7 +176,7 @@ getBtn.addEventListener("click", async ()=>{
   paid99=false;
 
   messages=[{role:"user",content:text}];
-  outputBox.innerHTML="";
+  outputBox.innerHTML="⏳ Thinking...";
 
   const reply=await callAPI();
 
@@ -171,14 +188,46 @@ nextBtn.addEventListener("click", async ()=>{
   const text = reflectionInput.value.trim();
   if(!text) return;
 
+  // 🔒 LOCK ₹49
+  if(loopLevel === 2 && !paid49){
+    payBtn.style.display="block";
+    payBtn.innerText="⚠️ Unlock Clarity (₹49)";
+    return;
+  }
+
+  // 🔒 LOCK ₹99
+  if(loopLevel === 3 && !paid99){
+    payBtn.style.display="block";
+    payBtn.innerText="🔥 Unlock Full Execution (₹99)";
+    return;
+  }
+
+  // 🛑 FINAL STOP
+  if(loopLevel === 4){
+    summaryBox.innerHTML = `
+      <b>Your Pattern:</b><br>
+      You avoid execution and delay decisions.<br><br>
+
+      <b>What you need:</b><br>
+      Direct action + accountability.<br><br>
+
+      <b>Next Step:</b><br>
+      Upgrade for full execution system.
+    `;
+
+    finalScreen.style.display="block";
+    mainApp.style.display="none";
+    return;
+  }
+
+  loopLevel++;
+
   messages.push({role:"user", content:text});
-  outputBox.innerHTML += `<br><b>You:</b> ${text}<br>`;
+  outputBox.innerHTML += `<br><b>You:</b> ${text}<br>⏳ Thinking...`;
 
   const reply = await callAPI();
 
-  outputBox.innerHTML += formatReply(reply);
-
-  loopLevel++; // 🔥 AFTER API
+  outputBox.innerHTML = outputBox.innerHTML.replace("⏳ Thinking...", formatReply(reply));
 
   reflectionInput.value="";
 });
@@ -186,12 +235,12 @@ nextBtn.addEventListener("click", async ()=>{
 // PAYMENT
 payBtn.addEventListener("click", ()=>{
 
-  if(loopLevel===3){
+  if(loopLevel === 2){
     alert("✅ ₹49 Payment Success");
     paid49=true;
   }
 
-  else if(loopLevel===4){
+  else if(loopLevel === 3){
     alert("🔥 ₹99 Payment Success");
     paid99=true;
   }
@@ -199,14 +248,24 @@ payBtn.addEventListener("click", ()=>{
   payBtn.style.display="none";
 });
 
-// RESET
-newSessionBtn.addEventListener("click", ()=>{
+// RESTART
+restartBtn.addEventListener("click", ()=>{
   messages=[];
   loopLevel=1;
   paid49=false;
   paid99=false;
+
+  finalScreen.style.display="none";
+  mainApp.style.display="block";
   outputBox.innerHTML="";
-  payBtn.style.display="none";
+
+  mainInput.value="";
+  reflectionInput.value="";
+});
+
+// CTA
+upgradeBtn.addEventListener("click", ()=>{
+  alert("🚀 ₹299 Upgrade coming soon");
 });
 
 });
