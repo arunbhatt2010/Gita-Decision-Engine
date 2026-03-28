@@ -152,7 +152,7 @@ window.saveAction=()=>{
 };
 
 // API
-async function callAPI(){
+  async function callAPI(){
   const res=await fetch("/api/chat",{
     method:"POST",
     headers:{ "Content-Type":"application/json" },
@@ -179,35 +179,35 @@ getBtn.addEventListener("click", async ()=>{
   outputBox.innerHTML="";
 
   const reply=await callAPI();
+  // 🔒 HARD LOCK BEFORE LOOP 3
+if(loopLevel === 3 && !paid49){
+  payBtn.style.display = "block";
+  payBtn.innerText = "⚠️ Unlock Clarity (₹49)";
+  return "🔒 Unlock required";
+}
+
+// 🔒 HARD LOCK BEFORE LOOP 4
+if(loopLevel === 4 && !paid99){
+  payBtn.style.display = "block";
+  payBtn.innerText = "🔥 Unlock Full Execution (₹99)";
+  return "🔒 Unlock required";
+}
   outputBox.innerHTML=`<b>You:</b> ${text}<br><br>${formatReply(reply)}`;
 });
 
 // NEXT LOOP (🔥 MAIN CONTROL)
 nextBtn.addEventListener("click", async ()=>{
-  const text=reflectionInput.value.trim();
+  const text = reflectionInput.value.trim();
   if(!text) return;
-
-  // 🔒 BLOCK BEFORE LOOP 3
-  if(loopLevel===2 && !paid49){
-    payBtn.style.display="block";
-    payBtn.innerText="⚠️ Unlock Clarity (₹49)";
-    return;
-  }
-
-  // 🔒 BLOCK BEFORE LOOP 4
-  if(loopLevel===3 && !paid99){
-    payBtn.style.display="block";
-    payBtn.innerText="🔥 Unlock Full Execution (₹99)";
-    return;
-  }
 
   loopLevel++;
 
-  messages.push({role:"user",content:text});
-  outputBox.innerHTML+=`<br><b>You:</b> ${text}<br>`;
+  messages.push({role:"user", content:text});
+  outputBox.innerHTML += `<br><b>You:</b> ${text}<br>`;
 
-  const reply=await callAPI();
-  outputBox.innerHTML+=formatReply(reply);
+  const reply = await callAPI();
+
+  outputBox.innerHTML += formatReply(reply);
 
   reflectionInput.value="";
 });
