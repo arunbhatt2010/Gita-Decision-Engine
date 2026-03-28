@@ -255,8 +255,8 @@ Push action
     { role: "system", content: systemPrompt },
     { role: "user", content: lastUserMessage }
   ],
-  temperature: 0.7,
-  max_tokens: 180
+  temperature: 0.9,
+  max_tokens: 400
 })
       }
     );
