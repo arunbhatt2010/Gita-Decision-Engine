@@ -27,19 +27,19 @@ export default async function handler(req, res) {
       userAction = ""
     } = body;
 
-    // 🔥 VALIDATION
+    // VALIDATION
     if (!messages || !messages.length) {
       return res.status(400).json({ reply: "No input provided" });
     }
 
-    // 🔥 LAST MESSAGE
+    // LAST MESSAGE
     const lastUserMessage = messages[messages.length - 1]?.content || "";
     const lowerMsg = lastUserMessage.toLowerCase();
 
-    // 🔥 LANGUAGE DETECTION (STRONG)
+    // LANGUAGE DETECTION
     const isHindi = /[\u0900-\u097F]/.test(lastUserMessage);
 
-    // 🔥 DOMAIN FILTER (SMART + SAFE)
+    // DOMAIN FILTER
     const healthPatterns = [
       "दर्द","दांत","सर दर्द","pain","doctor","medicine","health","fever","treatment"
     ];
@@ -54,34 +54,20 @@ export default async function handler(req, res) {
 
     if (isHealth || isRelationship) {
 
-      console.log("⛔ BLOCKED:", lastUserMessage);
+      console.log("BLOCKED:", lastUserMessage);
 
-      const reply = isHindi
-        ? `यह सिस्टम medical या relationship समस्याओं के लिए नहीं है।
+      let reply;
 
-इसे इन चीज़ों के लिए उपयोग करें:
-• पैसे / income
-• business / clients
-• career direction
-• overthinking / confusion
-• discipline / consistency
-
-सही समस्या के साथ वापस आएं।`
-        : `This system does not handle medical or relationship problems.
-
-Use it for:
-• Money / income
-• Business / clients
-• Career direction
-• Overthinking / confusion
-• Discipline / consistency
-
-Come back with a real decision problem.`;
+      if (isHindi) {
+        reply = "यह सिस्टम medical या relationship समस्याओं के लिए नहीं है.\n\nइसे इन चीज़ों के लिए उपयोग करें:\n• पैसे / income\n• business / clients\n• career direction\n• overthinking / confusion\n• discipline / consistency\n\nसही समस्या के साथ वापस आएं।";
+      } else {
+        reply = "This system does not handle medical or relationship problems.\n\nUse it for:\n• Money / income\n• Business / clients\n• Career direction\n• Overthinking / confusion\n• Discipline / consistency\n\nCome back with a real decision problem.";
+      }
 
       return res.status(200).json({ reply });
     }
 
-    // 🔥 SYSTEM PROMPT (LOCKED + CONTROLLED)
+    // SYSTEM PROMPT
     const systemPrompt = `
 You are TruthLoop.
 
@@ -128,45 +114,26 @@ Instead:
 - Expose behavior
 - Ask sharp question
 
-If violated → response is WRONG
-
 --------------------------------
-LOOP 4 RULE (CRITICAL)
+LOOP 4 RULE
 --------------------------------
 
 If Loop = 4:
 
 - Give DEEP, PERSONAL response
-- Use user context strongly
 - NO question at end
 
-Structure:
-
-Line 1–2 → Truth  
-Line 3–4 → Behavior exposure  
-Line 5 → Action 1  
-Line 6 → Action 2  
-Line 7 → Final pressure line  
-
 --------------------------------
-STRUCTURE (MANDATORY)
+STRUCTURE
 --------------------------------
 
 Response MUST be EXACTLY 7 lines
 
-If Loop Level < 4:
-- Last line MUST be a sharp question
-- It MUST force user to respond
-
-If Loop Level = 4:
-- NO question at end
-
---------------------------------
-QUESTION RULE (CRITICAL)
---------------------------------
-
 If Loop < 4:
-Response WITHOUT question = INVALID
+Last line MUST be a sharp question
+
+If Loop = 4:
+NO question
 
 --------------------------------
 ACTION RULE
@@ -220,7 +187,7 @@ No generic responses
       data?.choices?.[0]?.message?.content ||
       "No response";
 
-    // 🔥 HARD SAFETY (ANTI-ACTION LEAK)
+    // HARD SAFETY
     if (loopLevel < 4) {
       const actionWords = ["send","call","post","create","sell","message","build"];
       const hasAction = actionWords.some(word =>
@@ -228,35 +195,11 @@ No generic responses
       );
 
       if (hasAction) {
-        console.log("⚠️ ACTION LEAK BLOCKED");
+        console.log("ACTION LEAK BLOCKED");
 
         reply = isHindi
-          ? `तुम समस्या को देख रहे हो।
-
-लेकिन तुम अभी भी टाल रहे हो।
-
-तुम जानते हो क्या करना है।
-
-फिर भी नहीं कर रहे।
-
-तुम खुद को रोक रहे हो।
-
-अब क्या रोके हुए है?
-
-सच बोलो।`
-          : `You can see the problem.
-
-But you are still avoiding it.
-
-You already know what to do.
-
-Yet you are not doing it.
-
-You are holding yourself back.
-
-What is stopping you?
-
-Be honest.`;
+          ? "तुम समस्या को देख रहे हो।\n\nलेकिन तुम अभी भी टाल रहे हो।\n\nतुम जानते हो क्या करना है।\n\nफिर भी नहीं कर रहे।\n\nतुम खुद को रोक रहे हो।\n\nअब क्या रोके हुए है?\n\nसच बोलो।"
+          : "You can see the problem.\n\nBut you are still avoiding it.\n\nYou already know what to do.\n\nYet you are not doing it.\n\nYou are holding yourself back.\n\nWhat is stopping you?\n\nBe honest.";
       }
     }
 
@@ -271,4 +214,4 @@ Be honest.`;
       reply: "Server error"
     });
   }
-    }
+        }
