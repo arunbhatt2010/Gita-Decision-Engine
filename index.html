@@ -214,16 +214,22 @@ nextBtn.addEventListener("click", async ()=>{
   // FINAL STOP
   if(loopLevel === 4){
 
-    summaryBox.innerHTML = `
-      <b>Reality:</b><br>
-      You were not stuck. You were avoiding the real move.<br><br>
+summaryBox.innerHTML = `
+<div style="background:#000; padding:15px; border-radius:10px; text-align:left;">
 
-      <b>Truth:</b><br>
-      You don’t need more thinking. You need execution.<br><br>
+You were not stuck.<br><br>
 
-      <b>Now:</b><br>
-      Act today, or stay exactly where you are.
-    `;
+You were avoiding the real move.<br><br>
+
+You kept doing what feels safe… but not what actually moves things forward.<br><br>
+
+You already know what matters.<br>
+You just haven’t acted on it.<br><br>
+
+Nothing changes from here… unless your actions change.
+
+</div>
+`;
 
     finalScreen.style.display="block";
     mainApp.style.display="none";
