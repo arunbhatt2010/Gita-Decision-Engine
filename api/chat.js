@@ -75,9 +75,27 @@ Problem: ${userProblem}
 Action: ${userAction}
 
 Before asking:
-- Say ONE specific behavior
-- Say what user is avoiding
-- Ask ONLY ONE question
+
+First say this clearly:
+"If you hide details, you will stay confused."
+
+Then:
+
+1. Point out ONE visible behavior of the user
+2. Say what they are avoiding (no question)
+
+Then ask ONE KYC question:
+- Who are you
+- What exactly you do
+- Where you do it
+- What you tried
+
+KYC question is mandatory.
+Never skip it even if you think you understand the user.
+
+Strict:
+- Only ONE question
+- Must extract real context
 
 Strict:
 - Only ONE '?'
