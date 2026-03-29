@@ -149,29 +149,53 @@ STYLE:
 
     // STAGE 4 (EXECUTION)
     if (loopLevel >= 4) {
-      reply = isHindi
-        ? `अब साफ है।
 
-तुम ${userProblem} में नहीं फंसे हो…
-तुम उस काम से बच रहे हो जो result देगा।
+  let actionLine = "";
 
-आज:
-एक ऐसा काम करो जो सीधे पैसे से जुड़ा हो  
-और उसे बाहर push करो
+  if (lowerMsg.includes("client") || lowerMsg.includes("क्लाइंट")) {
+    actionLine = isHindi
+      ? "आज 5 founders को DM करो और सीधे उनका content fix करने का specific idea भेजो."
+      : "DM 5 founders today with a specific idea to improve their content.";
+  }
 
-अब या तो करोगे  
-या फिर यही repeat होगा`
-        : `Now it's clear.
+  else if (lowerMsg.includes("content")) {
+    actionLine = isHindi
+      ? "आज एक ऐसा post लिखो जो सिर्फ founders की एक painful problem को hit करे."
+      : "Write one post today that hits one painful problem of founders.";
+  }
 
-You are not stuck in ${userProblem}  
-you are avoiding the real move
+  else {
+    actionLine = isHindi
+      ? "आज ऐसा काम करो जो सीधे पैसे ला सकता हो, busy work नहीं."
+      : "Do one task today that directly leads to money, not busy work.";
+  }
 
-Today:
-Do one task tied to results  
-and push it out
+  reply = isHindi
+    ? `अब साफ दिख रहा है।
 
-Act  
-or repeat the loop`;
+तुम LinkedIn पर लिख रहे हो…
+लेकिन clients के सामने खुद को रख नहीं रहे।
+
+तुम value दे रहे हो…
+लेकिन offer नहीं कर रहे।
+
+${actionLine}
+
+आज कर दो…
+या फिर यही cycle चलता रहेगा।`
+    : `Now it's clear.
+
+You're posting on LinkedIn…
+but not putting yourself in front of clients.
+
+You're giving value…
+but not making an offer.
+
+${actionLine}
+
+Do it today…
+or stay stuck in the same loop.`;
+
     }
 
     return res.status(200).json({
