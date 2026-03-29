@@ -64,7 +64,9 @@ button {
     <button onclick="sendFeedback('yes')">Yes</button>
     <button onclick="sendFeedback('no')">No</button>
     <input id="feedbackInput" placeholder="What felt wrong?" style="display:none;"/>
-  </div></div></div><script>
+  </div></div></div><p class="small">
+Privacy Policy | Terms | Refund Policy | Contact: arunbhatt2010@email.com
+  </p> <script>
 
 document.addEventListener("DOMContentLoaded", () => {
 
@@ -184,7 +186,7 @@ nextBtn.addEventListener("click", async ()=>{
 
   reflectionInput.value="";
 
-  if(loopLevel === 4){
+  if(loopLevel === 5){
     summaryBox.innerHTML = `
     You were not stuck.<br><br>
     You were avoiding the real move.<br><br>
