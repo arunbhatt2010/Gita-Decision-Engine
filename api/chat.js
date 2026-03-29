@@ -50,7 +50,7 @@ export default async function handler(req, res) {
       });
     }
 
-    // 🔥 KYC CHECK (Stage 1 only)
+    // 🔥 BASIC CLARITY CHECK (Stage 1)
     if (loopLevel === 1) {
 
       const hasDetail =
@@ -60,64 +60,54 @@ export default async function handler(req, res) {
       if (!hasDetail) {
         return res.status(200).json({
           reply: isHindi
-            ? "रुको।\n\nतुम साफ नहीं बोल रहे।\n\nअगर सही जानकारी नहीं दोगे तो सही जवाब नहीं मिलेगा।\n\nएक लाइन में बताओ:\nतुम क्या करते हो + कहाँ करते हो + क्या काम नहीं कर रहा"
-            : "Stop.\n\nYou're being vague.\n\nIf you don't give clear details, you won't get a useful answer.\n\nAnswer in ONE line:\nWhat you do + where you do it + what exactly is failing right now"
+            ? "रुको। साफ बोलो।\n\nएक लाइन में:\nतुम क्या करते हो + कहाँ करते हो + अभी क्या काम नहीं कर रहा"
+            : "Stop.\n\nBe specific.\n\nIn ONE line:\nWhat you do + where you do it + what exactly is failing"
         });
       }
     }
 
-    // PROMPT
+    // 🔥 IMPROVED PROMPT (NO REPETITION)
     const systemPrompt = `
 You are TruthLoop.
 
+Context:
 Goal: ${userGoal}
 Problem: ${userProblem}
 Action: ${userAction}
 
-Before asking:
+Rules:
+- Never repeat the same sentence.
+- Never use phrases like:
+  "If you hide details"
+  "Looking deeper"
+  "You're being vague"
+- No generic advice.
+- No motivational tone.
 
-First say this clearly:
-"If you hide details, you will stay confused."
-
-Then:
-
-1. Point out ONE visible behavior of the user
-2. Say what they are avoiding (no question)
-
-Then ask ONE KYC question:
-- Who are you
-- What exactly you do
-- Where you do it
-- What you tried
-
-KYC question is mandatory.
-Never skip it even if you think you understand the user.
+Structure:
+1. Start with a sharp observation (1–2 lines)
+2. Point out what the user is actually doing (real behavior)
+3. Expose what they are avoiding (1–2 lines)
+4. End with ONE sharp question (only if stage < 4)
 
 Strict:
-- Only ONE question
-- Must extract real context
+- Only ONE question mark allowed
+- Keep it under 8 lines
+- Make it feel personal, not template
 
-Strict:
-- Only ONE '?'
-- No generic words
-- No teaching tone
-
-If user is vague → call it out
-
-STAGE: ${loopLevel}
+Stage: ${loopLevel}
 
 Stage 1–3:
-- No action
 - End with ONE question
 
 Stage 4:
 - No question
-- Give direct action based on conversation
+- Give direct conclusion
 
-STYLE:
+Tone:
 - Direct
-- Personal
-- Uncomfortable
+- Slightly uncomfortable
+- Clear, not rude
 `;
 
     const response = await fetch(
@@ -134,8 +124,8 @@ STYLE:
             { role: "system", content: systemPrompt },
             ...messages
           ],
-          temperature: 0.8,
-          max_tokens: 300
+          temperature: 0.7,
+          max_tokens: 250
         })
       }
     );
@@ -147,7 +137,7 @@ STYLE:
     const data = await response.json();
     let reply = data?.choices?.[0]?.message?.content || "No response";
 
-    // 🔥 SAFETY (Stage 1–3)
+    // 🔥 SAFETY (Stage 1–3 → no action words)
     if (loopLevel < 4) {
       const forbidden = ["send","call","post","create","sell","build"];
       const hasAction = forbidden.some(word => reply.toLowerCase().includes(word));
@@ -160,16 +150,8 @@ STYLE:
     // 🔥 STAGE 4 CLEANUP
     if (loopLevel >= 4) {
 
-      // remove question
       reply = reply.replace(/\?/g, "");
 
-      // remove generic patterns
-      reply = reply
-        .replace(/do one task.*$/gim, "")
-        .replace(/today.*$/gim, "")
-        .replace(/act.*$/gim, "");
-
-      // add pressure ending
       reply += isHindi
         ? "\n\nअब करना है या नहीं — यही फर्क बनाएगा।"
         : "\n\nNow it's on you to act or stay stuck.";
