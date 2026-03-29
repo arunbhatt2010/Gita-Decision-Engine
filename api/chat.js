@@ -199,7 +199,56 @@ Push action
           ? "तुम काम कर रहे हो, लेकिन सही दिशा में नहीं बढ़ रहे हो।\n\nतुम एक्टिव हो, पर असली कदम लेने से बच रहे हो।\n\nतुम्हें पता है क्या करना चाहिए, फिर भी टाल रहे हो।\n\nअभी सच में तुम्हें क्या रोक रहा है?"
           : "You are active, but not moving in the right direction.\n\nYou are doing work, but avoiding the real move.\n\nYou already know what needs to be done, yet you delay it.\n\nWhat is actually stopping you right now?";
       }
-    }
+    }// 🔥 STAGE 4 (NICHOD + ACTION)
+if (loopLevel >= 4) {
+
+  const context = `
+Goal: ${userGoal}
+Problem: ${userProblem}
+Recent Action: ${userAction}
+User said: ${lastUserMessage}
+`;
+
+  reply = isHindi
+    ? `यहीं असली बात है।
+
+${context}
+
+तुम वही कर रहे हो जो safe लगता है…  
+लेकिन वही नहीं कर रहे जो सच में फर्क डालता।
+
+अब सीधा करो:
+
+ऐसा 1–2 कदम बताओ जो इसी समस्या को सीधे तोड़े,
+ना कि general improvement दे।
+
+शर्त:
+- आज ही किया जा सके
+- सीधा असर दिखे
+- user के exact situation से जुड़ा हो
+
+अंत में एक line लिखो जो उसे अभी action लेने पर मजबूर करे।`
+    : `This is the core.
+
+${context}
+
+You are doing what feels safe…
+but avoiding what actually moves things.
+
+Now give:
+
+1–2 actions that directly break THIS exact problem,
+not general improvement.
+
+Conditions:
+- Can be done today
+- Direct impact
+- Based on this exact situation
+
+End with a line that forces immediate action.`;
+
+           }
+    
 
     return res.status(200).json({
       reply,
