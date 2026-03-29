@@ -1,18 +1,12 @@
-<!DOCTYPE html>
-<html>
+<!DOCTYPE html><html>
 <head>
 <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-<title>TruthLoop</title>
-
-<script async src="https://www.googletagmanager.com/gtag/js?id=G-RBMQ2F6P9Q"></script>
-<script>
+<title>TruthLoop</title><script async src="https://www.googletagmanager.com/gtag/js?id=G-RBMQ2F6P9Q"></script><script>
 window.dataLayer = window.dataLayer || [];
 function gtag(){dataLayer.push(arguments);}
 gtag('js', new Date());
 gtag('config', 'G-RBMQ2F6P9Q');
-</script>
-
-<style>
+</script><style>
 body { background:#0f0f0f; color:#fff; font-family:Arial; margin:0; }
 .container { max-width:500px; margin:auto; padding:15px; }
 h2 { text-align:center; }
@@ -44,89 +38,38 @@ button {
 
 #finalScreen { display:none; text-align:center; margin-top:15px; }
 .small { font-size:12px; color:#aaa; text-align:center; margin-top:5px; }
-</style>
-</head>
-
-<body>
-
-<div class="container">
-<h2>TruthLoop</h2>
-
-<p class="small">This is not advice. This is confrontation.</p>
-
-<!-- EMAIL -->
-<div id="emailScreen">
+</style></head><body><div class="container">
+<h2>TruthLoop</h2><p class="small">This is not advice. This is confrontation.</p><!-- EMAIL --><div id="emailScreen">
   <input id="emailInput" placeholder="Enter your email to continue"/>
   <button onclick="saveEmail()">Start</button>
-</div>
-
-<!-- GOAL -->
-<div id="goalScreen" style="display:none;">
+</div><!-- GOAL --><div id="goalScreen" style="display:none;">
   <p>Where are you stuck… really?</p>
   <button onclick="selectGoal('Money')">Money</button>
   <button onclick="selectGoal('Clarity')">Clarity</button>
   <button onclick="selectGoal('Consistency')">Consistency</button>
   <button onclick="selectGoal('Overthinking')">Overthinking</button>
-</div>
-
-<!-- PROBLEM -->
-<div id="problemScreen" style="display:none;">
+</div><!-- PROBLEM --><div id="problemScreen" style="display:none;">
   <input id="problemInput" placeholder="Tell clearly what’s not working..." />
   <button onclick="saveProblem()">Continue</button>
-</div>
-
-<!-- ACTION -->
-<div id="actionScreen" style="display:none;">
+</div><!-- ACTION --><div id="actionScreen" style="display:none;">
   <input id="actionInput" placeholder="What did you actually do in last 48 hours?" />
   <button onclick="saveAction()">Start</button>
-</div>
+</div><!-- MAIN --><div id="mainApp" style="display:none;">  <div id="outputBox" class="output"></div>  <input id="mainInput" placeholder="Don't type what sounds smart. Type what is real." />
+  <button id="getBtn">Face the truth</button>  <input id="reflectionInput" placeholder="Answer honestly..." />
+  <button id="nextBtn">Go deeper</button></div><!-- FINAL --><div id="finalScreen">  <p>Now it's clear.</p>  <div id="summaryBox" style="background:#000; padding:15px; border-radius:10px;"></div>  <p class="small">Only works if you answer honestly.</p><button id="upgradeBtn">Unlock exact next steps (₹299)</button>
+<button id="restartBtn">🔄 Start Again</button>
 
-<!-- MAIN -->
-<div id="mainApp" style="display:none;">
-  
-  <div id="outputBox" class="output"></div>
-
-  <input id="mainInput" placeholder="Don't type what sounds smart. Type what is real." />
-  <button id="getBtn">Face the truth</button>
-
-  <input id="reflectionInput" placeholder="Answer honestly..." />
-  <button id="nextBtn">Go deeper</button>
-
-  <button id="payBtn" style="display:none;"></button>
-
-</div>
-
-<!-- FINAL -->
-<div id="finalScreen">
-
-  <p>Now it's clear.</p>
-
-  <div id="summaryBox" style="background:#000; padding:15px; border-radius:10px;"></div>
-
-  <p class="small">Only works if you answer honestly.</p>
-
-  <button id="upgradeBtn">Unlock exact next steps (₹299)</button>
-  <button id="restartBtn">🔄 Start Again</button>
-
-  <!-- FEEDBACK -->
-  <div style="margin-top:15px;">
+  <!-- FEEDBACK -->  <div style="margin-top:15px;">
     <p>Was this useful?</p>
     <button onclick="sendFeedback('yes')">Yes</button>
     <button onclick="sendFeedback('no')">No</button>
     <input id="feedbackInput" placeholder="What felt wrong?" style="display:none;"/>
-  </div>
-
-</div>
-
-</div>
-
-<script>
+  </div></div></div><script>
 
 document.addEventListener("DOMContentLoaded", () => {
 
 let userGoal="", userProblem="", userAction="";
 let messages=[], loopLevel=1;
-let paid49=false, paid99=false;
 let userEmail = localStorage.getItem("truthloop_email") || "";
 let sessionId = localStorage.getItem("truthloop_session") || Date.now()+"-"+Math.random();
 
@@ -146,7 +89,6 @@ const reflectionInput=document.getElementById("reflectionInput");
 const outputBox=document.getElementById("outputBox");
 const getBtn=document.getElementById("getBtn");
 const nextBtn=document.getElementById("nextBtn");
-const payBtn=document.getElementById("payBtn");
 
 const finalScreen=document.getElementById("finalScreen");
 const summaryBox=document.getElementById("summaryBox");
@@ -254,12 +196,40 @@ nextBtn.addEventListener("click", async ()=>{
   }
 });
 
-// FEEDBACK
-window.sendFeedback=(type)=>{
-  if(type==="no"){
-    document.getElementById("feedbackInput").style.display="block";
+// FEEDBACK (WORKING)
+async function submitFeedback(isUseful, text="") {
+  try {
+    await fetch("https://docs.google.com/forms/d/e/1FAIpQLScq0kWwwkvfJPCkXiWkq2DDOfzgcm7LRwD4DuW5TqlHpSbp1w/formResponse", {
+      method: "POST",
+      mode: "no-cors",
+      headers: {
+        "Content-Type": "application/x-www-form-urlencoded"
+      },
+      body: `entry.547964989=${encodeURIComponent(isUseful ? "YES" : "NO - " + text)}`
+    });
+  } catch (e) {
+    console.log("Feedback error", e);
   }
-  console.log("Feedback:", type);
+}
+
+window.sendFeedback = (type) => {
+
+  const input = document.getElementById("feedbackInput");
+
+  if(type === "yes"){
+    submitFeedback(true);
+    alert("Thanks for feedback 🙏");
+  }
+
+  if(type === "no"){
+    input.style.display = "block";
+
+    if(input.value){
+      submitFeedback(false, input.value);
+      alert("Got it. This helps improve 🔥");
+      input.value="";
+    }
+  }
 };
 
 // RESET
@@ -269,7 +239,5 @@ restartBtn.addEventListener("click", ()=>{
 
 });
 
-</script>
-
-</body>
-  </html>
+</script></body>
+                                             </html>
