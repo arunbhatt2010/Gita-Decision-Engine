@@ -61,7 +61,7 @@ export default async function handler(req, res) {
         return res.status(200).json({
           reply: isHindi
             ? "रुको।\n\nतुम साफ नहीं बोल रहे।\n\nअगर सही जानकारी नहीं दोगे तो सही जवाब नहीं मिलेगा।\n\nएक लाइन में बताओ:\nतुम क्या करते हो + कहाँ करते हो + क्या काम नहीं कर रहा"
-            : "Stop.\n\nYou're being vague.\n\nIf you don't give clear details, you won't get a useful answer.\n\nSay in one line:\nWhat you do + where you do it + what is not working"
+            : "Stop.\n\nYou're being vague.\n\nIf you don't give clear details, you won't get a useful answer.\n\nAnswer in ONE line:\nWhat you do + where you do it + what exactly is failing right now"
         });
       }
     }
