@@ -4,7 +4,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
 <title>TruthLoop</title>
 
-<!-- ✅ GOOGLE ANALYTICS (SAFE) -->
+<!-- ✅ GOOGLE ANALYTICS -->
 <script async src="https://www.googletagmanager.com/gtag/js?id=G-RBMQ2F6P9Q"></script>
 <script>
 window.dataLayer = window.dataLayer || [];
@@ -138,12 +138,15 @@ function formatReply(text){
   return text.split("\n").map(l=>`<div style="margin-bottom:12px;">${l}</div>`).join("");
 }
 
+function scrollToBottom(){
+  outputBox.scrollTop = outputBox.scrollHeight;
+}
+
 // FLOW
 window.selectGoal=(v)=>{
   userGoal=v;
   goalScreen.style.display="none";
   problemScreen.style.display="block";
-
   gtag('event', 'goal_selected', { goal: v });
 };
 
@@ -196,11 +199,12 @@ getBtn.addEventListener("click", async ()=>{
   paid99=false;
 
   messages=[{role:"user",content:text}];
-  outputBox.innerHTML="⚡ Thinking fast...";
+  outputBox.innerHTML=`<b>You:</b> ${text}<br>⚡ Thinking fast...`;
 
   const reply=await callAPI();
 
   outputBox.innerHTML=`<b>You:</b> ${text}<br><br>${formatReply(reply)}`;
+  scrollToBottom();
 
   gtag('event', 'started_conversation');
 });
@@ -239,7 +243,6 @@ nextBtn.addEventListener("click", async ()=>{
     mainApp.style.display="none";
 
     gtag('event', 'completed_flow');
-
     return;
   }
 
@@ -247,10 +250,12 @@ nextBtn.addEventListener("click", async ()=>{
 
   messages.push({role:"user", content:text});
   outputBox.innerHTML += `<br><b>You:</b> ${text}<br>⚡ Thinking fast...`;
+  scrollToBottom();
 
   const reply = await callAPI();
 
   outputBox.innerHTML += `<br>${formatReply(reply)}`;
+  scrollToBottom();
 
   reflectionInput.value="";
 });
