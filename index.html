@@ -3,7 +3,6 @@
 <head>
 <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
 <title>TruthLoop</title>
-
 <script async src="https://www.googletagmanager.com/gtag/js?id=G-RBMQ2F6P9Q"></script>
 <script>
 window.dataLayer = window.dataLayer || [];
@@ -11,7 +10,6 @@ function gtag(){dataLayer.push(arguments);}
 gtag('js', new Date());
 gtag('config', 'G-RBMQ2F6P9Q');
 </script>
-
 <style>
 body { background:#0f0f0f; color:#fff; font-family:Arial; margin:0; }
 .container { max-width:500px; margin:auto; padding:15px; box-shadow:0 0 20px rgba(255,94,0,0.1); border-radius:12px; }
@@ -64,128 +62,106 @@ style="width:160px; border-radius:12px;">
 <button onclick="saveEmail()">Start</button>
 </div>
 
-<div id="goalScreen" style="display:none;">
-<p>Where are you stuck… really?</p>
-<button onclick="selectGoal('Money')">Money</button>
-<button onclick="selectGoal('Clarity')">Clarity</button>
-<button onclick="selectGoal('Consistency')">Consistency</button>
-<button onclick="selectGoal('Overthinking')">Overthinking</button>
-</div>
-
-<div id="problemScreen" style="display:none;">
-<input id="problemInput" placeholder="Tell clearly what’s not working..." />
-<button onclick="saveProblem()">Continue</button>
-</div>
-
-<div id="actionScreen" style="display:none;">
-<input id="actionInput" placeholder="What did you actually do in last 48 hours?" />
-<button onclick="saveAction()">Start</button>
-</div>
-
 <div id="mainApp" style="display:none;">
 <div id="outputBox" class="output"></div>
 
-<input id="mainInput" placeholder="Don't type what sounds smart. Type what is real." />
+<input id="mainInput" placeholder="Type what is real"/>
 <button id="getBtn">Face the truth</button>
 
-<input id="reflectionInput" placeholder="Answer honestly..." />
+<input id="reflectionInput" placeholder="Answer honestly..."/>
 <button id="nextBtn">Go deeper</button>
 </div>
 
 <p class="small">
-<a href="/privacy.html">Privacy Policy</a> |
-<a href="/terms.html">Terms</a> |
-<a href="/refund.html">Refund Policy</a> |
 Contact: arunbhatt2010@email.com
 </p>
 
 </div>
 
 <script>
-document.addEventListener("DOMContentLoaded", () => {
 
-let userGoal="", userProblem="", userAction="";
-let messages=[], loopLevel=1;
+let messages=[];
+let loopLevel=1;
+
+const emailScreen=document.getElementById("emailScreen");
+const mainApp=document.getElementById("mainApp");
 
 const outputBox=document.getElementById("outputBox");
 const mainInput=document.getElementById("mainInput");
 const reflectionInput=document.getElementById("reflectionInput");
 
-// ✅ FIX 1: format function added
+
+// ✅ FORMAT FIX (MAIN BUG SOLVED)
 function formatReply(text){
-  return text.split("\n").map(l=>`<div style="margin-bottom:10px;">${l}</div>`).join("");
+  if(!text) return "<div>⚠️ No response</div>";
+
+  return text
+    .split("\n")
+    .map(line => `<div style="margin-bottom:10px;">${line}</div>`)
+    .join("");
 }
 
-// FLOW
-window.saveEmail=()=>{
+
+// EMAIL
+function saveEmail(){
   const email=document.getElementById("emailInput").value.trim();
   if(!email) return alert("Enter email");
 
-  localStorage.setItem("truthloop_email", email);
-
-  // optional backend
-  fetch("https://engine.vercel.app/api/saveEmail", {
+  fetch("/api/saveEmail",{
     method:"POST",
     headers:{ "Content-Type":"application/json" },
     body:JSON.stringify({ email })
   });
 
   emailScreen.style.display="none";
-  goalScreen.style.display="block";
-};
-
-window.selectGoal=(v)=>{
-  userGoal=v;
-  goalScreen.style.display="none";
-  problemScreen.style.display="block";
-};
-
-window.saveProblem=()=>{
-  userProblem=document.getElementById("problemInput").value.trim();
-  if(!userProblem) return alert("Enter problem");
-  problemScreen.style.display="none";
-  actionScreen.style.display="block";
-};
-
-window.saveAction=()=>{
-  userAction=document.getElementById("actionInput").value.trim();
-  if(!userAction) return alert("Enter action");
-  actionScreen.style.display="none";
   mainApp.style.display="block";
-};
-
-// ✅ FIX 2: FULL URL
-async function callAPI(){
-  const res=await fetch("https://engine.vercel.app/api/chat",{
-    method:"POST",
-    headers:{ "Content-Type":"application/json" },
-    body:JSON.stringify({ messages, loopLevel, userGoal, userProblem, userAction })
-  });
-
-  const data=await res.json();
-
-  messages.push({role:"assistant",content:data.reply});
-
-  return data.reply;
 }
 
-// START
+
+// API CALL
+async function callAPI(){
+  try{
+    const res=await fetch("/api/chat",{
+      method:"POST",
+      headers:{ "Content-Type":"application/json" },
+      body:JSON.stringify({ messages, loopLevel })
+    });
+
+    const data=await res.json();
+
+    console.log("API RESPONSE:", data);
+
+    let reply = data?.reply || "⚠️ Empty reply";
+
+    messages.push({role:"assistant",content:reply});
+
+    return reply;
+
+  }catch(e){
+    console.log("ERROR:", e);
+    return "⚠️ Connection error";
+  }
+}
+
+
+// FIRST QUESTION
 document.getElementById("getBtn").onclick = async ()=>{
   const text=mainInput.value.trim();
   if(!text) return;
 
   messages=[{role:"user",content:text}];
 
-  outputBox.innerHTML=`<b>You:</b> ${text}<br><br>`;
+  outputBox.innerHTML = `<b>You:</b> ${text}<br><br>`;
 
-  const reply=await callAPI();
+  const reply = await callAPI();
 
-  outputBox.innerHTML+=formatReply(reply);
+  outputBox.innerHTML += formatReply(reply);
 
   mainInput.value="";
 };
 
-// CONTINUE
+
+// NEXT LOOP
 document.getElementById("nextBtn").onclick = async ()=>{
   const text=reflectionInput.value.trim();
   if(!text) return;
@@ -194,17 +170,16 @@ document.getElementById("nextBtn").onclick = async ()=>{
 
   messages.push({role:"user",content:text});
 
-  outputBox.innerHTML+=`<br><b>You:</b> ${text}<br><br>`;
+  outputBox.innerHTML += `<br><b>You:</b> ${text}<br><br>`;
 
-  const reply=await callAPI();
+  const reply = await callAPI();
 
-  outputBox.innerHTML+=formatReply(reply);
+  outputBox.innerHTML += formatReply(reply);
 
   reflectionInput.value="";
 };
 
-});
 </script>
 
 </body>
-  </html>
+</html>
