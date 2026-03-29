@@ -182,8 +182,17 @@ if (loopLevel >= 4) {
   }
 }
 
+    return res.status(200).json({
+      reply,
+      paywall: loopLevel >= 4
+    });
 
-return res.status(200).json({
-  reply,
-  paywall: loopLevel >= 4
-});
+  } catch (error) {
+    console.error("Server error:", error);
+    return res.status(500).json({
+      reply: "Server error"
+    });
+  }
+}
+
+
