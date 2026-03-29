@@ -171,7 +171,7 @@ Push action
           model: "llama-3.3-70b-versatile",
           messages: [
   { role: "system", content: systemPrompt },
-  { role: "user", content: lastUserMessage }
+  ...messages.slice(-4)
 ],
           temperature: 0.7,
           max_tokens: 400
