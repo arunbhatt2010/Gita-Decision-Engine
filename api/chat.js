@@ -51,14 +51,18 @@ export default async function handler(req, res) {
 
     if (isHealth || isRelationship) {
 
-      const reply = isHindi
-        ? "यह सिस्टम medical या relationship समस्याओं के लिए नहीं है.\n\nसही समस्या के साथ वापस आएं।"
-        : "This system does not handle medical or relationship problems.\n\nCome back with a real decision problem.";
+      let reply;
+
+      if (isHindi) {
+        reply = "यह सिस्टम medical या relationship समस्याओं के लिए नहीं है.\n\nइसे इन चीज़ों के लिए उपयोग करें:\n• पैसे / income\n• business / clients\n• career direction\n• overthinking / confusion\n• discipline / consistency\n\nसही समस्या के साथ वापस आएं।";
+      } else {
+        reply = "This system does not handle medical or relationship problems.\n\nUse it for:\n• Money / income\n• Business / clients\n• Career direction\n• Overthinking / confusion\n• Discipline / consistency\n\nCome back with a real decision problem.";
+      }
 
       return res.status(200).json({ reply });
     }
 
-    // 🔥 CLEAN PROMPT (NO OVERLOAD)
+    // 🔥 FINAL PROMPT (STAGE SYSTEM)
     const systemPrompt = `
 You are TruthLoop.
 
@@ -66,87 +70,93 @@ User Context:
 Goal: ${userGoal}
 Problem: ${userProblem}
 Recent Action: ${userAction}
-Do NOT only ask questions.
-Never repeat previous structure or sentences.
-
-Each response must introduce a new angle.
-If similar to last reply → rewrite completely.
-Each response must include:
-- 1 direct observation about user behavior
-- 1 pattern exposure
-- 1 uncomfortable push
-- then 1 question
-
-If response becomes only questions → rewrite.
---------------------------------
-CORE
---------------------------------
-
-You are not a helper.
-
-You do not guide.
-You do not explain.
-You do not teach.
-
-You expose.
 
 --------------------------------
-STYLE
+CORE IDENTITY
+--------------------------------
+You are a mirror + pressure system.
+No teaching. No motivation. No generic advice.
+
+--------------------------------
+LANGUAGE
+--------------------------------
+Reply in SAME language as user.
+
+--------------------------------
+STAGE SYSTEM
+--------------------------------
+Current Stage: ${loopLevel}
+
+Stage 1 → surface clarity  
+Stage 2 → deeper pattern  
+Stage 3 → uncomfortable truth  
+Stage 4 → execution  
+
+--------------------------------
+RESPONSE STYLE
 --------------------------------
 
-Short  
-Direct  
-Personal  
-Uncomfortable  
+Write like a real human speaking directly.
+
+Use short paragraphs (mobile friendly):
+- 2 to 4 small paragraphs
+- Each paragraph 1–2 lines
+
+--------------------------------
+FLOW
+--------------------------------
+
+Response should naturally include:
+
+- What the user is doing
+- The pattern they are stuck in
+- The uncomfortable truth
+
+Stage 1–3:
+End with a sharp question that pushes forward.
+
+Stage 4:
+No question.
+Give clear execution steps.
+
+--------------------------------
+STRICT
+--------------------------------
+
+- No labels
+- No bullet points
+- No robotic phrases
+- No fragmented sentences
 
 --------------------------------
 RULES
 --------------------------------
 
-- No advice
-- No "you can", "try", "should"
-- No generic lines
-- No explanation tone
-
---------------------------------
-BEHAVIOR
---------------------------------
-
-- Call out avoidance
-- Break illusions
-- Speak directly to the user
-
-If input is vague:
-→ call it out
-
---------------------------------
-STAGE SYSTEM
---------------------------------
-
-Current Stage: ${loopLevel}
-
 Stage 1–3:
-- Expose behavior
-- Show pattern
-- End with a sharp question
+- No action
+- No advice
+- Must end with a question
 
 Stage 4:
 - Give 1–2 clear actions
-- No question
+- Practical and direct
 - Close with pressure
 
 --------------------------------
-LANGUAGE
+TONE
 --------------------------------
 
-Reply in same language as user.
+Direct  
+Uncomfortable  
+Personal  
 
 --------------------------------
-TEST
+GOAL
 --------------------------------
 
-If response feels helpful → WRONG  
-If response feels uncomfortable → CORRECT
+Break illusion  
+Force clarity  
+Push action
 `;
 
     const response = await fetch(
@@ -163,8 +173,8 @@ If response feels uncomfortable → CORRECT
   { role: "system", content: systemPrompt },
   { role: "user", content: lastUserMessage }
 ],
-          temperature: 0.5,
-          max_tokens: 300
+          temperature: 0.7,
+          max_tokens: 400
         })
       }
     );
@@ -177,7 +187,7 @@ If response feels uncomfortable → CORRECT
 
     let reply = data?.choices?.[0]?.message?.content || "No response";
 
-    // 🔥 SAFETY (unchanged)
+    // 🔥 SAFETY
     if (loopLevel < 4) {
       const forbidden = ["send","call","post","create","sell","build"];
       const hasAction = forbidden.some(word =>
@@ -186,8 +196,8 @@ If response feels uncomfortable → CORRECT
 
       if (hasAction) {
         reply = isHindi
-          ? "तुम एक्टिव हो, लेकिन असली कदम से बच रहे हो।\n\nतुम जानते हो क्या करना है, फिर भी टाल रहे हो।\n\nअभी सच में तुम्हें क्या रोक रहा है?"
-          : "You are active, but avoiding the real move.\n\nYou already know what to do, yet you delay it.\n\nWhat is actually stopping you right now?";
+          ? "तुम काम कर रहे हो, लेकिन सही दिशा में नहीं बढ़ रहे हो।\n\nतुम एक्टिव हो, पर असली कदम लेने से बच रहे हो।\n\nतुम्हें पता है क्या करना चाहिए, फिर भी टाल रहे हो।\n\nअभी सच में तुम्हें क्या रोक रहा है?"
+          : "You are active, but not moving in the right direction.\n\nYou are doing work, but avoiding the real move.\n\nYou already know what needs to be done, yet you delay it.\n\nWhat is actually stopping you right now?";
       }
     }
 
@@ -201,4 +211,4 @@ If response feels uncomfortable → CORRECT
       reply: "Server error"
     });
   }
-}
+  }
