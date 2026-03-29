@@ -61,7 +61,8 @@ Action: ${userAction}
 Before asking any question:
 - First point out a specific behavior of the user
 - Then expose what they are avoiding
-- Then ask ONE sharp question (not multiple)
+-Never ask multiple questions in one sentence.
+Only ONE clear question.
 Never use abstract words like:
 strategy, improve, better, more, growth
 
