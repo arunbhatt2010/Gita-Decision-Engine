@@ -134,6 +134,13 @@ window.saveEmail=()=>{
   const email=document.getElementById("emailInput").value.trim();
   if(!email) return alert("Enter email");
   localStorage.setItem("truthloop_email", email);
+  fetch("/api/saveEmail", {
+  method: "POST",
+  headers: {
+    "Content-Type": "application/json"
+  },
+  body: JSON.stringify({ email: userEmail })
+});
   emailScreen.style.display="none";
   goalScreen.style.display="block";
 };
