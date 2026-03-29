@@ -33,7 +33,6 @@ export default async function handler(req, res) {
 
     const lastUserMessage = messages[messages.length - 1]?.content || "";
     const lowerMsg = lastUserMessage.toLowerCase();
-
     const isHindi = /[\u0900-\u097F]/.test(lastUserMessage);
 
     // DOMAIN FILTER
@@ -51,6 +50,22 @@ export default async function handler(req, res) {
       });
     }
 
+    // 🔥 KYC CHECK (Stage 1 only)
+    if (loopLevel === 1) {
+
+      const hasDetail =
+        lastUserMessage.split(" ").length > 6 &&
+        (lowerMsg.includes("i ") || lowerMsg.includes("main") || lowerMsg.includes("मैं"));
+
+      if (!hasDetail) {
+        return res.status(200).json({
+          reply: isHindi
+            ? "रुको।\n\nतुम साफ नहीं बोल रहे।\n\nअगर सही जानकारी नहीं दोगे तो सही जवाब नहीं मिलेगा।\n\nएक लाइन में बताओ:\nतुम क्या करते हो + कहाँ करते हो + क्या काम नहीं कर रहा"
+            : "Stop.\n\nYou're being vague.\n\nIf you don't give clear details, you won't get a useful answer.\n\nSay in one line:\nWhat you do + where you do it + what is not working"
+        });
+      }
+    }
+
     // PROMPT
     const systemPrompt = `
 You are TruthLoop.
@@ -58,63 +73,28 @@ You are TruthLoop.
 Goal: ${userGoal}
 Problem: ${userProblem}
 Action: ${userAction}
+
 Before asking:
-
-1. Say ONE specific behavior of the user
-2. Say what they are avoiding (no question)
-
-Then ask ONLY ONE question at the end.
+- Say ONE specific behavior
+- Say what user is avoiding
+- Ask ONLY ONE question
 
 Strict:
-- No multiple questions
-- No question inside explanation
-- Only ONE '?' allowed in entire reply
-If more than one '?' is generated → rewrite the response
-Never use abstract words like:
-strategy, improve, better, more, growth
-
-Always refer to something the user is actually doing
-(e.g. posting, messaging, writing, not replying, avoiding)
-You are not a teacher.
-You are a pressure mirror.
-
-If user gives clear behavior:
-→ Attack that specific behavior
-
-If user is vague:
-→ Do NOT guess
-→ Do NOT give generic truth
-→ Call it out directly
-→ Force them to clarify with a sharp question
-
-Never break the flow.
-Never exit conversation.
-
-
-RULES:
-
-- No generic advice
-- No explanation
+- Only ONE '?'
+- No generic words
 - No teaching tone
-- No repeating same sentence
 
-If response feels similar → rewrite from new angle
-
-If user is vague:
-Call it out directly
-
-Example:
-"You are hiding behind 'I don't know'. Say it clearly."
+If user is vague → call it out
 
 STAGE: ${loopLevel}
 
 Stage 1–3:
 - No action
-- End with question
+- End with ONE question
 
 Stage 4:
-- Give 1–2 direct actions
 - No question
+- Give direct action based on conversation
 
 STYLE:
 - Direct
@@ -123,64 +103,59 @@ STYLE:
 `;
 
     const response = await fetch(
-  "https://api.groq.com/openai/v1/chat/completions",
-  {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-      Authorization: "Bearer " + process.env.GROQ_API_KEY
-    },
-    body: JSON.stringify({
-      model: "llama-3.3-70b-versatile",
-      messages: [
-        { role: "system", content: systemPrompt },
-        ...messages   // ✅ full context (IMPORTANT)
-      ],
-      temperature: 0.9,
-      max_tokens: 300
-    })
-  }
-);
+      "https://api.groq.com/openai/v1/chat/completions",
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: "Bearer " + process.env.GROQ_API_KEY
+        },
+        body: JSON.stringify({
+          model: "llama-3.3-70b-versatile",
+          messages: [
+            { role: "system", content: systemPrompt },
+            ...messages
+          ],
+          temperature: 0.8,
+          max_tokens: 300
+        })
+      }
+    );
 
-if (!response.ok) {
-  return res.status(500).json({ reply: "API error" });
-}
+    if (!response.ok) {
+      return res.status(500).json({ reply: "API error" });
+    }
 
-const data = await response.json();
+    const data = await response.json();
+    let reply = data?.choices?.[0]?.message?.content || "No response";
 
-let reply = data?.choices?.[0]?.message?.content || "No response";
+    // 🔥 SAFETY (Stage 1–3)
+    if (loopLevel < 4) {
+      const forbidden = ["send","call","post","create","sell","build"];
+      const hasAction = forbidden.some(word => reply.toLowerCase().includes(word));
 
+      if (hasAction) {
+        reply = reply.replace(/send|call|post|create|sell|build/gi, "");
+      }
+    }
 
-// 🔥 SOFT SAFETY (Stage 1–3 only, no overwrite)
-if (loopLevel < 4) {
-  const forbidden = ["send","call","post","create","sell","build"];
-  const hasAction = forbidden.some(word => reply.toLowerCase().includes(word));
+    // 🔥 STAGE 4 CLEANUP
+    if (loopLevel >= 4) {
 
-  if (hasAction) {
-    reply = reply.replace(/send|call|post|create|sell|build/gi, "");
-    reply += isHindi
-      ? "\n\nतुम जल्दी action पर भाग रहे हो… पहले सच देखो।"
-      : "\n\nYou are rushing to action… face the real issue first.";
-  }
-}
+      // remove question
+      reply = reply.replace(/\?/g, "");
 
+      // remove generic patterns
+      reply = reply
+        .replace(/do one task.*$/gim, "")
+        .replace(/today.*$/gim, "")
+        .replace(/act.*$/gim, "");
 
-// 🔥 STAGE 4 (NO TEMPLATE, NO CONTROL — ONLY CLEANUP)
-if (loopLevel >= 4) {
-
-  // ❌ remove typical generic AI lines if any
-  reply = reply
-    .replace(/do one task.*$/gim, "")
-    .replace(/today.*$/gim, "")
-    .replace(/act.*loop.*$/gim, "");
-
-  // ✅ ensure tone ends with pressure (without template)
-  if (!reply.toLowerCase().includes("today") && !reply.toLowerCase().includes("आज")) {
-    reply += isHindi
-      ? "\n\nअब या तो इसे सच में करके दिखाओ… या फिर यही pattern चलता रहेगा।"
-      : "\n\nNow either act on this… or stay stuck in the same pattern.";
-  }
-}
+      // add pressure ending
+      reply += isHindi
+        ? "\n\nअब करना है या नहीं — यही फर्क बनाएगा।"
+        : "\n\nNow it's on you to act or stay stuck.";
+    }
 
     return res.status(200).json({
       reply,
@@ -193,6 +168,4 @@ if (loopLevel >= 4) {
       reply: "Server error"
     });
   }
-}
-
-
+         }
