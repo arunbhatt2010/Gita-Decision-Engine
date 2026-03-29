@@ -36,93 +36,61 @@ export default async function handler(req, res) {
 
     const isHindi = /[\u0900-\u097F]/.test(lastUserMessage);
 
-    // 🔥 DOMAIN FILTER
-    const healthPatterns = [
-      "दर्द","दांत","सर दर्द","pain","doctor","medicine","health","fever","treatment"
-    ];
-
-    const relationshipPatterns = [
-      "relationship","breakup","love","girlfriend",
-      "boyfriend","wife","husband","marriage","ex"
-    ];
+    // DOMAIN FILTER
+    const healthPatterns = ["दर्द","दांत","सर दर्द","pain","doctor","medicine","health","fever","treatment"];
+    const relationshipPatterns = ["relationship","breakup","love","girlfriend","boyfriend","wife","husband","marriage","ex"];
 
     const isHealth = healthPatterns.some(word => lowerMsg.includes(word));
     const isRelationship = relationshipPatterns.some(word => lowerMsg.includes(word));
 
     if (isHealth || isRelationship) {
-
-      let reply;
-
-      if (isHindi) {
-        reply = "यह सिस्टम medical या relationship समस्याओं के लिए नहीं है.\n\nइसे इन चीज़ों के लिए उपयोग करें:\n• पैसे / income\n• business / clients\n• career direction\n• overthinking / confusion\n• discipline / consistency\n\nसही समस्या के साथ वापस आएं।";
-      } else {
-        reply = "This system does not handle medical or relationship problems.\n\nUse it for:\n• Money / income\n• Business / clients\n• Career direction\n• Overthinking / confusion\n• Discipline / consistency\n\nCome back with a real decision problem.";
-      }
-
-      return res.status(200).json({ reply });
+      return res.status(200).json({
+        reply: isHindi
+          ? "यह सिस्टम इस समस्या के लिए नहीं है। सही समस्या के साथ वापस आएं।"
+          : "This system does not handle this problem. Come back with a real decision problem."
+      });
     }
 
-    // 🔥 FINAL PROMPT (UPGRADED)
+    // PROMPT
     const systemPrompt = `
 You are TruthLoop.
 
-User Context:
 Goal: ${userGoal}
 Problem: ${userProblem}
-Recent Action: ${userAction}
+Action: ${userAction}
 
-You are a mirror + pressure system.
-No teaching. No motivation. No generic advice.
+You are not a teacher.
+You are a pressure mirror.
 
-Reply in SAME language as user.
+RULES:
 
-Current Stage: ${loopLevel}
+- No generic advice
+- No explanation
+- No teaching tone
+- No repeating same sentence
+
+If response feels similar → rewrite from new angle
+
+If user is vague:
+Call it out directly
+
+Example:
+"You are hiding behind 'I don't know'. Say it clearly."
+
+STAGE: ${loopLevel}
 
 Stage 1–3:
 - No action
-- End with a question
+- End with question
 
 Stage 4:
-- Give 1–2 clear actions
+- Give 1–2 direct actions
 - No question
 
---------------------------------
-ANTI-REPETITION (CRITICAL)
---------------------------------
-
-Every response must feel new.
-
-- Never reuse sentence structure
-- Never repeat phrases like:
-"You are avoiding"
-"You are active"
-"You already know"
-
-If similar → rewrite from new angle
-
---------------------------------
-ANTI-GENERIC
---------------------------------
-
-If response fits many people → reject
-
-Make it feel personal
-
---------------------------------
-STYLE
---------------------------------
-
-No explanation  
-No teaching tone  
-Only direct observation  
-
---------------------------------
-TENSION
---------------------------------
-
-Each response must increase pressure
-
---------------------------------
+STYLE:
+- Direct
+- Personal
+- Uncomfortable
 `;
 
     const response = await fetch(
@@ -139,8 +107,8 @@ Each response must increase pressure
             { role: "system", content: systemPrompt },
             ...messages.slice(-4)
           ],
-          temperature: 0.7,
-          max_tokens: 400
+          temperature: 0.9,
+          max_tokens: 300
         })
       }
     );
@@ -153,53 +121,44 @@ Each response must increase pressure
 
     let reply = data?.choices?.[0]?.message?.content || "No response";
 
-    // 🔥 SAFETY (SOFT — NO OVERRIDE)
+    // SOFT SAFETY (NO OVERWRITE)
     if (loopLevel < 4) {
       const forbidden = ["send","call","post","create","sell","build"];
-      const hasAction = forbidden.some(word =>
-        reply.toLowerCase().includes(word)
-      );
+      const hasAction = forbidden.some(word => reply.toLowerCase().includes(word));
 
       if (hasAction) {
+        reply = reply.replace(/send|call|post|create|sell|build/gi, "");
         reply += isHindi
-          ? "\n\nतुम जल्दी solution पर भाग रहे हो… पहले सच देखो।"
+          ? "\n\nतुम जल्दी action पर भाग रहे हो… पहले सच देखो।"
           : "\n\nYou are rushing to action… face the real issue first.";
       }
     }
 
-    // 🔥 STAGE 4 (EXECUTION MODE)
+    // STAGE 4 (EXECUTION)
     if (loopLevel >= 4) {
-
       reply = isHindi
-        ? `अब साफ दिख रहा है।
+        ? `अब साफ है।
 
-तुम ${userProblem} से अटके नहीं हो…
-तुम उस चीज़ से बच रहे हो जो सीधा result दे सकती है।
+तुम ${userProblem} में नहीं फंसे हो…
+तुम उस काम से बच रहे हो जो result देगा।
 
-आज ही ये करो:
+आज:
+एक ऐसा काम करो जो सीधे पैसे से जुड़ा हो  
+और उसे बाहर push करो
 
-एक ऐसा काम चुनो जो सीधे outcome या पैसे से जुड़ा हो  
-और उसे push करो — छुपाओ मत
-
-तुम जानते हो वो क्या है।
-
-अब या तो करोगे…
-या फिर यही pattern दोहराओगे।`
+अब या तो करोगे  
+या फिर यही repeat होगा`
         : `Now it's clear.
 
-You are not stuck because of ${userProblem}…
-you are avoiding the move that creates results.
+You are not stuck in ${userProblem}  
+you are avoiding the real move
 
-Do this today:
+Today:
+Do one task tied to results  
+and push it out
 
-Pick one task directly tied to outcome or money  
-and push it out — do not hide it
-
-You know what that is.
-
-Now either act…
-or repeat the same pattern.`;
-
+Act  
+or repeat the loop`;
     }
 
     return res.status(200).json({
@@ -208,8 +167,6 @@ or repeat the same pattern.`;
     });
 
   } catch (error) {
-    return res.status(500).json({
-      reply: "Server error"
-    });
+    return res.status(500).json({ reply: "Server error" });
   }
   }
