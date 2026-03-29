@@ -62,7 +62,7 @@ export default async function handler(req, res) {
       return res.status(200).json({ reply });
     }
 
-    // 🔥 FINAL PROMPT (STAGE SYSTEM)
+    // 🔥 FINAL PROMPT (UPGRADED)
     const systemPrompt = `
 You are TruthLoop.
 
@@ -71,92 +71,58 @@ Goal: ${userGoal}
 Problem: ${userProblem}
 Recent Action: ${userAction}
 
---------------------------------
-CORE IDENTITY
---------------------------------
 You are a mirror + pressure system.
 No teaching. No motivation. No generic advice.
 
---------------------------------
-LANGUAGE
---------------------------------
 Reply in SAME language as user.
 
---------------------------------
-STAGE SYSTEM
---------------------------------
 Current Stage: ${loopLevel}
-
-Stage 1 → surface clarity  
-Stage 2 → deeper pattern  
-Stage 3 → uncomfortable truth  
-Stage 4 → execution  
-
---------------------------------
-RESPONSE STYLE
---------------------------------
-
-Write like a real human speaking directly.
-
-Use short paragraphs (mobile friendly):
-- 2 to 4 small paragraphs
-- Each paragraph 1–2 lines
-
---------------------------------
-FLOW
---------------------------------
-
-Response should naturally include:
-
-- What the user is doing
-- The pattern they are stuck in
-- The uncomfortable truth
-
-Stage 1–3:
-End with a sharp question that pushes forward.
-
-Stage 4:
-No question.
-Give clear execution steps.
-
---------------------------------
-STRICT
---------------------------------
-
-- No labels
-- No bullet points
-- No robotic phrases
-- No fragmented sentences
-
---------------------------------
-RULES
---------------------------------
 
 Stage 1–3:
 - No action
-- No advice
-- Must end with a question
+- End with a question
 
 Stage 4:
 - Give 1–2 clear actions
-- Practical and direct
-- Close with pressure
+- No question
 
 --------------------------------
-TONE
+ANTI-REPETITION (CRITICAL)
 --------------------------------
 
-Direct  
-Uncomfortable  
-Personal  
+Every response must feel new.
+
+- Never reuse sentence structure
+- Never repeat phrases like:
+"You are avoiding"
+"You are active"
+"You already know"
+
+If similar → rewrite from new angle
 
 --------------------------------
-GOAL
+ANTI-GENERIC
 --------------------------------
 
-Break illusion  
-Force clarity  
-Push action
+If response fits many people → reject
+
+Make it feel personal
+
+--------------------------------
+STYLE
+--------------------------------
+
+No explanation  
+No teaching tone  
+Only direct observation  
+
+--------------------------------
+TENSION
+--------------------------------
+
+Each response must increase pressure
+
+--------------------------------
 `;
 
     const response = await fetch(
@@ -170,9 +136,9 @@ Push action
         body: JSON.stringify({
           model: "llama-3.3-70b-versatile",
           messages: [
-  { role: "system", content: systemPrompt },
-  ...messages.slice(-4)
-],
+            { role: "system", content: systemPrompt },
+            ...messages.slice(-4)
+          ],
           temperature: 0.7,
           max_tokens: 400
         })
@@ -187,7 +153,7 @@ Push action
 
     let reply = data?.choices?.[0]?.message?.content || "No response";
 
-    // 🔥 SAFETY
+    // 🔥 SAFETY (SOFT — NO OVERRIDE)
     if (loopLevel < 4) {
       const forbidden = ["send","call","post","create","sell","build"];
       const hasAction = forbidden.some(word =>
@@ -195,60 +161,46 @@ Push action
       );
 
       if (hasAction) {
-        reply = isHindi
-          ? "तुम काम कर रहे हो, लेकिन सही दिशा में नहीं बढ़ रहे हो।\n\nतुम एक्टिव हो, पर असली कदम लेने से बच रहे हो।\n\nतुम्हें पता है क्या करना चाहिए, फिर भी टाल रहे हो।\n\nअभी सच में तुम्हें क्या रोक रहा है?"
-          : "You are active, but not moving in the right direction.\n\nYou are doing work, but avoiding the real move.\n\nYou already know what needs to be done, yet you delay it.\n\nWhat is actually stopping you right now?";
+        reply += isHindi
+          ? "\n\nतुम जल्दी solution पर भाग रहे हो… पहले सच देखो।"
+          : "\n\nYou are rushing to action… face the real issue first.";
       }
-    }// 🔥 STAGE 4 (NICHOD + ACTION)
-if (loopLevel >= 4) {
+    }
 
-  const context = `
-Goal: ${userGoal}
-Problem: ${userProblem}
-Recent Action: ${userAction}
-User said: ${lastUserMessage}
-`;
+    // 🔥 STAGE 4 (EXECUTION MODE)
+    if (loopLevel >= 4) {
 
-  reply = isHindi
-    ? `यहीं असली बात है।
+      reply = isHindi
+        ? `अब साफ दिख रहा है।
 
-${context}
+तुम ${userProblem} से अटके नहीं हो…
+तुम उस चीज़ से बच रहे हो जो सीधा result दे सकती है।
 
-तुम वही कर रहे हो जो safe लगता है…  
-लेकिन वही नहीं कर रहे जो सच में फर्क डालता।
+आज ही ये करो:
 
-अब सीधा करो:
+एक ऐसा काम चुनो जो सीधे outcome या पैसे से जुड़ा हो  
+और उसे push करो — छुपाओ मत
 
-ऐसा 1–2 कदम बताओ जो इसी समस्या को सीधे तोड़े,
-ना कि general improvement दे।
+तुम जानते हो वो क्या है।
 
-शर्त:
-- आज ही किया जा सके
-- सीधा असर दिखे
-- user के exact situation से जुड़ा हो
+अब या तो करोगे…
+या फिर यही pattern दोहराओगे।`
+        : `Now it's clear.
 
-अंत में एक line लिखो जो उसे अभी action लेने पर मजबूर करे।`
-    : `This is the core.
+You are not stuck because of ${userProblem}…
+you are avoiding the move that creates results.
 
-${context}
+Do this today:
 
-You are doing what feels safe…
-but avoiding what actually moves things.
+Pick one task directly tied to outcome or money  
+and push it out — do not hide it
 
-Now give:
+You know what that is.
 
-1–2 actions that directly break THIS exact problem,
-not general improvement.
+Now either act…
+or repeat the same pattern.`;
 
-Conditions:
-- Can be done today
-- Direct impact
-- Based on this exact situation
-
-End with a line that forces immediate action.`;
-
-           }
-    
+    }
 
     return res.status(200).json({
       reply,
