@@ -8,7 +8,7 @@ gtag('js', new Date());
 gtag('config', 'G-RBMQ2F6P9Q');
 </script><style>
 body { background:#0f0f0f; color:#fff; font-family:Arial; margin:0; }
-.container { max-width:500px; margin:auto; padding:15px; }
+.container { max-width:500px; margin:auto; padding:15px; box-shadow:0 0 20px rgba(255,94,0,0.1); border-radius:12px; }
 h2 { text-align:center; }
 
 .output {
@@ -21,13 +21,7 @@ h2 { text-align:center; }
   line-height:1.8;
   font-size:15px;
 }
-.container {
-  max-width:500px;
-  margin:auto;
-  padding:15px;
-  box-shadow:0 0 20px rgba(255,94,0,0.1);
-  border-radius:12px;
-}
+
 input,button {
   width:100%;
   padding:12px;
@@ -44,63 +38,45 @@ button {
 
 #finalScreen { display:none; text-align:center; margin-top:15px; }
 .small { font-size:12px; color:#aaa; text-align:center; margin-top:5px; }
-</style></head><body><div class="container">
-<div style="text-align:center; margin-bottom:15px;">
-
-  <img src="https://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEg-VwI2SYcAKJd9poW1FTNoP_z0J1YXtLt26G8548Ro41EVKY9L4EOw_hZx1K1WdiSmeVYdBBB0JDZdDCfF8AEGAh8CiY49VyKij2mPSv8csI6qsr9Admcjzgd53AYmg8Y3u3PtoT1fwIcSQgqgguENrHngiR8AzohGXVgaXcorGoYUGf2JYPCx99bWWA/s1536/file_00000000756c720baec218a6947d616f.jpeg"
-       alt="TruthLoop logo"
-       style="width:160px; border-radius:12px; margin-bottom:10px;">
-
-  <p style="font-size:13px; color:#888;">
-    Used by creators, founders & decision makers  
-    who want clarity, not motivation.
-  </p>
-
-</div>
-
-<h2 style="text-align:center;">TruthLoop</h2>
-<p class="small" style="text-align:center;">
-This is not advice. This is confrontation.
-</p><!-- EMAIL --><div id="emailScreen">
-  <input id="emailInput" placeholder="Enter your email to continue"/>
-  <button onclick="saveEmail()">Start</button>
-</div><!-- GOAL --><div id="goalScreen" style="display:none;">
-  <p>Where are you stuck… really?</p>
-  <button onclick="selectGoal('Money')">Money</button>
-  <button onclick="selectGoal('Clarity')">Clarity</button>
-  <button onclick="selectGoal('Consistency')">Consistency</button>
-  <button onclick="selectGoal('Overthinking')">Overthinking</button>
-</div><!-- PROBLEM --><div id="problemScreen" style="display:none;">
-  <input id="problemInput" placeholder="Tell clearly what’s not working..." />
-  <button onclick="saveProblem()">Continue</button>
-</div><!-- ACTION --><div id="actionScreen" style="display:none;">
-  <input id="actionInput" placeholder="What did you actually do in last 48 hours?" />
-  <button onclick="saveAction()">Start</button>
-</div><!-- MAIN --><div id="mainApp" style="display:none;">  <div id="outputBox" class="output"></div>  <input id="mainInput" placeholder="Don't type what sounds smart. Type what is real." />
-  <button id="getBtn">Face the truth</button>  <input id="reflectionInput" placeholder="Answer honestly..." />
-  <button id="nextBtn">Go deeper</button></div><!-- FINAL --><div id="finalScreen">  <p>Now it's clear.</p>  <div id="summaryBox" style="background:#000; padding:15px; border-radius:10px;"></div>  <p class="small">Only works if you answer honestly.</p><button id="upgradeBtn">Unlock exact next steps (₹299)</button>
+</style></head><body>
+<div class="container"><div style="text-align:center; margin-bottom:15px;">
+<img src="https://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEg-VwI2SYcAKJd9poW1FTNoP_z0J1YXtLt26G8548Ro41EVKY9L4EOw_hZx1K1WdiSmeVYdBBB0JDZdDCfF8AEGAh8CiY49VyKij2mPSv8csI6qsr9Admcjzgd53AYmg8Y3u3PtoT1fwIcSQgqgguENrHngiR8AzohGXVgaXcorGoYUGf2JYPCx99bWWA/s1536/file_00000000756c720baec218a6947d616f.jpeg"
+style="width:160px; border-radius:12px;">
+<p class="small">Used by creators, founders & decision makers who want clarity, not motivation.</p>
+</div><h2>TruthLoop</h2>
+<p class="small">This is not advice. This is confrontation.</p><div id="emailScreen">
+<input id="emailInput" placeholder="Enter your email to continue"/>
+<button onclick="saveEmail()">Start</button>
+</div><div id="goalScreen" style="display:none;">
+<p>Where are you stuck… really?</p>
+<button onclick="selectGoal('Money')">Money</button>
+<button onclick="selectGoal('Clarity')">Clarity</button>
+<button onclick="selectGoal('Consistency')">Consistency</button>
+<button onclick="selectGoal('Overthinking')">Overthinking</button>
+</div><div id="problemScreen" style="display:none;">
+<input id="problemInput" placeholder="Tell clearly what’s not working..." />
+<button onclick="saveProblem()">Continue</button>
+</div><div id="actionScreen" style="display:none;">
+<input id="actionInput" placeholder="What did you actually do in last 48 hours?" />
+<button onclick="saveAction()">Start</button>
+</div><div id="mainApp" style="display:none;">
+<div id="outputBox" class="output"></div><input id="mainInput" placeholder="Don't type what sounds smart. Type what is real." />
+<button id="getBtn">Face the truth</button><input id="reflectionInput" placeholder="Answer honestly..." />
+<button id="nextBtn">Go deeper</button>
+</div><div id="finalScreen">
+<p>Now it's clear.</p>
+<div id="summaryBox" style="background:#000; padding:15px; border-radius:10px;"></div>
 <button id="restartBtn">🔄 Start Again</button>
-
-  <!-- FEEDBACK -->  <div style="margin-top:15px;">
-    <p>Was this useful?</p>
-    <button onclick="sendFeedback('yes')">Yes</button>
-    <button onclick="sendFeedback('no')">No</button>
-    <input id="feedbackInput" placeholder="What felt wrong?" style="display:none;"/>
-  </div></div></div><p class="small">
+</div><p class="small">
 <a href="/privacy.html">Privacy Policy</a> |
 <a href="/terms.html">Terms</a> |
 <a href="/refund.html">Refund Policy</a> |
 Contact: arunbhatt2010@email.com
-  </p> <script>
-
+</p><script>
 document.addEventListener("DOMContentLoaded", () => {
 
 let userGoal="", userProblem="", userAction="";
 let messages=[], loopLevel=1;
-let userEmail = localStorage.getItem("truthloop_email") || "";
-let sessionId = localStorage.getItem("truthloop_session") || Date.now()+"-"+Math.random();
-
-localStorage.setItem("truthloop_session", sessionId);
 
 const emailScreen=document.getElementById("emailScreen");
 const goalScreen=document.getElementById("goalScreen");
@@ -108,44 +84,30 @@ const problemScreen=document.getElementById("problemScreen");
 const actionScreen=document.getElementById("actionScreen");
 const mainApp=document.getElementById("mainApp");
 
-const problemInput=document.getElementById("problemInput");
-const actionInput=document.getElementById("actionInput");
+const outputBox=document.getElementById("outputBox");
 const mainInput=document.getElementById("mainInput");
 const reflectionInput=document.getElementById("reflectionInput");
-
-const outputBox=document.getElementById("outputBox");
-const getBtn=document.getElementById("getBtn");
-const nextBtn=document.getElementById("nextBtn");
-
-const finalScreen=document.getElementById("finalScreen");
-const summaryBox=document.getElementById("summaryBox");
-const restartBtn=document.getElementById("restartBtn");
 
 function formatReply(text){
   return text.split("\n").map(l=>`<div style="margin-bottom:12px;">${l}</div>`).join("");
 }
 
-function scrollToBottom(){
-  outputBox.scrollTop = outputBox.scrollHeight;
-}
-
-// EMAIL
 window.saveEmail=()=>{
   const email=document.getElementById("emailInput").value.trim();
   if(!email) return alert("Enter email");
+
   localStorage.setItem("truthloop_email", email);
+
   fetch("/api/saveEmail", {
-  method: "POST",
-  headers: {
-    "Content-Type": "application/json"
-  },
-  body: JSON.stringify({ email: userEmail })
-});
+    method:"POST",
+    headers:{ "Content-Type":"application/json" },
+    body:JSON.stringify({ email: email })
+  });
+
   emailScreen.style.display="none";
   goalScreen.style.display="block";
 };
 
-// FLOW
 window.selectGoal=(v)=>{
   userGoal=v;
   goalScreen.style.display="none";
@@ -153,125 +115,64 @@ window.selectGoal=(v)=>{
 };
 
 window.saveProblem=()=>{
-  userProblem=problemInput.value.trim();
+  userProblem=document.getElementById("problemInput").value.trim();
   if(!userProblem) return alert("Enter problem");
   problemScreen.style.display="none";
   actionScreen.style.display="block";
 };
 
 window.saveAction=()=>{
-  userAction=actionInput.value.trim();
+  userAction=document.getElementById("actionInput").value.trim();
   if(!userAction) return alert("Enter action");
   actionScreen.style.display="none";
   mainApp.style.display="block";
 };
 
-// API
 async function callAPI(){
-  try{
-    const res=await fetch("/api/chat",{
-      method:"POST",
-      headers:{ "Content-Type":"application/json" },
-      body:JSON.stringify({
-        messages, loopLevel, userGoal, userProblem, userAction, sessionId
-      })
-    });
-
-    const data=await res.json();
-    messages.push({role:"assistant",content:data.reply});
-    return data.reply;
-
-  } catch(e){
-    return "⚠️ Connection error";
-  }
+  const res=await fetch("/api/chat",{
+    method:"POST",
+    headers:{ "Content-Type":"application/json" },
+    body:JSON.stringify({ messages, loopLevel, userGoal, userProblem, userAction })
+  });
+  const data=await res.json();
+  messages.push({role:"assistant",content:data.reply});
+  return data.reply;
 }
 
-// START
-getBtn.addEventListener("click", async ()=>{
+document.getElementById("getBtn").onclick = async ()=>{
   const text=mainInput.value.trim();
   if(!text) return;
 
   messages=[{role:"user",content:text}];
-  outputBox.innerHTML=`<b>You:</b> ${text}<br>Looking at what you're avoiding...`;
+
+  outputBox.innerHTML=`<b>You:</b> ${text}<br><br>`;
 
   const reply=await callAPI();
 
-  outputBox.innerHTML=`<b>You:</b> ${text}<br><br>${formatReply(reply)}`;
-  scrollToBottom();
-});
+  outputBox.innerHTML+=formatReply(reply);
 
-// CONTINUE
-nextBtn.addEventListener("click", async ()=>{
-  const text = reflectionInput.value.trim();
+  mainInput.value="";
+};
+
+document.getElementById("nextBtn").onclick = async ()=>{
+  const text=reflectionInput.value.trim();
   if(!text) return;
 
   loopLevel++;
 
-  messages.push({role:"user", content:text});
-  outputBox.innerHTML += `<br><b>You:</b> ${text}<br>Looking deeper...`;
-  scrollToBottom();
+  messages.push({role:"user",content:text});
 
-  const reply = await callAPI();
+  outputBox.innerHTML+=`<br><b>You:</b> ${text}<br><br>`;
 
-  outputBox.innerHTML += `<br>${formatReply(reply)}`;
-  scrollToBottom();
+  const reply=await callAPI();
+
+  outputBox.innerHTML+=formatReply(reply);
 
   reflectionInput.value="";
-
-  if(loopLevel === 5){
-    summaryBox.innerHTML = `
-    You were not stuck.<br><br>
-    You were avoiding the real move.<br><br>
-    You already know what matters.<br><br>
-    Now act.
-    `;
-    finalScreen.style.display="block";
-    mainApp.style.display="none";
-  }
-});
-
-// FEEDBACK (WORKING)
-async function submitFeedback(isUseful, text="") {
-  try {
-    await fetch("https://docs.google.com/forms/d/e/1FAIpQLScq0kWwwkvfJPCkXiWkq2DDOfzgcm7LRwD4DuW5TqlHpSbp1w/formResponse", {
-      method: "POST",
-      mode: "no-cors",
-      headers: {
-        "Content-Type": "application/x-www-form-urlencoded"
-      },
-      body: `entry.547964989=${encodeURIComponent(isUseful ? "YES" : "NO - " + text)}`
-    });
-  } catch (e) {
-    console.log("Feedback error", e);
-  }
-}
-
-window.sendFeedback = (type) => {
-
-  const input = document.getElementById("feedbackInput");
-
-  if(type === "yes"){
-    submitFeedback(true);
-    alert("Thanks for feedback 🙏");
-  }
-
-  if(type === "no"){
-    input.style.display = "block";
-
-    if(input.value){
-      submitFeedback(false, input.value);
-      alert("Got it. This helps improve 🔥");
-      input.value="";
-    }
-  }
 };
 
-// RESET
-restartBtn.addEventListener("click", ()=>{
-  location.reload();
-});
+document.getElementById("restartBtn").onclick=()=>location.reload();
 
 });
-
 </script></body>
-                                             </html>
+  </html>
