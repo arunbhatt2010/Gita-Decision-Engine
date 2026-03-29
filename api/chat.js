@@ -125,7 +125,7 @@ Tone:
             ...messages
           ],
           temperature: 0.7,
-          max_tokens: 250
+          max_tokens: 400
         })
       }
     );
@@ -135,7 +135,16 @@ Tone:
     }
 
     const data = await response.json();
-    let reply = data?.choices?.[0]?.message?.content || "No response";
+    let reply = "No response";
+
+if (data && data.choices && data.choices.length > 0) {
+  reply = data.choices[0].message?.content || "No response";
+}
+
+// extra safety
+if (!reply || reply.trim() === "") {
+  reply = "⚠️ No response generated. Try again.";
+}
 
     // 🔥 SAFETY (Stage 1–3 → no action words)
     if (loopLevel < 4) {
