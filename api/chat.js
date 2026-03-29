@@ -123,103 +123,67 @@ STYLE:
 `;
 
     const response = await fetch(
-      "https://api.groq.com/openai/v1/chat/completions",
-      {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: "Bearer " + process.env.GROQ_API_KEY
-        },
-        body: JSON.stringify({
-          model: "llama-3.3-70b-versatile",
-          messages: [
-            { role: "system", content: systemPrompt },
-            ...messages.slice(-4)
-          ],
-          temperature: 0.9,
-          max_tokens: 300
-        })
-      }
-    );
-
-    if (!response.ok) {
-      return res.status(500).json({ reply: "API error" });
-    }
-
-    const data = await response.json();
-
-    let reply = data?.choices?.[0]?.message?.content || "No response";
-
-    // SOFT SAFETY (NO OVERWRITE)
-    if (loopLevel < 4) {
-      const forbidden = ["send","call","post","create","sell","build"];
-      const hasAction = forbidden.some(word => reply.toLowerCase().includes(word));
-
-      if (hasAction) {
-        reply = reply.replace(/send|call|post|create|sell|build/gi, "");
-        reply += isHindi
-          ? "\n\nतुम जल्दी action पर भाग रहे हो… पहले सच देखो।"
-          : "\n\nYou are rushing to action… face the real issue first.";
-      }
-    }
-
-    // STAGE 4 (EXECUTION)
-    if (loopLevel >= 4) {
-
-  let actionLine = "";
-
-  if (lowerMsg.includes("client") || lowerMsg.includes("क्लाइंट")) {
-    actionLine = isHindi
-      ? "आज 5 founders को DM करो और सीधे उनका content fix करने का specific idea भेजो."
-      : "DM 5 founders today with a specific idea to improve their content.";
+  "https://api.groq.com/openai/v1/chat/completions",
+  {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: "Bearer " + process.env.GROQ_API_KEY
+    },
+    body: JSON.stringify({
+      model: "llama-3.3-70b-versatile",
+      messages: [
+        { role: "system", content: systemPrompt },
+        ...messages   // ✅ full context (IMPORTANT)
+      ],
+      temperature: 0.9,
+      max_tokens: 300
+    })
   }
+);
 
-  else if (lowerMsg.includes("content")) {
-    actionLine = isHindi
-      ? "आज एक ऐसा post लिखो जो सिर्फ founders की एक painful problem को hit करे."
-      : "Write one post today that hits one painful problem of founders.";
+if (!response.ok) {
+  return res.status(500).json({ reply: "API error" });
+}
+
+const data = await response.json();
+
+let reply = data?.choices?.[0]?.message?.content || "No response";
+
+
+// 🔥 SOFT SAFETY (Stage 1–3 only, no overwrite)
+if (loopLevel < 4) {
+  const forbidden = ["send","call","post","create","sell","build"];
+  const hasAction = forbidden.some(word => reply.toLowerCase().includes(word));
+
+  if (hasAction) {
+    reply = reply.replace(/send|call|post|create|sell|build/gi, "");
+    reply += isHindi
+      ? "\n\nतुम जल्दी action पर भाग रहे हो… पहले सच देखो।"
+      : "\n\nYou are rushing to action… face the real issue first.";
   }
+}
 
-  else {
-    actionLine = isHindi
-      ? "आज ऐसा काम करो जो सीधे पैसे ला सकता हो, busy work नहीं."
-      : "Do one task today that directly leads to money, not busy work.";
+
+// 🔥 STAGE 4 (NO TEMPLATE, NO CONTROL — ONLY CLEANUP)
+if (loopLevel >= 4) {
+
+  // ❌ remove typical generic AI lines if any
+  reply = reply
+    .replace(/do one task.*$/gim, "")
+    .replace(/today.*$/gim, "")
+    .replace(/act.*loop.*$/gim, "");
+
+  // ✅ ensure tone ends with pressure (without template)
+  if (!reply.toLowerCase().includes("today") && !reply.toLowerCase().includes("आज")) {
+    reply += isHindi
+      ? "\n\nअब या तो इसे सच में करके दिखाओ… या फिर यही pattern चलता रहेगा।"
+      : "\n\nNow either act on this… or stay stuck in the same pattern.";
   }
+}
 
-  reply = isHindi
-    ? `अब साफ दिख रहा है।
 
-तुम LinkedIn पर लिख रहे हो…
-लेकिन clients के सामने खुद को रख नहीं रहे।
-
-तुम value दे रहे हो…
-लेकिन offer नहीं कर रहे।
-
-${actionLine}
-
-आज कर दो…
-या फिर यही cycle चलता रहेगा।`
-    : `Now it's clear.
-
-You're posting on LinkedIn…
-but not putting yourself in front of clients.
-
-You're giving value…
-but not making an offer.
-
-${actionLine}
-
-Do it today…
-or stay stuck in the same loop.`;
-
-    }
-
-    return res.status(200).json({
-      reply,
-      paywall: loopLevel >= 4
-    });
-
-  } catch (error) {
-    return res.status(500).json({ reply: "Server error" });
-  }
-  }
+return res.status(200).json({
+  reply,
+  paywall: loopLevel >= 4
+});
