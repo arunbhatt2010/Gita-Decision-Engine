@@ -67,7 +67,10 @@ Goal: ${userGoal}
 Problem: ${userProblem}
 Recent Action: ${userAction}
 Do NOT only ask questions.
+Never repeat previous structure or sentences.
 
+Each response must introduce a new angle.
+If similar to last reply → rewrite completely.
 Each response must include:
 - 1 direct observation about user behavior
 - 1 pattern exposure
@@ -157,9 +160,9 @@ If response feels uncomfortable → CORRECT
         body: JSON.stringify({
           model: "llama-3.1-8b-instant",
           messages: [
-            { role: "system", content: systemPrompt },
-            ...messages
-          ],
+  { role: "system", content: systemPrompt },
+  { role: "user", content: lastUserMessage }
+],
           temperature: 0.5,
           max_tokens: 300
         })
