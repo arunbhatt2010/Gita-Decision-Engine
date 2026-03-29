@@ -4,7 +4,6 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
 <title>TruthLoop</title>
 
-<!-- ✅ GOOGLE ANALYTICS -->
 <script async src="https://www.googletagmanager.com/gtag/js?id=G-RBMQ2F6P9Q"></script>
 <script>
 window.dataLayer = window.dataLayer || [];
@@ -26,6 +25,7 @@ h2 { text-align:center; }
   border-radius:12px;
   margin-bottom:10px;
   line-height:1.8;
+  font-size:15px;
 }
 
 input,button {
@@ -42,11 +42,8 @@ button {
   cursor:pointer;
 }
 
-#finalScreen {
-  display:none;
-  text-align:center;
-  margin-top:15px;
-}
+#finalScreen { display:none; text-align:center; margin-top:15px; }
+.small { font-size:12px; color:#aaa; text-align:center; margin-top:5px; }
 </style>
 </head>
 
@@ -55,9 +52,17 @@ button {
 <div class="container">
 <h2>TruthLoop</h2>
 
+<p class="small">This is not advice. This is confrontation.</p>
+
+<!-- EMAIL -->
+<div id="emailScreen">
+  <input id="emailInput" placeholder="Enter your email to continue"/>
+  <button onclick="saveEmail()">Start</button>
+</div>
+
 <!-- GOAL -->
-<div id="goalScreen">
-  <p>Where are you stuck right now?</p>
+<div id="goalScreen" style="display:none;">
+  <p>Where are you stuck… really?</p>
   <button onclick="selectGoal('Money')">Money</button>
   <button onclick="selectGoal('Clarity')">Clarity</button>
   <button onclick="selectGoal('Consistency')">Consistency</button>
@@ -66,13 +71,13 @@ button {
 
 <!-- PROBLEM -->
 <div id="problemScreen" style="display:none;">
-  <input id="problemInput" placeholder="What’s actually not working?" />
+  <input id="problemInput" placeholder="Tell clearly what’s not working..." />
   <button onclick="saveProblem()">Continue</button>
 </div>
 
 <!-- ACTION -->
 <div id="actionScreen" style="display:none;">
-  <input id="actionInput" placeholder="What did you do in last 48 hours?" />
+  <input id="actionInput" placeholder="What did you actually do in last 48 hours?" />
   <button onclick="saveAction()">Start</button>
 </div>
 
@@ -81,11 +86,11 @@ button {
   
   <div id="outputBox" class="output"></div>
 
-  <input id="mainInput" placeholder="Say it clearly. No hiding." />
-  <button id="getBtn">Face It</button>
+  <input id="mainInput" placeholder="Don't type what sounds smart. Type what is real." />
+  <button id="getBtn">Face the truth</button>
 
   <input id="reflectionInput" placeholder="Answer honestly..." />
-  <button id="nextBtn">Continue</button>
+  <button id="nextBtn">Go deeper</button>
 
   <button id="payBtn" style="display:none;"></button>
 
@@ -94,12 +99,22 @@ button {
 <!-- FINAL -->
 <div id="finalScreen">
 
-  <p>⚠️ You now see the truth.</p>
+  <p>Now it's clear.</p>
 
   <div id="summaryBox" style="background:#000; padding:15px; border-radius:10px;"></div>
 
-  <button id="upgradeBtn">🚀 Get Full Execution Plan (₹299)</button>
+  <p class="small">Only works if you answer honestly.</p>
+
+  <button id="upgradeBtn">Unlock exact next steps (₹299)</button>
   <button id="restartBtn">🔄 Start Again</button>
+
+  <!-- FEEDBACK -->
+  <div style="margin-top:15px;">
+    <p>Was this useful?</p>
+    <button onclick="sendFeedback('yes')">Yes</button>
+    <button onclick="sendFeedback('no')">No</button>
+    <input id="feedbackInput" placeholder="What felt wrong?" style="display:none;"/>
+  </div>
 
 </div>
 
@@ -112,7 +127,12 @@ document.addEventListener("DOMContentLoaded", () => {
 let userGoal="", userProblem="", userAction="";
 let messages=[], loopLevel=1;
 let paid49=false, paid99=false;
+let userEmail = localStorage.getItem("truthloop_email") || "";
+let sessionId = localStorage.getItem("truthloop_session") || Date.now()+"-"+Math.random();
 
+localStorage.setItem("truthloop_session", sessionId);
+
+const emailScreen=document.getElementById("emailScreen");
 const goalScreen=document.getElementById("goalScreen");
 const problemScreen=document.getElementById("problemScreen");
 const actionScreen=document.getElementById("actionScreen");
@@ -131,10 +151,8 @@ const payBtn=document.getElementById("payBtn");
 const finalScreen=document.getElementById("finalScreen");
 const summaryBox=document.getElementById("summaryBox");
 const restartBtn=document.getElementById("restartBtn");
-const upgradeBtn=document.getElementById("upgradeBtn");
 
 function formatReply(text){
-  if(!text) return "<div>⚠️ Empty response</div>";
   return text.split("\n").map(l=>`<div style="margin-bottom:12px;">${l}</div>`).join("");
 }
 
@@ -142,12 +160,20 @@ function scrollToBottom(){
   outputBox.scrollTop = outputBox.scrollHeight;
 }
 
+// EMAIL
+window.saveEmail=()=>{
+  const email=document.getElementById("emailInput").value.trim();
+  if(!email) return alert("Enter email");
+  localStorage.setItem("truthloop_email", email);
+  emailScreen.style.display="none";
+  goalScreen.style.display="block";
+};
+
 // FLOW
 window.selectGoal=(v)=>{
   userGoal=v;
   goalScreen.style.display="none";
   problemScreen.style.display="block";
-  gtag('event', 'goal_selected', { goal: v });
 };
 
 window.saveProblem=()=>{
@@ -171,16 +197,11 @@ async function callAPI(){
       method:"POST",
       headers:{ "Content-Type":"application/json" },
       body:JSON.stringify({
-        messages, loopLevel, userGoal, userProblem, userAction
+        messages, loopLevel, userGoal, userProblem, userAction, sessionId
       })
     });
 
     const data=await res.json();
-
-    if(!data || !data.reply){
-      return "⚠️ No response";
-    }
-
     messages.push({role:"assistant",content:data.reply});
     return data.reply;
 
@@ -194,19 +215,13 @@ getBtn.addEventListener("click", async ()=>{
   const text=mainInput.value.trim();
   if(!text) return;
 
-  loopLevel=1;
-  paid49=false;
-  paid99=false;
-
   messages=[{role:"user",content:text}];
-  outputBox.innerHTML=`<b>You:</b> ${text}<br>⚡ Thinking fast...`;
+  outputBox.innerHTML=`<b>You:</b> ${text}<br>Looking at what you're avoiding...`;
 
   const reply=await callAPI();
 
   outputBox.innerHTML=`<b>You:</b> ${text}<br><br>${formatReply(reply)}`;
   scrollToBottom();
-
-  gtag('event', 'started_conversation');
 });
 
 // CONTINUE
@@ -214,42 +229,10 @@ nextBtn.addEventListener("click", async ()=>{
   const text = reflectionInput.value.trim();
   if(!text) return;
 
-  if(loopLevel === 2 && !paid49){
-    payBtn.style.display="block";
-    payBtn.innerText="⚠️ Go Deeper (₹49)";
-    return;
-  }
-
-  if(loopLevel === 3 && !paid99){
-    payBtn.style.display="block";
-    payBtn.innerText="🔥 Get Clear Action (₹99)";
-    return;
-  }
-
-  if(loopLevel === 4){
-
-    summaryBox.innerHTML = `
-    <div style="background:#000; padding:15px; border-radius:10px; text-align:left;">
-    You were not stuck.<br><br>
-    You were avoiding the real move.<br><br>
-    You kept doing what feels safe… but not what actually moves things forward.<br><br>
-    You already know what matters.<br>
-    You just haven’t acted on it.<br><br>
-    Nothing changes from here… unless your actions change.
-    </div>
-    `;
-
-    finalScreen.style.display="block";
-    mainApp.style.display="none";
-
-    gtag('event', 'completed_flow');
-    return;
-  }
-
   loopLevel++;
 
   messages.push({role:"user", content:text});
-  outputBox.innerHTML += `<br><b>You:</b> ${text}<br>⚡ Thinking fast...`;
+  outputBox.innerHTML += `<br><b>You:</b> ${text}<br>Looking deeper...`;
   scrollToBottom();
 
   const reply = await callAPI();
@@ -258,45 +241,30 @@ nextBtn.addEventListener("click", async ()=>{
   scrollToBottom();
 
   reflectionInput.value="";
+
+  if(loopLevel === 4){
+    summaryBox.innerHTML = `
+    You were not stuck.<br><br>
+    You were avoiding the real move.<br><br>
+    You already know what matters.<br><br>
+    Now act.
+    `;
+    finalScreen.style.display="block";
+    mainApp.style.display="none";
+  }
 });
 
-// PAYMENT
-payBtn.addEventListener("click", ()=>{
-
-  if(loopLevel === 2){
-    alert("✅ Payment successful");
-    paid49=true;
-    gtag('event', 'paid_49');
+// FEEDBACK
+window.sendFeedback=(type)=>{
+  if(type==="no"){
+    document.getElementById("feedbackInput").style.display="block";
   }
-
-  else if(loopLevel === 3){
-    alert("🔥 Payment successful");
-    paid99=true;
-    gtag('event', 'paid_99');
-  }
-
-  payBtn.style.display="none";
-});
+  console.log("Feedback:", type);
+};
 
 // RESET
 restartBtn.addEventListener("click", ()=>{
-  messages=[];
-  loopLevel=1;
-  paid49=false;
-  paid99=false;
-
-  finalScreen.style.display="none";
-  mainApp.style.display="block";
-  outputBox.innerHTML="";
-
-  mainInput.value="";
-  reflectionInput.value="";
-});
-
-// CTA
-upgradeBtn.addEventListener("click", ()=>{
-  alert("🚀 Full system coming soon");
-  gtag('event', 'clicked_upgrade');
+  location.reload();
 });
 
 });
