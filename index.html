@@ -21,7 +21,13 @@ h2 { text-align:center; }
   line-height:1.8;
   font-size:15px;
 }
-
+.container {
+  max-width:500px;
+  margin:auto;
+  padding:15px;
+  box-shadow:0 0 20px rgba(255,94,0,0.1);
+  border-radius:12px;
+}
 input,button {
   width:100%;
   padding:12px;
@@ -39,7 +45,16 @@ button {
 #finalScreen { display:none; text-align:center; margin-top:15px; }
 .small { font-size:12px; color:#aaa; text-align:center; margin-top:5px; }
 </style></head><body><div class="container">
-<h2>TruthLoop</h2><p class="small">This is not advice. This is confrontation.</p><!-- EMAIL --><div id="emailScreen">
+<div style="text-align:center; margin-bottom:10px;">
+  <img src="https://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEg-VwI2SYcAKJd9poW1FTNoP_z0J1YXtLt26G8548Ro41EVKY9L4EOw_hZx1K1WdiSmeVYdBBB0JDZdDCfF8AEGAh8CiY49VyKij2mPSv8csI6qsr9Admcjzgd53AYmg8Y3u3PtoT1fwIcSQgqgguENrHngiR8AzohGXVgaXcorGoYUGf2JYPCx99bWWA/s1536/file_00000000756c720baec218a6947d616f.jpeg"
+     alt="TruthLoop logo"
+     style="width:130px; border-radius:12px;">
+</div>
+
+<h2 style="text-align:center;">TruthLoop</h2>
+<p class="small" style="text-align:center;">
+This is not advice. This is confrontation.
+</p><!-- EMAIL --><div id="emailScreen">
   <input id="emailInput" placeholder="Enter your email to continue"/>
   <button onclick="saveEmail()">Start</button>
 </div><!-- GOAL --><div id="goalScreen" style="display:none;">
