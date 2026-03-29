@@ -88,9 +88,6 @@ const outputBox=document.getElementById("outputBox");
 const mainInput=document.getElementById("mainInput");
 const reflectionInput=document.getElementById("reflectionInput");
 
-function formatReply(text){
-  return text.split("\n").map(l=>`<div style="margin-bottom:12px;">${l}</div>`).join("");
-}
 
 window.saveEmail=()=>{
   const email=document.getElementById("emailInput").value.trim();
