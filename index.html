@@ -1,12 +1,18 @@
-<!DOCTYPE html><html>
+<!DOCTYPE html>
+<html>
 <head>
 <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-<title>TruthLoop</title><script async src="https://www.googletagmanager.com/gtag/js?id=G-RBMQ2F6P9Q"></script><script>
+<title>TruthLoop</title>
+
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-RBMQ2F6P9Q"></script>
+<script>
 window.dataLayer = window.dataLayer || [];
 function gtag(){dataLayer.push(arguments);}
 gtag('js', new Date());
 gtag('config', 'G-RBMQ2F6P9Q');
-</script><style>
+</script>
+
+<style>
 body { background:#0f0f0f; color:#fff; font-family:Arial; margin:0; }
 .container { max-width:500px; margin:auto; padding:15px; box-shadow:0 0 20px rgba(255,94,0,0.1); border-radius:12px; }
 h2 { text-align:center; }
@@ -36,69 +42,92 @@ button {
   cursor:pointer;
 }
 
-#finalScreen { display:none; text-align:center; margin-top:15px; }
 .small { font-size:12px; color:#aaa; text-align:center; margin-top:5px; }
-</style></head><body>
-<div class="container"><div style="text-align:center; margin-bottom:15px;">
+</style>
+</head>
+
+<body>
+
+<div class="container">
+
+<div style="text-align:center; margin-bottom:15px;">
 <img src="https://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEg-VwI2SYcAKJd9poW1FTNoP_z0J1YXtLt26G8548Ro41EVKY9L4EOw_hZx1K1WdiSmeVYdBBB0JDZdDCfF8AEGAh8CiY49VyKij2mPSv8csI6qsr9Admcjzgd53AYmg8Y3u3PtoT1fwIcSQgqgguENrHngiR8AzohGXVgaXcorGoYUGf2JYPCx99bWWA/s1536/file_00000000756c720baec218a6947d616f.jpeg"
 style="width:160px; border-radius:12px;">
 <p class="small">Used by creators, founders & decision makers who want clarity, not motivation.</p>
-</div><h2>TruthLoop</h2>
-<p class="small">This is not advice. This is confrontation.</p><div id="emailScreen">
+</div>
+
+<h2>TruthLoop</h2>
+<p class="small">This is not advice. This is confrontation.</p>
+
+<div id="emailScreen">
 <input id="emailInput" placeholder="Enter your email to continue"/>
 <button onclick="saveEmail()">Start</button>
-</div><div id="goalScreen" style="display:none;">
+</div>
+
+<div id="goalScreen" style="display:none;">
 <p>Where are you stuck… really?</p>
 <button onclick="selectGoal('Money')">Money</button>
 <button onclick="selectGoal('Clarity')">Clarity</button>
 <button onclick="selectGoal('Consistency')">Consistency</button>
 <button onclick="selectGoal('Overthinking')">Overthinking</button>
-</div><div id="problemScreen" style="display:none;">
+</div>
+
+<div id="problemScreen" style="display:none;">
 <input id="problemInput" placeholder="Tell clearly what’s not working..." />
 <button onclick="saveProblem()">Continue</button>
-</div><div id="actionScreen" style="display:none;">
+</div>
+
+<div id="actionScreen" style="display:none;">
 <input id="actionInput" placeholder="What did you actually do in last 48 hours?" />
 <button onclick="saveAction()">Start</button>
-</div><div id="mainApp" style="display:none;">
-<div id="outputBox" class="output"></div><input id="mainInput" placeholder="Don't type what sounds smart. Type what is real." />
-<button id="getBtn">Face the truth</button><input id="reflectionInput" placeholder="Answer honestly..." />
+</div>
+
+<div id="mainApp" style="display:none;">
+<div id="outputBox" class="output"></div>
+
+<input id="mainInput" placeholder="Don't type what sounds smart. Type what is real." />
+<button id="getBtn">Face the truth</button>
+
+<input id="reflectionInput" placeholder="Answer honestly..." />
 <button id="nextBtn">Go deeper</button>
-</div><div id="finalScreen">
-<p>Now it's clear.</p>
-<div id="summaryBox" style="background:#000; padding:15px; border-radius:10px;"></div>
-<button id="restartBtn">🔄 Start Again</button>
-</div><p class="small">
+</div>
+
+<p class="small">
 <a href="/privacy.html">Privacy Policy</a> |
 <a href="/terms.html">Terms</a> |
 <a href="/refund.html">Refund Policy</a> |
 Contact: arunbhatt2010@email.com
-</p><script>
+</p>
+
+</div>
+
+<script>
 document.addEventListener("DOMContentLoaded", () => {
 
 let userGoal="", userProblem="", userAction="";
 let messages=[], loopLevel=1;
 
-const emailScreen=document.getElementById("emailScreen");
-const goalScreen=document.getElementById("goalScreen");
-const problemScreen=document.getElementById("problemScreen");
-const actionScreen=document.getElementById("actionScreen");
-const mainApp=document.getElementById("mainApp");
-
 const outputBox=document.getElementById("outputBox");
 const mainInput=document.getElementById("mainInput");
 const reflectionInput=document.getElementById("reflectionInput");
 
+// ✅ FIX 1: format function added
+function formatReply(text){
+  return text.split("\n").map(l=>`<div style="margin-bottom:10px;">${l}</div>`).join("");
+}
 
+// FLOW
 window.saveEmail=()=>{
   const email=document.getElementById("emailInput").value.trim();
   if(!email) return alert("Enter email");
 
   localStorage.setItem("truthloop_email", email);
 
-  fetch("/api/saveEmail", {
+  // optional backend
+  fetch("https://engine.vercel.app/api/saveEmail", {
     method:"POST",
     headers:{ "Content-Type":"application/json" },
-    body:JSON.stringify({ email: email })
+    body:JSON.stringify({ email })
   });
 
   emailScreen.style.display="none";
@@ -125,17 +154,22 @@ window.saveAction=()=>{
   mainApp.style.display="block";
 };
 
+// ✅ FIX 2: FULL URL
 async function callAPI(){
-  const res=await fetch("/api/chat",{
+  const res=await fetch("https://engine.vercel.app/api/chat",{
     method:"POST",
     headers:{ "Content-Type":"application/json" },
     body:JSON.stringify({ messages, loopLevel, userGoal, userProblem, userAction })
   });
+
   const data=await res.json();
+
   messages.push({role:"assistant",content:data.reply});
+
   return data.reply;
 }
 
+// START
 document.getElementById("getBtn").onclick = async ()=>{
   const text=mainInput.value.trim();
   if(!text) return;
@@ -151,6 +185,7 @@ document.getElementById("getBtn").onclick = async ()=>{
   mainInput.value="";
 };
 
+// CONTINUE
 document.getElementById("nextBtn").onclick = async ()=>{
   const text=reflectionInput.value.trim();
   if(!text) return;
@@ -168,8 +203,8 @@ document.getElementById("nextBtn").onclick = async ()=>{
   reflectionInput.value="";
 };
 
-document.getElementById("restartBtn").onclick=()=>location.reload();
-
 });
-</script></body>
+</script>
+
+</body>
   </html>
