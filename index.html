@@ -177,7 +177,7 @@ async function callAPI(){
     body: JSON.stringify({ messages, loopLevel })
   const data=await res.json();
 
-  let reply=data.reply || "";
+  let reply = data?.reply || "⚠️ No reply";
 
   messages.push({role:"assistant",content:reply});
 
