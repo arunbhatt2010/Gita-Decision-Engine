@@ -4,6 +4,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
 <title>TruthLoop</title>
 
+<!-- ✅ Google Analytics -->
 <script async src="https://www.googletagmanager.com/gtag/js?id=G-RBMQ2F6P9Q"></script>
 <script>
 window.dataLayer = window.dataLayer || [];
@@ -17,29 +18,26 @@ body { background:#0f0f0f; color:#fff; font-family:Arial; margin:0; }
 .container { max-width:500px; margin:auto; padding:15px; }
 
 .output {
-  height:40vh;
-  overflow-y:auto;
-  background:#000;
-  padding:15px;
-  border-radius:12px;
-  margin-bottom:10px;
+  height:40vh; overflow-y:auto;
+  background:#000; padding:15px;
+  border-radius:12px; margin-bottom:10px;
+  line-height:1.7;
 }
 
 input,button {
-  width:100%;
-  padding:12px;
-  margin-top:10px;
-  border-radius:8px;
-  border:none;
+  width:100%; padding:12px;
+  margin-top:10px; border-radius:8px; border:none;
 }
 
 button {
   background:linear-gradient(45deg, orange, #ff5e00);
+  font-weight:bold; cursor:pointer;
 }
 
 .small { font-size:12px; color:#aaa; text-align:center; }
+.links { text-align:center; margin-top:10px; }
+.links a { color:#4da6ff; margin:0 5px; font-size:12px; }
 
-.payBtn { background:#ff9800; }
 </style>
 </head>
 
@@ -47,14 +45,27 @@ button {
 
 <div class="container">
 
-<h2>TruthLoop</h2>
+<!-- ✅ LOGO + TAGLINE -->
+<div style="text-align:center; margin-bottom:15px;">
+<img src="https://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEg-VwI2SYcAKJd9poW1FTNoP_z0J1YXtLt26G8548Ro41EVKY9L4EOw_hZx1K1WdiSmeVYdBBB0JDZdDCfF8AEGAh8CiY49VyKij2mPSv8csI6qsr9Admcjzgd53AYmg8Y3u3PtoT1fwIcSQgqgguENrHngiR8AzohGXVgaXcorGoYUGf2JYPCx99bWWA/s1536/file_00000000756c720baec218a6947d616f.jpeg"
+style="width:160px; border-radius:12px;">
+<p class="small">
+Used by creators, founders & decision makers who want clarity, not motivation.
+</p>
+</div>
 
+<h2 style="text-align:center;">TruthLoop</h2>
+<p class="small">This is not advice. This is confrontation.</p>
+
+<!-- EMAIL -->
 <div id="emailScreen">
-<input id="emailInput" placeholder="Enter your email"/>
+<input id="emailInput" placeholder="Enter your email to continue"/>
 <button onclick="saveEmail()">Start</button>
 </div>
 
+<!-- MAIN APP -->
 <div id="mainApp" style="display:none;">
+
 <div id="outputBox" class="output"></div>
 
 <input id="mainInput" placeholder="Type what is real"/>
@@ -64,14 +75,21 @@ button {
 <button id="nextBtn">Go deeper</button>
 
 <!-- 💰 PAY BUTTONS -->
-<button id="pay49" class="payBtn" style="display:none;">Unlock deeper (₹49)</button>
-<button id="pay99" class="payBtn" style="display:none;">Unlock full clarity (₹99)</button>
+<button id="pay49" style="display:none;">Unlock deeper (₹49)</button>
+<button id="pay99" style="display:none;">Unlock full clarity (₹99)</button>
 
 </div>
 
-<!-- 🎯 FINAL SCREEN -->
+<!-- FINAL SCREEN -->
 <div id="finalScreen" style="display:none; text-align:center;">
-<p>Now it's clear.</p>
+
+<div class="links">
+<a href="#">Privacy Policy</a> |
+<a href="#">Terms</a> |
+<a href="#">Refund Policy</a>
+</div>
+
+<p style="margin-top:10px;">Now it's clear.</p>
 
 <div style="background:#000; padding:15px; border-radius:10px;">
 You were not stuck.<br><br>
@@ -80,8 +98,28 @@ You already know what matters.<br><br>
 Now act.
 </div>
 
-<button onclick="location.reload()">Start Again</button>
+<!-- 💰 299 -->
+<button style="margin-top:15px;">
+Unlock exact next steps (₹299)
+</button>
+
+<button onclick="resetApp()">Start Again</button>
+
+<p class="small">Was this useful?</p>
+
+<button onclick="sendFeedback('Yes')">Yes</button>
+<button onclick="sendFeedback('No')">No</button>
+
 </div>
+
+<!-- FOOTER -->
+<div class="links">
+<a href="#">Privacy Policy</a> |
+<a href="#">Terms</a> |
+<a href="#">Refund Policy</a>
+</div>
+
+<p class="small">Contact: arunbhatt2010@email.com</p>
 
 </div>
 
@@ -90,60 +128,73 @@ Now act.
 let messages=[];
 let loopLevel=1;
 
+const emailScreen=document.getElementById("emailScreen");
+const mainApp=document.getElementById("mainApp");
+const finalScreen=document.getElementById("finalScreen");
+
 const outputBox=document.getElementById("outputBox");
+const mainInput=document.getElementById("mainInput");
+const reflectionInput=document.getElementById("reflectionInput");
+
+const pay49=document.getElementById("pay49");
+const pay99=document.getElementById("pay99");
 
 // FORMAT
 function formatReply(text){
-  return text.split("\n").map(l=>`<div>${l}</div>`).join("");
+  if(!text) return "";
+  return text.split("\n").map(line=>`<div>${line}</div>`).join("");
 }
 
 // EMAIL
 function saveEmail(){
-  document.getElementById("emailScreen").style.display="none";
-  document.getElementById("mainApp").style.display="block";
+  const email=document.getElementById("emailInput").value.trim();
+  if(!email) return alert("Enter email");
+
+  fetch("/api/saveEmail",{
+    method:"POST",
+    headers:{ "Content-Type":"application/json" },
+    body:JSON.stringify({ email })
+  });
+
+  emailScreen.style.display="none";
+  mainApp.style.display="block";
 }
 
 // API
 async function callAPI(){
-  try{
-    const res = await fetch("/api/chat",{
-      method:"POST",
-      headers:{ "Content-Type":"application/json" },
-      body:JSON.stringify({ messages, loopLevel })
-    });
 
-    const data = await res.json();
+  const res=await fetch("/api/chat",{
+    method:"POST",
+    headers:{ "Content-Type":"application/json" },
+    body:JSON.stringify({ messages, loopLevel })
+  });
 
-    // FINAL SCREEN
-    if(data.paywall){
-      document.getElementById("mainApp").style.display="none";
-      document.getElementById("finalScreen").style.display="block";
-      return "";
-    }
+  const data=await res.json();
 
-    return data.reply;
+  let reply=data.reply || "";
 
-  }catch{
-    return "⚠️ Error";
-  }
+  messages.push({role:"assistant",content:reply});
+
+  return reply;
 }
 
 // FIRST
-document.getElementById("getBtn").onclick = async ()=>{
-  const text=document.getElementById("mainInput").value.trim();
+getBtn.onclick=async ()=>{
+  const text=mainInput.value.trim();
   if(!text) return;
 
   messages=[{role:"user",content:text}];
-
   outputBox.innerHTML=`<b>You:</b> ${text}<br><br>`;
 
   const reply=await callAPI();
   outputBox.innerHTML+=formatReply(reply);
+
+  mainInput.value="";
 };
 
 // NEXT
-document.getElementById("nextBtn").onclick = async ()=>{
-  const text=document.getElementById("reflectionInput").value.trim();
+nextBtn.onclick=async ()=>{
+  const text=reflectionInput.value.trim();
   if(!text) return;
 
   loopLevel++;
@@ -154,26 +205,54 @@ document.getElementById("nextBtn").onclick = async ()=>{
   const reply=await callAPI();
   outputBox.innerHTML+=formatReply(reply);
 
-  // 💰 STAGE LOGIC
-  if(loopLevel === 2){
-    document.getElementById("pay49").style.display="block";
+  reflectionInput.value="";
+
+  // 💰 PAY FLOW
+  if(loopLevel===2){
+    pay49.style.display="block";
   }
 
-  if(loopLevel === 3){
-    document.getElementById("pay99").style.display="block";
+  if(loopLevel===3){
+    pay99.style.display="block";
+  }
+
+  // ✅ FINAL SCREEN AFTER STAGE 4
+  if(loopLevel>4){
+    mainApp.style.display="none";
+    finalScreen.style.display="block";
   }
 };
 
-// 💰 FAKE PAYMENT (replace later with Razorpay)
-document.getElementById("pay49").onclick = ()=>{
-  alert("₹49 paid (demo)");
-  document.getElementById("pay49").style.display="none";
-};
+// FEEDBACK
+function sendFeedback(type){
 
-document.getElementById("pay99").onclick = ()=>{
-  alert("₹99 paid (demo)");
-  document.getElementById("pay99").style.display="none";
-};
+  if(type==="No"){
+    // 👉 open form with prefill
+    window.open("https://docs.google.com/forms/d/e/1FAIpQLScq0kWwwkvfJPCkXiWkq2DDOfzgcm7LRwD4DuW5TqlHpSbp1w/viewform?entry.547964989=No","_blank");
+  } else {
+    fetch("https://docs.google.com/forms/d/e/1FAIpQLScq0kWwwkvfJPCkXiWkq2DDOfzgcm7LRwD4DuW5TqlHpSbp1w/formResponse",{
+      method:"POST",
+      mode:"no-cors",
+      headers:{ "Content-Type":"application/x-www-form-urlencoded" },
+      body:`entry.547964989=Yes`
+    });
+
+    alert("Thanks!");
+  }
+}
+
+// RESET
+function resetApp(){
+  messages=[];
+  loopLevel=1;
+
+  finalScreen.style.display="none";
+  mainApp.style.display="block";
+
+  outputBox.innerHTML="";
+  pay49.style.display="none";
+  pay99.style.display="none";
+}
 
 </script>
 
