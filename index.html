@@ -131,30 +131,49 @@ const nextBtn=document.getElementById("nextBtn");
 
 const pay49=document.getElementById("pay49");
 const pay99=document.getElementById("pay99");
+if(localStorage.getItem("paid49")){
+  pay49.style.display = "none";
+}
 
+if(localStorage.getItem("paid99")){
+  pay99.style.display = "none";
+}
 // 💰 REAL PAYMENT LINKS
-pay49.onclick = ()=>{
-  const done = confirm("Did you complete the payment?");
+// 🔓 PAYMENT FLOW (FINAL)
 
-  if(done){
-    localStorage.setItem("paid49","true");
-    pay49.style.display="none";
-    alert("Unlocked ✅ Continue now");
-  }else{
+let pay49Step = 0;
+let pay99Step = 0;
+
+// ₹49
+pay49.onclick = ()=>{
+
+  // step 1 → open payment
+  if(pay49Step === 0){
+    pay49Step = 1;
     window.open("https://rzp.io/rzp/Gl9QDcVA","_blank");
+    alert("Step 1: Complete payment\nStep 2: Come back and click again");
+    return;
   }
+
+  // step 2 → unlock
+  localStorage.setItem("paid49","true");
+  pay49.style.display="none";
+  alert("Unlocked ✅ Continue now");
 };
 
+// ₹99
 pay99.onclick = ()=>{
-  const done = confirm("Did you complete the payment?");
 
-  if(done){
-    localStorage.setItem("paid99","true");
-    pay99.style.display="none";
-    alert("Unlocked ✅ Continue now");
-  }else{
+  if(pay99Step === 0){
+    pay99Step = 1;
     window.open("https://rzp.io/rzp/qcjrdEgd","_blank");
+    alert("Step 1: Complete payment\nStep 2: Come back and click again");
+    return;
   }
+
+  localStorage.setItem("paid99","true");
+  pay99.style.display="none";
+  alert("Unlocked ✅ Continue now");
 };
 // FORMAT
 function formatReply(text){
