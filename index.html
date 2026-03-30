@@ -136,14 +136,25 @@ const nextBtn=document.getElementById("nextBtn");
 
 const pay49=document.getElementById("pay49");
 const pay99=document.getElementById("pay99");
+if(localStorage.getItem("paid49")){
+  pay49.style.display = "none";
+}
 
+if(localStorage.getItem("paid99")){
+  pay99.style.display = "none";
+}
 // PAY CLICK
 pay49.onclick = ()=>{
   showFakePayment(49, "paid49", "Stage 3 unlocked");
-};
 
+  // 👇 ADD THIS
+  pay49.style.display = "none";
+};
 pay99.onclick = ()=>{
   showFakePayment(99, "paid99", "Stage 4 unlocked");
+
+  // 👇 ADD THIS
+  pay99.style.display = "none";
 };
 
 // FORMAT
