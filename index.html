@@ -134,19 +134,28 @@ const pay99=document.getElementById("pay99");
 
 // 💰 REAL PAYMENT LINKS
 pay49.onclick = ()=>{
-  window.open("https://rzp.io/rzp/Gl9QDcVA","_blank");
-  setTimeout(()=>{
-    alert("Complete payment → come back → click again to continue.");
-  },2000);
+  const done = confirm("Did you complete the payment?");
+
+  if(done){
+    localStorage.setItem("paid49","true");
+    pay49.style.display="none";
+    alert("Unlocked ✅ Continue now");
+  }else{
+    window.open("https://rzp.io/rzp/Gl9QDcVA","_blank");
+  }
 };
 
 pay99.onclick = ()=>{
-  window.open("https://rzp.io/rzp/qcjrdEgd","_blank");
-  setTimeout(()=>{
-    alert("Complete payment → come back → click again to continue.");
-  },2000);
-};
+  const done = confirm("Did you complete the payment?");
 
+  if(done){
+    localStorage.setItem("paid99","true");
+    pay99.style.display="none";
+    alert("Unlocked ✅ Continue now");
+  }else{
+    window.open("https://rzp.io/rzp/qcjrdEgd","_blank");
+  }
+};
 // FORMAT
 function formatReply(text){
   if(!text) return "";
