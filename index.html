@@ -139,13 +139,11 @@ const pay99=document.getElementById("pay99");
 
 // PAY CLICK
 pay49.onclick = ()=>{
-  localStorage.setItem("paid49", "true");
-  alert("Unlocked Stage 3");
+  showFakePayment(49, "paid49", "Stage 3 unlocked");
 };
 
 pay99.onclick = ()=>{
-  localStorage.setItem("paid99", "true");
-  alert("Unlocked Stage 4");
+  showFakePayment(99, "paid99", "Stage 4 unlocked");
 };
 
 // FORMAT
@@ -260,7 +258,26 @@ function sendFeedback(type){
     alert("Thanks!");
   }
 }
+function showFakePayment(amount, key, successMsg){
 
+  const confirmPay = confirm(`Proceed to pay ₹${amount}?`);
+  if(!confirmPay) return;
+
+  // loading feel
+  const loading = document.createElement("div");
+  loading.innerHTML = "Processing payment...";
+  loading.style.textAlign = "center";
+  loading.style.marginTop = "10px";
+  document.body.appendChild(loading);
+
+  setTimeout(()=>{
+    loading.remove();
+
+    localStorage.setItem(key, "true");
+
+    alert(`Payment successful ✅ ${successMsg}`);
+  }, 1200);
+          }
 // RESET
 function resetApp(){
   messages=[];
