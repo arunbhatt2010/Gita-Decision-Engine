@@ -37,7 +37,6 @@ button {
 .small { font-size:12px; color:#aaa; text-align:center; }
 .links { text-align:center; margin-top:10px; }
 .links a { color:#4da6ff; margin:0 5px; font-size:12px; }
-
 </style>
 </head>
 
@@ -45,7 +44,7 @@ button {
 
 <div class="container">
 
-<!-- ✅ LOGO + TAGLINE -->
+<!-- LOGO -->
 <div style="text-align:center; margin-bottom:15px;">
 <img src="https://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEg-VwI2SYcAKJd9poW1FTNoP_z0J1YXtLt26G8548Ro41EVKY9L4EOw_hZx1K1WdiSmeVYdBBB0JDZdDCfF8AEGAh8CiY49VyKij2mPSv8csI6qsr9Admcjzgd53AYmg8Y3u3PtoT1fwIcSQgqgguENrHngiR8AzohGXVgaXcorGoYUGf2JYPCx99bWWA/s1536/file_00000000756c720baec218a6947d616f.jpeg"
 style="width:160px; border-radius:12px;">
@@ -63,9 +62,8 @@ Used by creators, founders & decision makers who want clarity, not motivation.
 <button onclick="saveEmail()">Start</button>
 </div>
 
-<!-- MAIN APP -->
+<!-- MAIN -->
 <div id="mainApp" style="display:none;">
-
 <div id="outputBox" class="output"></div>
 
 <input id="mainInput" placeholder="Type what is real"/>
@@ -74,13 +72,11 @@ Used by creators, founders & decision makers who want clarity, not motivation.
 <input id="reflectionInput" placeholder="Answer honestly..."/>
 <button id="nextBtn">Go deeper</button>
 
-<!-- 💰 PAY BUTTONS -->
 <button id="pay49" style="display:none;">Unlock deeper (₹49)</button>
 <button id="pay99" style="display:none;">Unlock full clarity (₹99)</button>
-
 </div>
 
-<!-- FINAL SCREEN -->
+<!-- FINAL -->
 <div id="finalScreen" style="display:none; text-align:center;">
 
 <div class="links">
@@ -98,7 +94,6 @@ You already know what matters.<br><br>
 Now act.
 </div>
 
-<!-- 💰 299 -->
 <button style="margin-top:15px;">
 Unlock exact next steps (₹299)
 </button>
@@ -136,8 +131,13 @@ const outputBox=document.getElementById("outputBox");
 const mainInput=document.getElementById("mainInput");
 const reflectionInput=document.getElementById("reflectionInput");
 
+const getBtn=document.getElementById("getBtn");
+const nextBtn=document.getElementById("nextBtn");
+
 const pay49=document.getElementById("pay49");
 const pay99=document.getElementById("pay99");
+
+// PAY CLICK
 pay49.onclick = ()=>{
   localStorage.setItem("paid49", "true");
   alert("Unlocked Stage 3");
@@ -147,6 +147,7 @@ pay99.onclick = ()=>{
   localStorage.setItem("paid99", "true");
   alert("Unlocked Stage 4");
 };
+
 // FORMAT
 function formatReply(text){
   if(!text) return "";
@@ -168,20 +169,32 @@ function saveEmail(){
   mainApp.style.display="block";
 }
 
-// API
+// ✅ FIXED API FUNCTION
 async function callAPI(){
+  try{
+    const res=await fetch("/api/chat",{
+      method:"POST",
+      headers:{ "Content-Type":"application/json" },
+      body: JSON.stringify({ messages, loopLevel })
+    });
 
-  const res=await fetch("/api/chat",{
-    method:"POST",
-    headers:{ "Content-Type":"application/json" },
-    body: JSON.stringify({ messages, loopLevel })
-  const data=await res.json();
+    if(!res.ok){
+      console.log("API ERROR:", res.status);
+      return "⚠️ Server error";
+    }
 
-  let reply = data?.reply || "⚠️ No reply";
+    const data=await res.json();
 
-  messages.push({role:"assistant",content:reply});
+    let reply = data?.reply || "⚠️ No reply";
 
-  return reply;
+    messages.push({role:"assistant",content:reply});
+
+    return reply;
+
+  }catch(e){
+    console.log("ERROR:", e);
+    return "⚠️ Connection error";
+  }
 }
 
 // FIRST
@@ -203,19 +216,16 @@ nextBtn.onclick = async ()=>{
   const text = reflectionInput.value.trim();
   if(!text) return;
 
-  // 🛑 Stage 2 → 3 block (₹49)
   if(loopLevel === 2 && !localStorage.getItem("paid49")){
     alert("Unlock deeper first (₹49)");
     return;
   }
 
-  // 🛑 Stage 3 → 4 block (₹99)
   if(loopLevel === 3 && !localStorage.getItem("paid99")){
     alert("Unlock full clarity first (₹99)");
     return;
   }
 
-  // ✅ Move forward only if allowed
   loopLevel++;
 
   messages.push({role:"user",content:text});
@@ -226,16 +236,9 @@ nextBtn.onclick = async ()=>{
 
   reflectionInput.value="";
 
-  // 💰 Show payment buttons
-  if(loopLevel === 2){
-    pay49.style.display="block";
-  }
+  if(loopLevel === 2) pay49.style.display="block";
+  if(loopLevel === 3) pay99.style.display="block";
 
-  if(loopLevel === 3){
-    pay99.style.display="block";
-  }
-
-  // 🎯 Final screen AFTER Stage 4 + next click
   if(loopLevel === 5){
     mainApp.style.display="none";
     finalScreen.style.display="block";
@@ -244,9 +247,7 @@ nextBtn.onclick = async ()=>{
 
 // FEEDBACK
 function sendFeedback(type){
-
   if(type==="No"){
-    // 👉 open form with prefill
     window.open("https://docs.google.com/forms/d/e/1FAIpQLScq0kWwwkvfJPCkXiWkq2DDOfzgcm7LRwD4DuW5TqlHpSbp1w/viewform?entry.547964989=No","_blank");
   } else {
     fetch("https://docs.google.com/forms/d/e/1FAIpQLScq0kWwwkvfJPCkXiWkq2DDOfzgcm7LRwD4DuW5TqlHpSbp1w/formResponse",{
