@@ -4,7 +4,6 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
 <title>TruthLoop</title>
 
-<!-- ✅ Google Analytics -->
 <script async src="https://www.googletagmanager.com/gtag/js?id=G-RBMQ2F6P9Q"></script>
 <script>
 window.dataLayer = window.dataLayer || [];
@@ -44,7 +43,6 @@ button {
 
 <div class="container">
 
-<!-- LOGO -->
 <div style="text-align:center; margin-bottom:15px;">
 <img src="https://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEg-VwI2SYcAKJd9poW1FTNoP_z0J1YXtLt26G8548Ro41EVKY9L4EOw_hZx1K1WdiSmeVYdBBB0JDZdDCfF8AEGAh8CiY49VyKij2mPSv8csI6qsr9Admcjzgd53AYmg8Y3u3PtoT1fwIcSQgqgguENrHngiR8AzohGXVgaXcorGoYUGf2JYPCx99bWWA/s1536/file_00000000756c720baec218a6947d616f.jpeg"
 style="width:160px; border-radius:12px;">
@@ -56,13 +54,11 @@ Used by creators, founders & decision makers who want clarity, not motivation.
 <h2 style="text-align:center;">TruthLoop</h2>
 <p class="small">This is not advice. This is confrontation.</p>
 
-<!-- EMAIL -->
 <div id="emailScreen">
 <input id="emailInput" placeholder="Enter your email to continue"/>
 <button onclick="saveEmail()">Start</button>
 </div>
 
-<!-- MAIN -->
 <div id="mainApp" style="display:none;">
 <div id="outputBox" class="output"></div>
 
@@ -76,7 +72,6 @@ Used by creators, founders & decision makers who want clarity, not motivation.
 <button id="pay99" style="display:none;">Unlock full clarity (₹99)</button>
 </div>
 
-<!-- FINAL -->
 <div id="finalScreen" style="display:none; text-align:center;">
 
 <div class="links">
@@ -94,7 +89,8 @@ You already know what matters.<br><br>
 Now act.
 </div>
 
-<button style="margin-top:15px;">
+<button style="margin-top:15px;"
+onclick="window.open('https://rzp.io/rzp/BmHxTtty','_blank')">
 Unlock exact next steps (₹299)
 </button>
 
@@ -107,7 +103,6 @@ Unlock exact next steps (₹299)
 
 </div>
 
-<!-- FOOTER -->
 <div class="links">
 <a href="#">Privacy Policy</a> |
 <a href="#">Terms</a> |
@@ -136,25 +131,20 @@ const nextBtn=document.getElementById("nextBtn");
 
 const pay49=document.getElementById("pay49");
 const pay99=document.getElementById("pay99");
-if(localStorage.getItem("paid49")){
-  pay49.style.display = "none";
-}
 
-if(localStorage.getItem("paid99")){
-  pay99.style.display = "none";
-}
-// PAY CLICK
+// 💰 REAL PAYMENT LINKS
 pay49.onclick = ()=>{
-  showFakePayment(49, "paid49", "Stage 3 unlocked");
-
-  // 👇 ADD THIS
-  pay49.style.display = "none";
+  window.open("https://rzp.io/rzp/Gl9QDcVA","_blank");
+  setTimeout(()=>{
+    alert("Complete payment → come back → click again to continue.");
+  },2000);
 };
-pay99.onclick = ()=>{
-  showFakePayment(99, "paid99", "Stage 4 unlocked");
 
-  // 👇 ADD THIS
-  pay99.style.display = "none";
+pay99.onclick = ()=>{
+  window.open("https://rzp.io/rzp/qcjrdEgd","_blank");
+  setTimeout(()=>{
+    alert("Complete payment → come back → click again to continue.");
+  },2000);
 };
 
 // FORMAT
@@ -178,7 +168,7 @@ function saveEmail(){
   mainApp.style.display="block";
 }
 
-// ✅ FIXED API FUNCTION
+// API
 async function callAPI(){
   try{
     const res=await fetch("/api/chat",{
@@ -187,22 +177,14 @@ async function callAPI(){
       body: JSON.stringify({ messages, loopLevel })
     });
 
-    if(!res.ok){
-      console.log("API ERROR:", res.status);
-      return "⚠️ Server error";
-    }
-
     const data=await res.json();
-
     let reply = data?.reply || "⚠️ No reply";
 
     messages.push({role:"assistant",content:reply});
-
     return reply;
 
   }catch(e){
-    console.log("ERROR:", e);
-    return "⚠️ Connection error";
+    return "⚠️ Error";
   }
 }
 
@@ -225,13 +207,13 @@ nextBtn.onclick = async ()=>{
   const text = reflectionInput.value.trim();
   if(!text) return;
 
-  if(loopLevel === 2 && !localStorage.getItem("paid49")){
-    alert("Unlock deeper first (₹49)");
+  if(loopLevel === 2){
+    alert("Unlock deeper (₹49) to continue");
     return;
   }
 
-  if(loopLevel === 3 && !localStorage.getItem("paid99")){
-    alert("Unlock full clarity first (₹99)");
+  if(loopLevel === 3){
+    alert("Unlock full clarity (₹99) to continue");
     return;
   }
 
@@ -254,41 +236,6 @@ nextBtn.onclick = async ()=>{
   }
 };
 
-// FEEDBACK
-function sendFeedback(type){
-  if(type==="No"){
-    window.open("https://docs.google.com/forms/d/e/1FAIpQLScq0kWwwkvfJPCkXiWkq2DDOfzgcm7LRwD4DuW5TqlHpSbp1w/viewform?entry.547964989=No","_blank");
-  } else {
-    fetch("https://docs.google.com/forms/d/e/1FAIpQLScq0kWwwkvfJPCkXiWkq2DDOfzgcm7LRwD4DuW5TqlHpSbp1w/formResponse",{
-      method:"POST",
-      mode:"no-cors",
-      headers:{ "Content-Type":"application/x-www-form-urlencoded" },
-      body:`entry.547964989=Yes`
-    });
-
-    alert("Thanks!");
-  }
-}
-function showFakePayment(amount, key, successMsg){
-
-  const confirmPay = confirm(`Proceed to pay ₹${amount}?`);
-  if(!confirmPay) return;
-
-  // loading feel
-  const loading = document.createElement("div");
-  loading.innerHTML = "Processing payment...";
-  loading.style.textAlign = "center";
-  loading.style.marginTop = "10px";
-  document.body.appendChild(loading);
-
-  setTimeout(()=>{
-    loading.remove();
-
-    localStorage.setItem(key, "true");
-
-    alert(`Payment successful ✅ ${successMsg}`);
-  }, 1200);
-          }
 // RESET
 function resetApp(){
   messages=[];
