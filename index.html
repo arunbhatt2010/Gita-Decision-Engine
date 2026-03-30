@@ -174,13 +174,7 @@ async function callAPI(){
   const res=await fetch("/api/chat",{
     method:"POST",
     headers:{ "Content-Type":"application/json" },
-    body: JSON.stringify({
-  messages,
-  loopLevel,
-  userGoal: messages[0]?.content || "",
-  userProblem: messages[1]?.content || "",
-  userAction: messages[2]?.content || ""
-})
+    body: JSON.stringify({ messages, loopLevel })
   const data=await res.json();
 
   let reply=data.reply || "";
