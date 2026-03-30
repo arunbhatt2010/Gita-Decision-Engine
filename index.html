@@ -138,7 +138,15 @@ const reflectionInput=document.getElementById("reflectionInput");
 
 const pay49=document.getElementById("pay49");
 const pay99=document.getElementById("pay99");
+pay49.onclick = ()=>{
+  localStorage.setItem("paid49", "true");
+  alert("Unlocked Stage 3");
+};
 
+pay99.onclick = ()=>{
+  localStorage.setItem("paid99", "true");
+  alert("Unlocked Stage 4");
+};
 // FORMAT
 function formatReply(text){
   if(!text) return "";
@@ -166,9 +174,13 @@ async function callAPI(){
   const res=await fetch("/api/chat",{
     method:"POST",
     headers:{ "Content-Type":"application/json" },
-    body:JSON.stringify({ messages, loopLevel })
-  });
-
+    body: JSON.stringify({
+  messages,
+  loopLevel,
+  userGoal: messages[0]?.content || "",
+  userProblem: messages[1]?.content || "",
+  userAction: messages[2]?.content || ""
+})
   const data=await res.json();
 
   let reply=data.reply || "";
@@ -193,31 +205,44 @@ getBtn.onclick=async ()=>{
 };
 
 // NEXT
-nextBtn.onclick=async ()=>{
-  const text=reflectionInput.value.trim();
+nextBtn.onclick = async ()=>{
+  const text = reflectionInput.value.trim();
   if(!text) return;
 
+  // 🛑 Stage 2 → 3 block (₹49)
+  if(loopLevel === 2 && !localStorage.getItem("paid49")){
+    alert("Unlock deeper first (₹49)");
+    return;
+  }
+
+  // 🛑 Stage 3 → 4 block (₹99)
+  if(loopLevel === 3 && !localStorage.getItem("paid99")){
+    alert("Unlock full clarity first (₹99)");
+    return;
+  }
+
+  // ✅ Move forward only if allowed
   loopLevel++;
 
   messages.push({role:"user",content:text});
-  outputBox.innerHTML+=`<br><b>You:</b> ${text}<br><br>`;
+  outputBox.innerHTML += `<br><b>You:</b> ${text}<br><br>`;
 
-  const reply=await callAPI();
-  outputBox.innerHTML+=formatReply(reply);
+  const reply = await callAPI();
+  outputBox.innerHTML += formatReply(reply);
 
   reflectionInput.value="";
 
-  // 💰 PAY FLOW
-  if(loopLevel===2){
+  // 💰 Show payment buttons
+  if(loopLevel === 2){
     pay49.style.display="block";
   }
 
-  if(loopLevel===3){
+  if(loopLevel === 3){
     pay99.style.display="block";
   }
 
-  // ✅ FINAL SCREEN AFTER STAGE 4
-  if(loopLevel>4){
+  // 🎯 Final screen AFTER Stage 4 + next click
+  if(loopLevel === 5){
     mainApp.style.display="none";
     finalScreen.style.display="block";
   }
