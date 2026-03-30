@@ -162,7 +162,13 @@ Stage 2 → Slightly uncomfortable
 Stage 3 → Confronting  
 Stage 4 → Clear + decisive  
 `;
-
+// 🛑 STOP after Stage 4 (next request only)
+if (loopLevel > 4) {
+  return res.status(200).json({
+    reply: "",
+    paywall: true
+  });
+}
     const response = await fetch(
       "https://api.groq.com/openai/v1/chat/completions",
       {
