@@ -120,16 +120,23 @@ function saveEmail(){
 
 // API CALL
 async function callAPI(){
-  try{
-    const res=await fetch("/api/chat",{
+  try {
+    const res = await fetch("/api/chat",{
       method:"POST",
       headers:{ "Content-Type":"application/json" },
-      body:JSON.stringify({ messages, loopLevel })
+      body:JSON.stringify({ messages, loopLevel, userGoal, userProblem, userAction })
     });
 
-    const data=await res.json();
+    const data = await res.json();
 
     console.log("API RESPONSE:", data);
+
+    // 🛑 PAYWALL TRIGGER (FINAL SCREEN)
+    if (data.paywall) {
+      document.getElementById("mainApp").style.display = "none";
+      document.getElementById("finalScreen").style.display = "block";
+      return "";
+    }
 
     let reply = data?.reply || "⚠️ Empty reply";
 
@@ -137,13 +144,11 @@ async function callAPI(){
 
     return reply;
 
-  }catch(e){
+  } catch(e){
     console.log("ERROR:", e);
     return "⚠️ Connection error";
   }
-}
-
-
+    }
 // FIRST QUESTION
 document.getElementById("getBtn").onclick = async ()=>{
   const text=mainInput.value.trim();
